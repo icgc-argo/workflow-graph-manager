@@ -1,2 +1,2 @@
-# workflow-graph-manager
+# Workflow Graph Manager
 Workflow Graph Manager
