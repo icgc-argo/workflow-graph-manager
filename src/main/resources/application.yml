@@ -1,0 +1,3 @@
+spring:
+  application:
+    name: wg-manager-dev

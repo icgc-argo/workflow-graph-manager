@@ -1,0 +1,8 @@
+type Pipeline {
+    id: ID!
+    sampleField: String
+}
+
+extend type Query {
+    pipeline(id: ID!): Node
+}
