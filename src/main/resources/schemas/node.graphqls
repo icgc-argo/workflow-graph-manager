@@ -1,0 +1,8 @@
+type Node {
+    id: ID!
+    sampleField: String
+}
+
+extend type Query {
+    node(id: ID!): Node
+}
