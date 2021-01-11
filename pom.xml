@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.icgc_argo</groupId>
         <artifactId>workflow-graph-parent-pom</artifactId>
-        <version>1.4.0</version>
+        <version>1.6.0</version>
     </parent>
 
     <artifactId>workflow-graph-manager</artifactId>
@@ -16,34 +16,46 @@
     <description>Workflow Graph Manager</description>
     <url>https://github.com/icgc-argo/workflow-graph-manager</url>
 
+    <properties>
+        <graphql.version>15.0</graphql.version>
+        <federation-graphql.version>0.4.1</federation-graphql.version>
+        <elasticsearch.version>7.6.0</elasticsearch.version>
+        <guava.version>29.0-jre</guava.version>
+        <junit5.version>5.6.2</junit5.version>
+        <junit-platform.version>1.6.2</junit-platform.version>
+    </properties>
+
     <dependencies>
         <!-- Spring Boot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-            <version>2.4.0</version>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+
+        <!-- Spring-boot security dependencies -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <version>2.4.0</version>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <scope>runtime</scope>
-            <optional>true</optional>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-jose</artifactId>
+            <version>5.3.3.RELEASE</version>
         </dependency>
 
         <!-- GraphQL Server -->
         <dependency>
             <groupId>com.graphql-java</groupId>
             <artifactId>graphql-java</artifactId>
-            <version>15.0</version>
+            <version>${graphql.version}</version>
         </dependency>
         <dependency>
             <groupId>com.graphql-java</groupId>
-            <artifactId>graphql-java-spring-boot-starter-webmvc</artifactId>
+            <artifactId>graphql-java-spring-boot-starter-webflux</artifactId>
             <version>2.0</version>
         </dependency>
         <dependency>
@@ -52,16 +64,29 @@
             <version>1.0</version>
         </dependency>
 
+        <!-- GraphQL Apollo Federation -->
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>28.0-jre</version>
+            <groupId>com.apollographql.federation</groupId>
+            <artifactId>federation-graphql-java-support</artifactId>
+            <version>${federation-graphql.version}</version>
         </dependency>
 
-        <!-- LIB -->
+        <!-- Elasticsearch dependencies -->
         <dependency>
-            <groupId>org.icgc_argo</groupId>
-            <artifactId>workflow-graph-lib</artifactId>
+            <groupId>org.elasticsearch</groupId>
+            <artifactId>elasticsearch</artifactId>
+            <version>${elasticsearch.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-high-level-client</artifactId>
+            <version>${elasticsearch.version}</version>
+        </dependency>
+
+        <!-- Health Check -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
         <!-- Testing -->
@@ -82,10 +107,21 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Lombok -->
+        <!-- LIB -->
+        <dependency>
+            <groupId>org.icgc_argo</groupId>
+            <artifactId>workflow-graph-lib</artifactId>
+        </dependency>
+
+        <!-- Utils -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
         </dependency>
 
     </dependencies>
@@ -96,10 +132,29 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>com.coveo</groupId>
+                <artifactId>fmt-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
 
     <repositories>
+        <repository>
+            <id>jcenter</id>
+            <url>https://jcenter.bintray.com/</url>
+        </repository>
         <repository>
             <id>dcc-release</id>
             <name>artifacts.oicr.on.ca-releases</name>
