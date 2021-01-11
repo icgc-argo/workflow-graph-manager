@@ -17,7 +17,6 @@
  */
 package org.icgc_argo.workflowgraphmanager.graphql;
 
-import static graphql.schema.idl.TypeRuntimeWiring.newTypeWiring;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;

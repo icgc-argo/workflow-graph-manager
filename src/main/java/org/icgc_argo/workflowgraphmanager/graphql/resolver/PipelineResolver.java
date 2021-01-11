@@ -3,14 +3,12 @@ package org.icgc_argo.workflowgraphmanager.graphql.resolver;
 import static graphql.schema.idl.TypeRuntimeWiring.newTypeWiring;
 
 import graphql.schema.DataFetcher;
-import graphql.schema.idl.RuntimeWiring;
 import graphql.schema.idl.TypeRuntimeWiring;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.val;
 import org.icgc_argo.workflowgraphmanager.graphql.type.NodeGqlType;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 public class PipelineResolver implements GqlTypeProvider {
