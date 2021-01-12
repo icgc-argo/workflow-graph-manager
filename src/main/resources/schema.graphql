@@ -6,52 +6,51 @@ scalar Long
 type Pipeline @key(fields: "id") {
     id: ID!
     config: JSON
-    nodes: [GraphNode]
-    graphRunQueues: [GraphRunQueue]
-    graphRuns: [GraphRun]
-    graphEventQueues: [GraphEventQueue]
-    graphEvents: [GraphEvent]
+    nodes: [Node]
+    queues: [Queue]
+    messages: [Message]
     logs: [GraphLog]
 }
 
-type GraphNode @key(fields: "id") {
+type Node @key(fields: "id") {
     id: ID!
     config: JSON
     enabled: Boolean # is the node "turned on"
     capacity: Int # maximum runs allowed in running queue
-    # workflow: Workflow @external # workflow registry?
+    # workflow: Workflow  # TODO: This type should go in lib
     pipeline: Pipeline
-    graphRunQueue: GraphRunQueue
-    graphRuns: [GraphRun]
-    graphEventQueues: [GraphEventQueue]
-    graphEvents: [GraphEvent]
+    queues: [Queue]
+    messages: [Message]
     logs: [GraphLog]
 }
 
 ### QUEUE Types ###
 
-type GraphRunQueue @key(fields: "id") {
+type Queue @key(fields: "id") {
     id: ID!
     exchange: String
     pipeline: Pipeline
-    node: GraphNode
-    graphRuns: [GraphRun]
-    logs: [GraphLog]
-}
-
-type GraphEventQueue @key(fields: "id") {
-    id: ID!
-    exchange: String
-    pipeline: Pipeline
-    node: GraphNode
-    graphEvents: [GraphEvent]
+    node: Node
+    messages: [Message]
     logs: [GraphLog]
 }
 
 ### Message Types ###
 
-type GraphEvent @key(fields: "id") {
+interface Message {
     id: ID!
+    pipeline: Pipeline
+    node: Node
+    queue: Queue
+    logs: [GraphLog]
+}
+
+type GraphEvent implements Message @key(fields: "id") {
+    id: ID!
+    pipeline: Pipeline
+    node: Node
+    queue: Queue
+    logs: [GraphLog]
     analysisId: ID
     analysisState: String
     analysisType: String
@@ -59,34 +58,30 @@ type GraphEvent @key(fields: "id") {
     experimentalStrategy: String
     donorIds: [String]
     files: [AnalysisFile]
-    pipeline: Pipeline
-    node: GraphNode
-    queue: GraphEventQueue
-    logs: [GraphLog]
-    analysis: Analysis
+    # analysis: Analysis  # TODO: This type should go in lib
 }
 
 type AnalysisFile {
     dataType: String
 }
 
-type GraphRun @key(fields: "id") {
+type GraphRun implements Message @key(fields: "id") {
     id: ID!
-    runId: ID
     pipeline: Pipeline
-    node: GraphNode
-    queue: GraphRunQueue
+    node: Node
+    queue: Queue
     logs: [GraphLog]
+    runId: ID
+    # run: Run  # TODO: This type should go in lib
 }
 
-## Logs (for both GraphEvent and GraphRun)
-
+## Log types
 type GraphLog @key(fields: "id") {
     id: ID!
     graphMessageId: ID
     log: String
-    queue: GraphEventQueue
-    node: GraphNode
+    queue: Queue
+    node: Node
     pipeline: Pipeline
     timestamp: Long
 }
@@ -109,26 +104,26 @@ type NodeAggs {
 }
 
 # Stubbed external type (will come from Workflow Registry)
-type Workflow @key(fields: "id") @extends {
-    id: ID! @external
-    repo: String
-    schema: String
-    running: [Run] # runs that are in the running queue(s) owned by this Pipeline/Node
-}
+#type Workflow @key(fields: "id") @extends {
+#    id: ID! @external
+#    repo: String
+#    schema: String
+#    running: [Run] # runs that are in the running queue(s) owned by this Pipeline/Node
+#}
 
 # Stubbed external type (from Workflow Search)
-type Run @key(fields: "runId") @extends {
-    runId: ID! @external
-    pipeline: Pipeline @requires(fields: "workflow")
-    node: Node @requires(fields: "workflow")
-}
+#type Run @key(fields: "runId") @extends {
+#    runId: ID! @external
+#    pipeline: Pipeline @requires(fields: "workflow")
+#    node: Node @requires(fields: "workflow")
+#}
 
 # Stubbed external type (from Song Search)
-type Analysis @key(fields: "analysisId") @extends {
-    analysisId: ID! @external
-    pipeline: Pipeline
-    node: Node
-}
+#type Analysis @key(fields: "analysisId") @extends {
+#    analysisId: ID! @external
+#    pipeline: Pipeline
+#    node: Node
+#}
 
 # temp filter that does nothing currently
 input StubFilter {
@@ -144,12 +139,10 @@ input Page {
 # TBD if we want all these queries and what filters they would provide
 extend type Query {
     pipelines(filter: StubFilter, page: Page): [Pipeline]
-    graphNodes(filter: StubFilter, page: Page): [GraphNode]
-    graphRunQueues(filter: StubFilter, page: Page): [GraphRunQueue]
-    graphEventQueues(filter: StubFilter, page: Page): [GraphEventQueue]
-    graphRuns(filter: StubFilter, page: Page): [GraphRun]
-    graphEvents(filter: StubFilter, page: Page): [GraphEvent]
-    graphLogs(filter: StubFilter, page: Page): [GraphLog]
+    nodes(filter: StubFilter, page: Page): [Node]
+    queues(filter: StubFilter, page: Page): [Queue]
+    messages(filter: StubFilter, page: Page): [Message]
+    logs(filter: StubFilter, page: Page): [GraphLog]
     pipelineAggs: PipelineAggs
     nodeAggs: NodeAggs
 }
