@@ -29,17 +29,17 @@ public class JacksonUtils {
   protected static final ObjectMapper MAPPER = new ObjectMapper();
 
   public static <T> T parse(
-      @NonNull Map<String, Object> sourceMap, @NonNull ParameterizedTypeReference<T> typeRef) {
+      @NonNull Map<String, Object> sourceMap, @NonNull ParameterizedTypeReference<T> toValueParameterizedType) {
     return MAPPER.convertValue(
         sourceMap,
         new TypeReference<>() {
           public Type getType() {
-            return typeRef.getType();
+            return toValueParameterizedType.getType();
           }
         });
   }
 
-  public static <T> T parse(@NonNull Map<String, Object> sourceMap, Class<T> clazz) {
-    return MAPPER.convertValue(sourceMap, clazz);
+  public static <T> T parse(@NonNull Map<String, Object> sourceMap, Class<T> toValueType) {
+    return MAPPER.convertValue(sourceMap, toValueType);
   }
 }
