@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 The Ontario Institute for Cancer Research. All rights reserved
+ * Copyright (c) 2021 The Ontario Institute for Cancer Research. All rights reserved
  *
  * This program and the accompanying materials are made available under the terms of the GNU Affero General Public License v3.0.
  * You should have received a copy of the GNU Affero General Public License along with
@@ -15,8 +15,8 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc_argo.workflowgraphmanager.graphql;
 
+package org.icgc_argo.workflowgraphmanager.graphql;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
