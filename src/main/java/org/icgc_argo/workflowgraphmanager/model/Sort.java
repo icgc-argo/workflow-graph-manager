@@ -16,32 +16,12 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflowgraphmanager.utils;
+package org.icgc_argo.workflowgraphmanager.model;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.lang.reflect.Type;
-import java.util.Map;
-import lombok.NonNull;
-import org.springframework.core.ParameterizedTypeReference;
+import lombok.Data;
 
-// TODO: Move these into Graph-LIB
-public class JacksonUtils {
-  protected static final ObjectMapper MAPPER = new ObjectMapper();
-
-  public static <T> T parse(
-      @NonNull Map<String, Object> sourceMap,
-      @NonNull ParameterizedTypeReference<T> toValueParameterizedType) {
-    return MAPPER.convertValue(
-        sourceMap,
-        new TypeReference<>() {
-          public Type getType() {
-            return toValueParameterizedType.getType();
-          }
-        });
-  }
-
-  public static <T> T parse(@NonNull Map<String, Object> sourceMap, Class<T> toValueType) {
-    return MAPPER.convertValue(sourceMap, toValueType);
-  }
+@Data
+public class Sort {
+  String fieldName;
+  String order;
 }

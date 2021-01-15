@@ -18,30 +18,24 @@
 
 package org.icgc_argo.workflowgraphmanager.utils;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.lang.reflect.Type;
+import com.google.common.collect.ImmutableMap;
 import java.util.Map;
-import lombok.NonNull;
-import org.springframework.core.ParameterizedTypeReference;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 
-// TODO: Move these into Graph-LIB
-public class JacksonUtils {
-  protected static final ObjectMapper MAPPER = new ObjectMapper();
+@Slf4j
+public class CommonUtils {
+  private CommonUtils() {}
 
-  public static <T> T parse(
-      @NonNull Map<String, Object> sourceMap,
-      @NonNull ParameterizedTypeReference<T> toValueParameterizedType) {
-    return MAPPER.convertValue(
-        sourceMap,
-        new TypeReference<>() {
-          public Type getType() {
-            return toValueParameterizedType.getType();
-          }
-        });
-  }
-
-  public static <T> T parse(@NonNull Map<String, Object> sourceMap, Class<T> toValueType) {
-    return MAPPER.convertValue(sourceMap, toValueType);
+  public static <K, V> ImmutableMap<K, V> asImmutableMap(Object obj) {
+    val newMap = ImmutableMap.<K, V>builder();
+    if (obj instanceof Map) {
+      try {
+        newMap.putAll((Map<? extends K, ? extends V>) obj);
+      } catch (ClassCastException e) {
+        log.error("Failed to cast obj to Map<K,V>");
+      }
+    }
+    return newMap.build();
   }
 }

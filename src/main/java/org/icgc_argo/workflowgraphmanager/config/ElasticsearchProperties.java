@@ -32,6 +32,6 @@ public class ElasticsearchProperties {
   private Boolean useAuthentication;
   private String username;
   private String password;
-  private String analysisCentricIndex;
-  private String fileCentricIndex;
+  private String graphLogInfoDebugIndex;
+  private String graphLogErrorWarningIndex;
 }

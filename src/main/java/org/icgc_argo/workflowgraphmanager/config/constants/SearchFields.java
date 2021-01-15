@@ -16,32 +16,17 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflowgraphmanager.utils;
+package org.icgc_argo.workflowgraphmanager.config.constants;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.lang.reflect.Type;
-import java.util.Map;
-import lombok.NonNull;
-import org.springframework.core.ParameterizedTypeReference;
+import static lombok.AccessLevel.PRIVATE;
 
-// TODO: Move these into Graph-LIB
-public class JacksonUtils {
-  protected static final ObjectMapper MAPPER = new ObjectMapper();
+import lombok.NoArgsConstructor;
 
-  public static <T> T parse(
-      @NonNull Map<String, Object> sourceMap,
-      @NonNull ParameterizedTypeReference<T> toValueParameterizedType) {
-    return MAPPER.convertValue(
-        sourceMap,
-        new TypeReference<>() {
-          public Type getType() {
-            return toValueParameterizedType.getType();
-          }
-        });
-  }
-
-  public static <T> T parse(@NonNull Map<String, Object> sourceMap, Class<T> toValueType) {
-    return MAPPER.convertValue(sourceMap, toValueType);
-  }
+@NoArgsConstructor(access = PRIVATE)
+public class SearchFields {
+  public static final String GRAPH_MESSAGE_ID = "graphMessageId";
+  public static final String QUEUE = "queue";
+  public static final String NODE = "node";
+  public static final String PIPELINE = "pipeline";
+  public static final String TIMESTAMP = "timestamp";
 }
