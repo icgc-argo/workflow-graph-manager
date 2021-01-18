@@ -14,8 +14,8 @@ elastic:
   useAuthentication: false
   username: elastic
   password: testing
-  analysisCentricIndex: analysis_centric
-  fileCentricIndex: file_centric
+  graphLogInfoDebugIndex: graphlog_info_debug
+  graphLogErrorWarningIndex: graphlog_error_warning
 
 ---
 spring.profiles: secure

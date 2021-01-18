@@ -18,6 +18,8 @@
 
 package org.icgc_argo.workflowgraphmanager.graphql;
 
+import static graphql.schema.idl.TypeRuntimeWiring.newTypeWiring;
+
 import com.apollographql.federation.graphqljava.Federation;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
@@ -34,6 +36,7 @@ import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.icgc_argo.workflowgraphmanager.config.websecurity.AuthProperties;
 import org.icgc_argo.workflowgraphmanager.graphql.security.VerifyAuthQueryExecutionStrategyDecorator;
+import org.icgc_argo.workflowgraphmanager.model.GraphLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
@@ -43,13 +46,18 @@ import org.springframework.stereotype.Service;
 @Service
 public class GraphQLProvider {
 
+  private final GraphLogDataFetcher graphLogDataFetcher;
   private final EntityDataFetcher entityDataFetcher;
   private final AuthProperties authProperties;
   private GraphQL graphQL;
   private GraphQLSchema graphQLSchema;
 
   @Autowired
-  public GraphQLProvider(EntityDataFetcher entityDataFetcher, AuthProperties authProperties) {
+  public GraphQLProvider(
+      GraphLogDataFetcher graphLogDataFetcher,
+      EntityDataFetcher entityDataFetcher,
+      AuthProperties authProperties) {
+    this.graphLogDataFetcher = graphLogDataFetcher;
     this.entityDataFetcher = entityDataFetcher;
     this.authProperties = authProperties;
   }
@@ -87,14 +95,27 @@ public class GraphQLProvider {
         .fetchEntities(entityDataFetcher.getDataFetcher())
         .resolveEntityType(
             typeResolutionEnvironment -> {
-              // TODO: Implement this
+              final Object src = typeResolutionEnvironment.getObject();
+              if (src instanceof GraphLog) {
+                return typeResolutionEnvironment
+                    .getSchema()
+                    .getObjectType(EntityDataFetcher.GRAPH_LOG_ENTITY);
+              }
               return null;
             })
         .build();
   }
 
   private RuntimeWiring buildWiring() {
-    return RuntimeWiring.newRuntimeWiring().scalar(ExtendedScalars.Json).build();
+    return RuntimeWiring.newRuntimeWiring()
+        .scalar(ExtendedScalars.Json)
+        .type(
+            newTypeWiring("Query")
+                .dataFetcher("logs", graphLogDataFetcher.getGraphLogsDataFetcher()))
+        .type(
+            newTypeWiring("Query")
+                .dataFetcher("logAggs", graphLogDataFetcher.getAggregateGraphLogsDataFetcher()))
+        .build();
   }
 
   private ImmutableList<String> queryScopesToCheck() {

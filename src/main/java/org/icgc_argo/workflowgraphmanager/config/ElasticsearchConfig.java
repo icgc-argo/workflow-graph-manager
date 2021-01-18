@@ -78,7 +78,7 @@ public class ElasticsearchConfig {
                 }));
   }
 
-  @Bean
+  @Bean("GraphManagerClient")
   public RestHighLevelClient restHighLevelClient() {
 
     if (properties.getUseAuthentication()) {

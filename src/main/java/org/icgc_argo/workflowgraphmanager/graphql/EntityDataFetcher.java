@@ -25,18 +25,33 @@ import graphql.schema.DataFetcher;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.icgc_argo.workflowgraphmanager.service.GraphLogService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 public class EntityDataFetcher {
+  public static final String GRAPH_LOG_ENTITY = "GraphLog";
+
+  private final GraphLogService graphLogService;
+
+  @Autowired
+  public EntityDataFetcher(GraphLogService graphLogService) {
+    this.graphLogService = graphLogService;
+  }
 
   public DataFetcher getDataFetcher() {
     return environment ->
         environment.<List<Map<String, Object>>>getArgument(_Entity.argumentName).stream()
             .map(
                 values -> {
-                  // TODO: Implement this
+                  if (GRAPH_LOG_ENTITY.equals(values.get("__typename"))) {
+                    final Object graphMessageId = values.get("graphMessageId");
+                    if (graphMessageId instanceof String) {
+                      return graphLogService.getGraphLogByGraphMessageId((String) graphMessageId);
+                    }
+                  }
                   return null;
                 })
             .collect(toList());

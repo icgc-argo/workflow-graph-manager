@@ -88,20 +88,20 @@ type GraphLog @key(fields: "id") {
 
 ### Aggregations ###
 
-type PipelineAggs {
-    pipeline: Pipeline
-    numNodes: Int
-    queuedCount: Int
-    runningCount: Int
-    completeCount: Int
-}
-
-type NodeAggs {
-    node: Node
-    queuedCount: Int
-    runningCount: Int
-    completeCount: Int
-}
+#type PipelineAggs {
+#    pipeline: Pipeline
+#    numNodes: Int
+#    queuedCount: Int
+#    runningCount: Int
+#    completeCount: Int
+#}
+#
+#type NodeAggs {
+#    node: Node
+#    queuedCount: Int
+#    runningCount: Int
+#    completeCount: Int
+#}
 
 # Stubbed external type (will come from Workflow Registry)
 #type Workflow @key(fields: "id") @extends {
@@ -130,19 +130,62 @@ input StubFilter {
     id: ID
 }
 
-# TBD, could be improved following what happens in other services
+enum GraphLogFilter {
+    graphMessageId,
+    queue,
+    node,
+    pipeline,
+    timestamp
+}
+
+# Paging and Sort
 input Page {
     size: Int!
     from: Int!
 }
 
+enum SortOrder {
+    asc,
+    desc
+}
+
+input GraphLogSort {
+    fieldName: GraphLogSortField!
+    order: SortOrder!
+}
+
+enum GraphLogSortField {
+    graphMessageId,
+    queue,
+    node,
+    pipeline,
+    timestamp
+}
+
+#  Search Results
+type SearchResultInfo {
+    contentCount: String!
+    hasNextFrom: String!
+    totalHits: String!
+}
+
+type GraphLogsResult {
+    content: [GraphLog!]
+    info: SearchResultInfo!
+}
+
+type AggregationResult {
+    totalHits: String!
+}
+
 # TBD if we want all these queries and what filters they would provide
 extend type Query {
-    pipelines(filter: StubFilter, page: Page): [Pipeline]
-    nodes(filter: StubFilter, page: Page): [Node]
-    queues(filter: StubFilter, page: Page): [Queue]
-    messages(filter: StubFilter, page: Page): [Message]
-    logs(filter: StubFilter, page: Page): [GraphLog]
-    pipelineAggs: PipelineAggs
-    nodeAggs: NodeAggs
+    #    pipelines(filter: StubFilter, page: Page): [Pipeline]
+    #    nodes(filter: StubFilter, page: Page): [Node]
+    #    queues(filter: StubFilter, page: Page): [Queue]
+    #    messages(filter: StubFilter, page: Page): [Message]
+    logs(filter: GraphLogFilter, page: Page, sorts: [GraphLogSort!]): GraphLogsResult!
+    logAggs(filter: GraphLogFilter): AggregationResult!
+    #    pipelineAggs: PipelineAggs
+    #    nodeAggs: NodeAggs
 }
