@@ -16,7 +16,7 @@ spec:
   containers:
   - name: jdk
     tty: true
-    image: adoptopenjdk/openjdk14:jdk-14.0.2_12-alpine-slim
+    image: adoptopenjdk/openjdk11:jdk-11.0.7_10-alpine-slim
   - name: dind-daemon
     image: docker:18.06-dind
     securityContext:

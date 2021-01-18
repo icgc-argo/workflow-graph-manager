@@ -1,7 +1,7 @@
 #############################
 #   Builder
 #############################
-FROM adoptopenjdk/openjdk14:jdk-14.0.2_12-alpine-slim as builder
+FROM adoptopenjdk/openjdk11:jdk-11.0.7_10-alpine-slim as builder
 WORKDIR /usr/src/app
 ADD . .
 RUN ./mvnw clean package -DskipTests
