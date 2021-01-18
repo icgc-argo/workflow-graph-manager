@@ -16,14 +16,29 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflowgraphmanager.graphql.type;
+package org.icgc_argo.workflowgraphmanager.graphql;
 
-import lombok.Data;
-import lombok.NonNull;
+import static java.util.stream.Collectors.toList;
 
-@Data
-public class NodeGqlType {
+import com.apollographql.federation.graphqljava._Entity;
+import graphql.schema.DataFetcher;
+import java.util.List;
+import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
-  @NonNull String id;
-  String sampleField;
+@Slf4j
+@Component
+public class EntityDataFetcher {
+
+  public DataFetcher getDataFetcher() {
+    return environment ->
+        environment.<List<Map<String, Object>>>getArgument(_Entity.argumentName).stream()
+            .map(
+                values -> {
+                  // TODO: Implement this
+                  return null;
+                })
+            .collect(toList());
+  }
 }

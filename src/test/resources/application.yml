@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: wg-manager-dev
+  profiles:
+    active: secure
