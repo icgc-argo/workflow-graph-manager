@@ -109,6 +109,7 @@ public class GraphQLProvider {
   private RuntimeWiring buildWiring() {
     return RuntimeWiring.newRuntimeWiring()
         .scalar(ExtendedScalars.Json)
+        .type(newTypeWiring("Message").typeResolver(new MessageTypeResolver()))
         .type(
             newTypeWiring("Query")
                 .dataFetcher("logs", graphLogDataFetcher.getGraphLogsDataFetcher()))
