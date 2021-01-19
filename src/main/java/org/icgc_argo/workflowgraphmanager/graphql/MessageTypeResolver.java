@@ -16,15 +16,26 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflowgraphmanager;
+package org.icgc_argo.workflowgraphmanager.graphql;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import graphql.TypeResolutionEnvironment;
+import graphql.schema.GraphQLObjectType;
+import graphql.schema.TypeResolver;
+import lombok.extern.slf4j.Slf4j;
+import org.icgc_argo.workflowgraphmanager.model.GraphEvent;
+import org.icgc_argo.workflowgraphmanager.model.GraphRun;
+import org.springframework.stereotype.Component;
 
-@SpringBootApplication
-public class WorkflowGraphManagerApplication {
-
-  public static void main(String[] args) {
-    SpringApplication.run(WorkflowGraphManagerApplication.class, args);
+@Slf4j
+@Component
+public class MessageTypeResolver implements TypeResolver {
+  public GraphQLObjectType getType(TypeResolutionEnvironment env) {
+    if (env.getObject() instanceof GraphEvent) {
+      return env.getSchema().getObjectType("GraphEvent");
+    } else if (env.getObject() instanceof GraphRun) {
+      return env.getSchema().getObjectType("GraphRun");
+    } else {
+      return null;
+    }
   }
 }

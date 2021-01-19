@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 The Ontario Institute for Cancer Research. All rights reserved
+ * Copyright (c) 2021 The Ontario Institute for Cancer Research. All rights reserved
  *
  * This program and the accompanying materials are made available under the terms of the GNU Affero General Public License v3.0.
  * You should have received a copy of the GNU Affero General Public License along with
@@ -15,78 +15,114 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.icgc_argo.workflowgraphmanager.graphql;
 
 import static graphql.schema.idl.TypeRuntimeWiring.newTypeWiring;
 
+import com.apollographql.federation.graphqljava.Federation;
 import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
 import graphql.GraphQL;
+import graphql.execution.AsyncExecutionStrategy;
+import graphql.scalars.ExtendedScalars;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.RuntimeWiring;
-import graphql.schema.idl.SchemaGenerator;
-import graphql.schema.idl.SchemaParser;
-import graphql.schema.idl.TypeDefinitionRegistry;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.net.URL;
 import javax.annotation.PostConstruct;
-import lombok.val;
-import org.icgc_argo.workflowgraphmanager.graphql.resolver.NodeResolver;
-import org.icgc_argo.workflowgraphmanager.graphql.resolver.PipelineResolver;
+import lombok.extern.slf4j.Slf4j;
+import org.icgc_argo.workflowgraphmanager.config.websecurity.AuthProperties;
+import org.icgc_argo.workflowgraphmanager.graphql.security.VerifyAuthQueryExecutionStrategyDecorator;
+import org.icgc_argo.workflowgraphmanager.model.GraphLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Service;
 
-@Component
+@Slf4j
+@Service
 public class GraphQLProvider {
 
-  @Autowired NodeResolver nodeResolver;
-  @Autowired PipelineResolver pipelineResolver;
-
+  private final GraphLogDataFetcher graphLogDataFetcher;
+  private final EntityDataFetcher entityDataFetcher;
+  private final AuthProperties authProperties;
   private GraphQL graphQL;
+  private GraphQLSchema graphQLSchema;
+
+  @Autowired
+  public GraphQLProvider(
+      GraphLogDataFetcher graphLogDataFetcher,
+      EntityDataFetcher entityDataFetcher,
+      AuthProperties authProperties) {
+    this.graphLogDataFetcher = graphLogDataFetcher;
+    this.entityDataFetcher = entityDataFetcher;
+    this.authProperties = authProperties;
+  }
 
   @Bean
+  @Profile("!secure")
   public GraphQL graphQL() {
     return graphQL;
   }
 
+  @Bean
+  @Profile("secure")
+  public GraphQL secureGraphQL() {
+    return graphQL.transform(this::toSecureGraphql);
+  }
+
+  private void toSecureGraphql(GraphQL.Builder graphQLBuilder) {
+    // For more info on `Execution Strategies` see:
+    // https://www.graphql-java.com/documentation/v15/execution/
+    graphQLBuilder.queryExecutionStrategy(
+        new VerifyAuthQueryExecutionStrategyDecorator(
+            new AsyncExecutionStrategy(), queryScopesToCheck()));
+  }
+
   @PostConstruct
-  public void init() {
-
-    String[] filenames = {
-      "schemas/base.graphqls", "schemas/node.graphqls", "schemas/pipeline.graphqls"
-    };
-
-    val schemas =
-        Arrays.stream(filenames)
-            .map(
-                filename -> {
-                  try {
-                    return Resources.toString(Resources.getResource(filename), Charsets.UTF_8);
-                  } catch (IOException e) {
-                    throw new RuntimeException(e);
-                  }
-                })
-            .collect(Collectors.toList());
-    val graphQLSchema = buildSchema(schemas);
+  public void init() throws IOException {
+    URL url = Resources.getResource("schema.graphql");
+    String sdl = Resources.toString(url, Charsets.UTF_8);
+    this.graphQLSchema = buildSchema(sdl);
     this.graphQL = GraphQL.newGraphQL(graphQLSchema).build();
   }
 
-  private GraphQLSchema buildSchema(List<String> schemas) {
-    val typeRegistry = new TypeDefinitionRegistry();
-    val schemaParser = new SchemaParser();
-    schemas.forEach(schema -> typeRegistry.merge(schemaParser.parse(schema)));
-    RuntimeWiring runtimeWiring = buildWiring();
-    SchemaGenerator schemaGenerator = new SchemaGenerator();
-    return schemaGenerator.makeExecutableSchema(typeRegistry, runtimeWiring);
+  private GraphQLSchema buildSchema(String sdl) {
+    return Federation.transform(sdl, buildWiring())
+        .fetchEntities(entityDataFetcher.getDataFetcher())
+        .resolveEntityType(
+            typeResolutionEnvironment -> {
+              final Object src = typeResolutionEnvironment.getObject();
+              if (src instanceof GraphLog) {
+                return typeResolutionEnvironment
+                    .getSchema()
+                    .getObjectType(EntityDataFetcher.GRAPH_LOG_ENTITY);
+              }
+              return null;
+            })
+        .build();
   }
 
   private RuntimeWiring buildWiring() {
-    val builder = RuntimeWiring.newRuntimeWiring();
-    pipelineResolver.getTypes().forEach(type -> builder.type(type));
-    nodeResolver.getTypes().forEach(type -> builder.type(type));
-    return builder.build();
+    return RuntimeWiring.newRuntimeWiring()
+        .scalar(ExtendedScalars.Json)
+        .type(newTypeWiring("Message").typeResolver(new MessageTypeResolver()))
+        .type(
+            newTypeWiring("Query")
+                .dataFetcher("logs", graphLogDataFetcher.getGraphLogsDataFetcher()))
+        .type(
+            newTypeWiring("Query")
+                .dataFetcher("logAggs", graphLogDataFetcher.getAggregateGraphLogsDataFetcher()))
+        .build();
+  }
+
+  private ImmutableList<String> queryScopesToCheck() {
+    return ImmutableList.copyOf(
+        Iterables.concat(
+            authProperties.getGraphqlScopes().getQueryOnly(),
+            authProperties.getGraphqlScopes().getQueryAndMutation()));
   }
 }

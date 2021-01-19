@@ -16,15 +16,38 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflowgraphmanager;
+package org.icgc_argo.workflowgraphmanager.model;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import java.util.List;
+import java.util.Map;
+import lombok.Data;
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import org.icgc_argo.workflowgraphmanager.model.base.Message;
+import org.icgc_argo.workflowgraphmanager.utils.JacksonUtils;
 
-@SpringBootApplication
-public class WorkflowGraphManagerApplication {
+@Data
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+public class Pipeline {
 
-  public static void main(String[] args) {
-    SpringApplication.run(WorkflowGraphManagerApplication.class, args);
+  private String id;
+
+  private Map<String, Object> config;
+
+  private List<Node> nodes;
+
+  private List<Queue> queues;
+
+  private List<Message> messages;
+
+  private List<GraphLog> logs;
+
+  @SneakyThrows
+  public static Pipeline parse(@NonNull Map<String, Object> sourceMap) {
+    return JacksonUtils.parse(sourceMap, Pipeline.class);
   }
 }

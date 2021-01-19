@@ -16,15 +16,17 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflowgraphmanager;
+package org.icgc_argo.workflowgraphmanager.config.constants;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import static lombok.AccessLevel.PRIVATE;
 
-@SpringBootApplication
-public class WorkflowGraphManagerApplication {
+import lombok.NoArgsConstructor;
 
-  public static void main(String[] args) {
-    SpringApplication.run(WorkflowGraphManagerApplication.class, args);
-  }
+@NoArgsConstructor(access = PRIVATE)
+public class SearchFields {
+  public static final String GRAPH_MESSAGE_ID = "graphMessageId";
+  public static final String QUEUE = "queue";
+  public static final String NODE = "node";
+  public static final String PIPELINE = "pipeline";
+  public static final String TIMESTAMP = "timestamp";
 }

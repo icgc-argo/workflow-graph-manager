@@ -18,13 +18,11 @@
 
 package org.icgc_argo.workflowgraphmanager;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootApplication
-public class WorkflowGraphManagerApplication {
-
-  public static void main(String[] args) {
-    SpringApplication.run(WorkflowGraphManagerApplication.class, args);
-  }
+@SpringBootTest
+public class WorkflowGraphManagerApplicationTests {
+  @Test
+  void contextLoads() {}
 }

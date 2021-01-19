@@ -16,15 +16,26 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflowgraphmanager;
+package org.icgc_argo.workflowgraphmanager.utils;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import com.google.common.collect.ImmutableMap;
+import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 
-@SpringBootApplication
-public class WorkflowGraphManagerApplication {
+@Slf4j
+public class CommonUtils {
+  private CommonUtils() {}
 
-  public static void main(String[] args) {
-    SpringApplication.run(WorkflowGraphManagerApplication.class, args);
+  public static <K, V> ImmutableMap<K, V> asImmutableMap(Object obj) {
+    val newMap = ImmutableMap.<K, V>builder();
+    if (obj instanceof Map) {
+      try {
+        newMap.putAll((Map<? extends K, ? extends V>) obj);
+      } catch (ClassCastException e) {
+        log.error("Failed to cast obj to Map<K,V>");
+      }
+    }
+    return newMap.build();
   }
 }
