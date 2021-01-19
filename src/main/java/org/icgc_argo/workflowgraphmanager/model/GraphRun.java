@@ -37,7 +37,7 @@ public class GraphRun extends Message {
 
   private String runId;
 
-  //  private String run; // todo: Make Run an entity
+  private String run; // todo: Make Run an entity (in lib?)
 
   @SneakyThrows
   public static GraphRun parse(@NonNull Map<String, Object> sourceMap) {

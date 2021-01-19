@@ -38,9 +38,9 @@ public class GraphLog {
 
   private String log;
 
-  private String queue;
+  private Queue queue;
 
-  private String node;
+  private Node node;
 
   private Pipeline pipeline;
 

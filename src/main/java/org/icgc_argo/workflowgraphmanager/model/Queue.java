@@ -26,6 +26,7 @@ import java.util.Map;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.SneakyThrows;
+import org.icgc_argo.workflowgraphmanager.model.base.Message;
 import org.icgc_argo.workflowgraphmanager.utils.JacksonUtils;
 
 @Data
@@ -40,7 +41,7 @@ public class Queue {
 
   private Node node;
 
-  private List<String> messages;
+  private List<Message> messages;
 
   private List<GraphLog> logs;
 

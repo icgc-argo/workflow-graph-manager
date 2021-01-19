@@ -17,7 +17,7 @@ type Node @key(fields: "id") {
     config: JSON
     enabled: Boolean # is the node "turned on"
     capacity: Int # maximum runs allowed in running queue
-    # workflow: Workflow  # TODO: This type should go in lib
+    workflow: Workflow  # TODO: This type should go in lib
     pipeline: Pipeline
     queues: [Queue]
     messages: [Message]
@@ -58,7 +58,7 @@ type GraphEvent implements Message @key(fields: "id") {
     experimentalStrategy: String
     donorIds: [String]
     files: [AnalysisFile]
-    # analysis: Analysis  # TODO: This type should go in lib
+    analysis: Analysis  # TODO: This type should go in lib
 }
 
 type AnalysisFile {
@@ -72,7 +72,7 @@ type GraphRun implements Message @key(fields: "id") {
     queue: Queue
     logs: [GraphLog]
     runId: ID
-    # run: Run  # TODO: This type should go in lib
+    run: Run  # TODO: This type should go in lib
 }
 
 ## Log types
@@ -88,42 +88,42 @@ type GraphLog @key(fields: "id") {
 
 ### Aggregations ###
 
-#type PipelineAggs {
-#    pipeline: Pipeline
-#    numNodes: Int
-#    queuedCount: Int
-#    runningCount: Int
-#    completeCount: Int
-#}
-#
-#type NodeAggs {
-#    node: Node
-#    queuedCount: Int
-#    runningCount: Int
-#    completeCount: Int
-#}
+type PipelineAggs {
+    pipeline: Pipeline
+    numNodes: Int
+    queuedCount: Int
+    runningCount: Int
+    completeCount: Int
+}
+
+type NodeAggs {
+    node: Node
+    queuedCount: Int
+    runningCount: Int
+    completeCount: Int
+}
 
 # Stubbed external type (will come from Workflow Registry)
-#type Workflow @key(fields: "id") @extends {
-#    id: ID! @external
-#    repo: String
-#    schema: String
-#    running: [Run] # runs that are in the running queue(s) owned by this Pipeline/Node
-#}
+type Workflow @key(fields: "id") @extends {
+    id: ID! @external
+    repo: String
+    schema: String
+    running: [Run] # runs that are in the running queue(s) owned by this Pipeline/Node
+}
 
 # Stubbed external type (from Workflow Search)
-#type Run @key(fields: "runId") @extends {
-#    runId: ID! @external
-#    pipeline: Pipeline @requires(fields: "workflow")
-#    node: Node @requires(fields: "workflow")
-#}
+type Run @key(fields: "runId") @extends {
+    runId: ID! @external
+    pipeline: Pipeline @requires(fields: "workflow")
+    node: Node @requires(fields: "workflow")
+}
 
 # Stubbed external type (from Song Search)
-#type Analysis @key(fields: "analysisId") @extends {
-#    analysisId: ID! @external
-#    pipeline: Pipeline
-#    node: Node
-#}
+type Analysis @key(fields: "analysisId") @extends {
+    analysisId: ID! @external
+    pipeline: Pipeline
+    node: Node
+}
 
 # temp filter that does nothing currently
 input StubFilter {
