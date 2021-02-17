@@ -16,43 +16,32 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflowgraphmanager.model;
+package org.icgc_argo.workflowgraphmanager.service;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import org.icgc_argo.workflowgraphmanager.model.Pipeline;
+
 import java.util.List;
-import java.util.Map;
-import lombok.Data;
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import org.icgc_argo.workflowgraphmanager.model.base.Message;
-import org.icgc_argo.workflowgraphmanager.utils.JacksonUtils;
+import java.util.concurrent.ConcurrentHashMap;
 
-@Data
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class Node {
-  @NonNull private String id;
+/**
+ * The Sonar Service is responsible for building and maintaining an in-memory store
+ * that represents the current state of all pipelines deployed withing a single kubernetes
+ * namespace. After the initial construction it will ping the various repositories for partial
+ * state updates in order to maintain a near-realtime view of the current state of all
+ * aforementioned pipelines.
+ */
+public class SonarService {
+    private ConcurrentHashMap<String, Pipeline> store;
 
-  private Map<String, Object> config;
+    public Pipeline getPipelineById(String pipeline) {
+        return store.get(pipeline);
+    }
 
-  private Boolean enabled;
+    private ConcurrentHashMap<String, Pipeline> shallowUpdate(List<Pipeline> state) {
+        return null;
+    }
 
-  private Integer capacity;
-
-  //  private String workflow; // todo: Make Workflow an entity
-
-  private Pipeline pipeline;
-
-  private List<Queue> queues;
-
-  private List<Message> messages;
-
-  private List<GraphLog> logs;
-
-  @SneakyThrows
-  public static Node parse(@NonNull Map<String, Object> sourceMap) {
-    return JacksonUtils.parse(sourceMap, Node.class);
-  }
+    private ConcurrentHashMap<String, Pipeline> deepUpdate(List<Pipeline> state) {
+        return null;
+    }
 }

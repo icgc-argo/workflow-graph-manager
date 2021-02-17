@@ -34,11 +34,11 @@ import org.icgc_argo.workflowgraphmanager.utils.JacksonUtils;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class Pipeline {
 
-  private String id;
+  @NonNull private String id;
 
-  private Map<String, Object> config;
+  @NonNull private Map<String, Object> config;
 
-  private List<Node> nodes;
+  @NonNull private List<Node> nodes;
 
   private List<Queue> queues;
 
