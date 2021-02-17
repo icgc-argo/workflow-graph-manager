@@ -45,9 +45,9 @@ public class ElasticsearchConfig {
   public ElasticsearchConfig(@NonNull ElasticsearchProperties properties) {
     this.properties = properties;
     log.info(
-        String.format(
-            "Connecting to Elasticsearch host %s, port %s.",
-            properties.getHost(), properties.getPort()));
+        "Connecting to Elasticsearch host {}, port {}.",
+        properties.getHost(),
+        properties.getPort());
   }
 
   private RestHighLevelClient secureRestHighLevelClient() {
@@ -78,7 +78,7 @@ public class ElasticsearchConfig {
                 }));
   }
 
-  @Bean("GraphManagerClient")
+  @Bean("ElasticSearchClient")
   public RestHighLevelClient restHighLevelClient() {
 
     if (properties.getUseAuthentication()) {

@@ -65,7 +65,7 @@ public class GraphLogRepository {
 
   @Autowired
   public GraphLogRepository(
-      @Qualifier("GraphManagerClient") @NonNull RestHighLevelClient client,
+      @Qualifier("ElasticSearchClient") @NonNull RestHighLevelClient client,
       @NonNull ElasticsearchProperties elasticSearchProperties) {
     this.client = client;
     this.graphLogErrorWarningIndex = elasticSearchProperties.getGraphLogErrorWarningIndex();
