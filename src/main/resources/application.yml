@@ -17,6 +17,13 @@ elastic:
   graphLogInfoDebugIndex: graphlog_info_debug
   graphLogErrorWarningIndex: graphlog_error_warning
 
+# https://github.com/fabric8io/kubernetes-client#configuring-the-client
+kubernetes:
+  master: https://kubernetes.default.svc
+
+rdpc:
+  graphK8sNamespace: rdpc-collab
+
 ---
 spring.profiles: secure
 auth:
