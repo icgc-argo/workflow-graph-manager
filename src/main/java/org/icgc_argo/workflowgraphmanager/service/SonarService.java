@@ -24,24 +24,38 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * The Sonar Service is responsible for building and maintaining an in-memory store
- * that represents the current state of all pipelines deployed withing a single kubernetes
- * namespace. After the initial construction it will ping the various repositories for partial
- * state updates in order to maintain a near-realtime view of the current state of all
- * aforementioned pipelines.
+ * The Sonar Service is responsible for building and maintaining an in-memory store that represents
+ * the current state of all pipelines deployed withing a single kubernetes namespace. After the
+ * initial construction it will ping the various repositories for partial state updates in order to
+ * maintain a near-realtime view of the current state of all aforementioned pipelines. Ref:
+ * https://wiki.oicr.on.ca/pages/viewpage.action?pageId=154539008
  */
 public class SonarService {
-    private ConcurrentHashMap<String, Pipeline> store;
+  private ConcurrentHashMap<String, Pipeline> store;
 
-    public Pipeline getPipelineById(String pipeline) {
-        return store.get(pipeline);
-    }
+  public Pipeline getPipelineById(String pipeline) {
+    return store.get(pipeline);
+  }
 
-    private ConcurrentHashMap<String, Pipeline> shallowUpdate(List<Pipeline> state) {
-        return null;
-    }
+  /**
+   * Populates the top levels of the state tree comprised of pipelines, nodes, and a list of queues
+   * (without details), information which is gleamed via the Kubernetes API. A shallow update should
+   * not erase existing deep data unless there is an actual difference between the new state and the
+   * previous measured at the queue level. Pipeline/Node changes should be incorporated if possible
+   * without wiping the deeper data (ex. config change in a node)
+   *
+   * @param state - list of pipelines without details deeper than the name of the queues associated
+   *     with a node
+   */
+  private void shallowUpdate(List<Pipeline> state) {}
 
-    private ConcurrentHashMap<String, Pipeline> deepUpdate(List<Pipeline> state) {
-        return null;
-    }
+  /**
+   * TBD (not sure about this yet) Populates the deeper levels of the state tree, queues and below,
+   * information which is gleamed via the RabbitMQ management API. A deep update will use as input
+   * the complete state. New data WILL ALWAYS OVERWRITE existing data in a merge scenario.
+   *
+   * @param state - list of pipelines without details deeper than the name of the queues associated
+   *     with a node
+   */
+  private void deepUpdate(List<Pipeline> state) {}
 }

@@ -18,5 +18,29 @@
 
 package org.icgc_argo.workflowgraphmanager.repository;
 
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import lombok.val;
+import org.icgc_argo.workflowgraphmanager.model.Pipeline;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
+
 public class PipelineRepository {
+  /**
+   * label for all pipeline pods as per
+   * https://wiki.oicr.on.ca/display/icgcargotech/Kubernetes+Labelling
+   */
+  private final String pipelineLabel = "common.org.icgc.argo/type: workflow-graph";
+
+  private final DefaultKubernetesClient kubernetesClient;
+
+  public PipelineRepository(@Autowired DefaultKubernetesClient kubernetesClient) {
+    this.kubernetesClient = kubernetesClient;
+  }
+
+  public List<Pipeline> getPipelines() {
+    val graphPods = kubernetesClient.pods().withLabel(pipelineLabel).list();
+  }
+
+  public Pipeline getPipeline() {}
 }
