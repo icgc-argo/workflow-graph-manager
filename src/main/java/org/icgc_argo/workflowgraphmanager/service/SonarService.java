@@ -18,7 +18,11 @@
 
 package org.icgc_argo.workflowgraphmanager.service;
 
+import lombok.val;
 import org.icgc_argo.workflowgraphmanager.model.Pipeline;
+import org.icgc_argo.workflowgraphmanager.repository.PipelineRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,8 +34,15 @@ import java.util.concurrent.ConcurrentHashMap;
  * maintain a near-realtime view of the current state of all aforementioned pipelines. Ref:
  * https://wiki.oicr.on.ca/pages/viewpage.action?pageId=154539008
  */
+@Service
 public class SonarService {
+  private PipelineRepository pipelineRepository;
   private ConcurrentHashMap<String, Pipeline> store;
+
+  public SonarService(@Autowired PipelineRepository pipelineRepository) {
+    this.pipelineRepository = pipelineRepository;
+    val pipelines = pipelineRepository.getPipelines();
+  }
 
   public Pipeline getPipelineById(String pipeline) {
     return store.get(pipeline);

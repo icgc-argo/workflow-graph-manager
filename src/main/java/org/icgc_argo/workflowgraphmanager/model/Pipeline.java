@@ -39,7 +39,7 @@ public class Pipeline {
 
   @NonNull private String id;
 
-  @NonNull private Map<String, Object> config;
+  /* @NonNull */ private Map<String, Object> config;
 
   @NonNull private List<Node> nodes;
 
