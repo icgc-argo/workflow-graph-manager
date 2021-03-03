@@ -20,9 +20,9 @@ package org.icgc_argo.workflowgraphmanager.service;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import lombok.val;
+
 import org.icgc_argo.workflowgraphmanager.model.Pipeline;
-import org.icgc_argo.workflowgraphmanager.repository.PipelineRepository;
+import org.icgc_argo.workflowgraphmanager.repository.GraphNodeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,12 +35,11 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class SonarService {
-  private PipelineRepository pipelineRepository;
+  private GraphNodeRepository graphNodeRepository;
   private ConcurrentHashMap<String, Pipeline> store;
 
-  public SonarService(@Autowired PipelineRepository pipelineRepository) {
-    this.pipelineRepository = pipelineRepository;
-    val pipelines = pipelineRepository.getPipelines();
+  public SonarService(@Autowired GraphNodeRepository graphNodeRepository) {
+    this.graphNodeRepository = graphNodeRepository;
   }
 
   public Pipeline getPipelineById(String pipeline) {

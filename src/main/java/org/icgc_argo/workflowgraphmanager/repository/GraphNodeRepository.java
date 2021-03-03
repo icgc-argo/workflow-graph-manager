@@ -35,7 +35,7 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class PipelineRepository {
+public class GraphNodeRepository {
   /**
    * label for all pipeline pods as per
    * https://wiki.oicr.on.ca/display/icgcargotech/Kubernetes+Labelling
@@ -53,69 +53,48 @@ public class PipelineRepository {
 
   private final KubernetesClient kubernetesClient;
 
-  public PipelineRepository(@Autowired KubernetesClient kubernetesClient) {
+  public GraphNodeRepository(@Autowired KubernetesClient kubernetesClient) {
     this.kubernetesClient = kubernetesClient;
   }
 
-  public HashMap<String, Pipeline> getPipelines() {
-    return buildPipelinesFromPodList(
-        kubernetesClient.pods().withLabel(TYPE_LABEL_KEY, TYPE_LABEL_VAL).list().getItems());
+  public Stream<Node> getNodes() {
+    return kubernetesClient
+        .pods()
+        .withLabel(TYPE_LABEL_KEY, TYPE_LABEL_VAL)
+        .list()
+        .getItems()
+        .stream()
+        .map(
+            pod ->
+                pod.getMetadata().getLabels().get(APP_LABEL_KEY).equalsIgnoreCase(APP_GRAPH_NODE)
+                    ? parsePodToNode(pod)
+                    : parsePodToIngestNode(pod));
   }
 
-  private HashMap<String, Pipeline> buildPipelinesFromPodList(List<Pod> podList) {
-    return podList.stream()
+  public HashMap<String, Pipeline> getPipelines() {
+    return getNodes()
         .reduce(
             new HashMap<>(),
-            (HashMap<String, Pipeline> pipelines, Pod pod) ->
-                PatternMatch.<String, HashMap<String, Pipeline>>match(
-                        pod.getMetadata().getLabels().get(APP_LABEL_KEY))
-                    .on(
-                        app ->
-                            app.equalsIgnoreCase(APP_GRAPH_NODE)
-                                || app.equalsIgnoreCase(APP_GRAPH_INGEST_NODE),
-                        () -> {
-                          val pipeline = getOrCreatePipeline(pod, pipelines);
-                          val node =
-                              pod.getMetadata()
-                                      .getLabels()
-                                      .get(APP_LABEL_KEY)
-                                      .equalsIgnoreCase(APP_GRAPH_NODE)
-                                  ? parsePodToNode(pod)
-                                  : parsePodToIngestNode(pod);
+            (HashMap<String, Pipeline> pipelines, Node node) -> {
+              val pipeline = getOrCreatePipeline(node, pipelines);
 
-                          // Add the new node to the list of nodes for the pipeline
-                          pipeline.setNodes(
-                              Stream.concat(Stream.of(node), pipeline.getNodes().stream())
-                                  .collect(Collectors.toList()));
+              // Add the new node to the list of nodes for the pipeline
+              pipeline.setNodes(
+                  Stream.concat(Stream.of(node), pipeline.getNodes().stream())
+                      .collect(Collectors.toList()));
 
-                          // Add/Replace the pipeline with the newly updated one
-                          val pipelineId = getPipelineId(pod);
+              if (pipelines.containsKey(pipeline.getId())) {
+                pipelines.replace(pipeline.getId(), pipeline);
+              } else {
+                pipelines.put(pipeline.getId(), pipeline);
+              }
 
-                          if (pipelines.containsKey(pipelineId)) {
-                            pipelines.replace(pipelineId, pipeline);
-                          } else {
-                            pipelines.put(pipelineId, pipeline);
-                          }
-
-                          return pipelines;
-                        })
-                    .otherwise(
-                        () -> {
-                          log.warn(
-                              "Unknown Workflow Graph App: {}",
-                              pod.getMetadata().getLabels().get(APP_LABEL_KEY));
-                          return pipelines;
-                        }),
+              return pipelines;
+            },
             (pipelinesA, pipelinesB) -> {
               throw new RuntimeException(
                   "Beware, here there be dragons ... in the form of reducer combinators somehow being called on a non-parallel stream reduce ...");
             });
-  }
-
-  private Pipeline getOrCreatePipeline(Pod pod, HashMap<String, Pipeline> pipelines) {
-    return pipelines.getOrDefault(
-        getPipelineId(pod),
-        Pipeline.builder().id(getPipelineId(pod)).nodes(new ArrayList<>()).build());
   }
 
   private Node parsePodToNode(Pod pod) {
@@ -132,5 +111,11 @@ public class PipelineRepository {
 
   private String getNodeId(Pod pod) {
     return pod.getMetadata().getLabels().get(NODE_LABEL_KEY);
+  }
+
+  private Pipeline getOrCreatePipeline(Node node, HashMap<String, Pipeline> pipelines) {
+    return pipelines.getOrDefault(
+        node.getPipeline(),
+        Pipeline.builder().id(node.getPipeline()).nodes(new ArrayList<>()).build());
   }
 }

@@ -26,28 +26,28 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.server.mock.EnableKubernetesMockClient;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import lombok.val;
 import org.icgc_argo.workflow_graph_lib.utils.JacksonUtils;
-import org.junit.Before;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("test")
 @EnableKubernetesMockClient(crud = true)
-public class PipelineRepositoryTest {
+public class GraphNodeRepositoryTest {
 
   static KubernetesClient client;
 
-  private final PipelineRepository pipelineRepository;
+  private final GraphNodeRepository graphNodeRepository;
 
-  public PipelineRepositoryTest() {
-    this.pipelineRepository = new PipelineRepository(client);
+  public GraphNodeRepositoryTest() {
+    this.graphNodeRepository = new GraphNodeRepository(client);
   }
 
   @Test
-  public void singleNodePipeline() {
+  public void singlePipelineTest() {
     val simplePipelineJson =
         readValue(this.getClass().getResourceAsStream("fixtures/single-pipeline.json"), Map.class);
 
@@ -55,11 +55,17 @@ public class PipelineRepositoryTest {
         ((List<Map<String, Object>>) simplePipelineJson.get("items"))
             .stream().map(podJson -> JacksonUtils.convertValue(podJson, Pod.class)));
 
-    val result = pipelineRepository.getPipelines();
+    val nodes = graphNodeRepository.getNodes().collect(Collectors.toList());
+    val pipelines = graphNodeRepository.getPipelines();
 
-    assertThat(result.keySet().size()).isEqualTo(1);
-    assertThat(result.keySet().contains("test-pipeline")).isTrue();
-    assertThat(result.get("test-pipeline").getNodes().size()).isEqualTo(2);
+    // Test nodes list is correct
+    assertThat(nodes.size()).isEqualTo(2);
+    // add test cases
+
+    // Test pipeline is correct
+    assertThat(pipelines.keySet().size()).isEqualTo(1);
+    assertThat(pipelines.keySet().contains("test-pipeline")).isTrue();
+    assertThat(pipelines.get("test-pipeline").getNodes().size()).isEqualTo(2);
   }
 
   private void loadK8sWithDecoysAnd(Stream<Pod> pods) {
