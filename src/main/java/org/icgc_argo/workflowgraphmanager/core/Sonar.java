@@ -16,15 +16,22 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflowgraphmanager.service;
+package org.icgc_argo.workflowgraphmanager.core;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.icgc_argo.workflowgraphmanager.model.Pipeline;
 import org.icgc_argo.workflowgraphmanager.repository.GraphNodeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import reactor.core.Disposable;
+import reactor.core.publisher.Flux;
 
 /**
  * The Sonar Service is responsible for building and maintaining an in-memory store that represents
@@ -33,14 +40,23 @@ import org.springframework.stereotype.Service;
  * maintain a near-realtime view of the current state of all aforementioned pipelines. Ref:
  * https://wiki.oicr.on.ca/pages/viewpage.action?pageId=154539008
  */
-@Service
-public class SonarService {
+@Slf4j
+@Configuration
+public class Sonar {
   private GraphNodeRepository graphNodeRepository;
   private ConcurrentHashMap<String, Pipeline> store;
 
-  public SonarService(@Autowired GraphNodeRepository graphNodeRepository) {
+  public Sonar(@Autowired GraphNodeRepository graphNodeRepository) {
     this.graphNodeRepository = graphNodeRepository;
   }
+
+  public Disposable doShallowUpdate() {
+    return Flux.generate(graphNodeRepository::getPipelines, (state, sink) -> {
+      sink.next();
+      return graphNodeRepository.getPipelines();
+    }).subscribe();
+  }
+
 
   public Pipeline getPipelineById(String pipeline) {
     return store.get(pipeline);
@@ -56,7 +72,7 @@ public class SonarService {
    * @param state - list of pipelines without details deeper than the name of the queues associated
    *     with a node
    */
-  private void shallowUpdate(List<Pipeline> state) {}
+  private void shallowUpdate(HashMap<String, Pipeline> state) {}
 
   /**
    * TBD (not sure about this yet) Populates the deeper levels of the state tree, queues and below,
@@ -66,5 +82,6 @@ public class SonarService {
    * @param state - list of pipelines without details deeper than the name of the queues associated
    *     with a node
    */
-  private void deepUpdate(List<Pipeline> state) {}
+  private void deepUpdate(HashMap<String, Pipeline> state) {}
 }
+
