@@ -18,5 +18,4 @@
 
 package org.icgc_argo.workflowgraphmanager.service;
 
-public class SonarServiceTest {
-}
+public class SonarServiceTest {}

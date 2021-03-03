@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.util.List;
 import java.util.Map;
-
 import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;

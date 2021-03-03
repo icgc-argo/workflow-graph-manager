@@ -26,5 +26,5 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "rdpc")
 public class RdpcProperties {
-    private String graphK8sNamespace;
+  private String graphK8sNamespace;
 }

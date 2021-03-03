@@ -18,14 +18,13 @@
 
 package org.icgc_argo.workflowgraphmanager.service;
 
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.val;
 import org.icgc_argo.workflowgraphmanager.model.Pipeline;
 import org.icgc_argo.workflowgraphmanager.repository.PipelineRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The Sonar Service is responsible for building and maintaining an in-memory store that represents

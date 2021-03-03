@@ -20,6 +20,11 @@ package org.icgc_argo.workflowgraphmanager.repository;
 
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.icgc_argo.workflow_graph_lib.utils.PatternMatch;
@@ -28,12 +33,6 @@ import org.icgc_argo.workflowgraphmanager.model.Pipeline;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 @Slf4j
 @Component
 public class PipelineRepository {
@@ -41,16 +40,16 @@ public class PipelineRepository {
    * label for all pipeline pods as per
    * https://wiki.oicr.on.ca/display/icgcargotech/Kubernetes+Labelling
    */
-  private final String TYPE_LABEL_KEY = "common.org.icgc.argo/type";
+  static final String TYPE_LABEL_KEY = "common.org.icgc.argo/type";
 
-  private final String TYPE_LABEL_VAL = "workflow-graph";
+  static final String TYPE_LABEL_VAL = "workflow-graph";
 
-  private final String APP_LABEL_KEY = "workflow-graph.org.icgc.argo/app";
-  private final String APP_GRAPH_NODE = "workflow-graph-node";
-  private final String APP_GRAPH_INGEST_NODE = "workflow-graph-ingest-node";
+  static final String APP_LABEL_KEY = "workflow-graph.org.icgc.argo/app";
+  static final String APP_GRAPH_NODE = "workflow-graph-node";
+  static final String APP_GRAPH_INGEST_NODE = "workflow-graph-ingest-node";
 
-  private final String PIPELINE_LABEL_KEY = "workflow-graph.org.icgc.argo/pipeline-id";
-  private final String NODE_LABEL_KEY = "workflow-graph.org.icgc.argo/node-id";
+  static final String PIPELINE_LABEL_KEY = "workflow-graph.org.icgc.argo/pipeline-id";
+  static final String NODE_LABEL_KEY = "workflow-graph.org.icgc.argo/node-id";
 
   private final KubernetesClient kubernetesClient;
 
@@ -71,44 +70,66 @@ public class PipelineRepository {
                 PatternMatch.<String, HashMap<String, Pipeline>>match(
                         pod.getMetadata().getLabels().get(APP_LABEL_KEY))
                     .on(
-                        app -> app.equalsIgnoreCase(APP_GRAPH_NODE),
+                        app ->
+                            app.equalsIgnoreCase(APP_GRAPH_NODE)
+                                || app.equalsIgnoreCase(APP_GRAPH_INGEST_NODE),
                         () -> {
-                          // Get labels from pod meta
-                          val pipelineId = pod.getMetadata().getLabels().get(PIPELINE_LABEL_KEY);
-                          val nodeId = pod.getMetadata().getLabels().get(NODE_LABEL_KEY);
-
-                          // Build new pipeline object if not already present in accumulator
-                          val pipeline =
-                              pipelines.getOrDefault(
-                                  pipelineId, Pipeline.builder().id(pipelineId).nodes(new ArrayList<>()) .build());
-
-                          // Build new node
-                          val node = Node.builder().id(nodeId).build();
+                          val pipeline = getOrCreatePipeline(pod, pipelines);
+                          val node =
+                              pod.getMetadata()
+                                      .getLabels()
+                                      .get(APP_LABEL_KEY)
+                                      .equalsIgnoreCase(APP_GRAPH_NODE)
+                                  ? parsePodToNode(pod)
+                                  : parsePodToIngestNode(pod);
 
                           // Add the new node to the list of nodes for the pipeline
                           pipeline.setNodes(
                               Stream.concat(Stream.of(node), pipeline.getNodes().stream())
                                   .collect(Collectors.toList()));
 
-                          // Replace the pipeline with the newly updated one
-                          pipelines.replace(pipelineId, pipeline);
+                          // Add/Replace the pipeline with the newly updated one
+                          val pipelineId = getPipelineId(pod);
+                          if (pipelines.containsKey(pipelineId)) {
+                            pipelines.replace(pipelineId, pipeline);
+                          } else {
+                            pipelines.put(pipelineId, pipeline);
+                          }
 
                           return pipelines;
                         })
-                    .on(app -> app.equalsIgnoreCase(APP_GRAPH_INGEST_NODE), () -> pipelines)
-                    .otherwise(() -> pipelines),
+                    .otherwise(
+                        () -> {
+                          log.warn(
+                              "Unknown Workflow Graph App: {}",
+                              pod.getMetadata().getLabels().get(APP_LABEL_KEY));
+                          return pipelines;
+                        }),
             (pipelinesA, pipelinesB) -> {
               throw new RuntimeException(
                   "Beware, here there be dragons ... in the form of reducer combinators somehow being called on a non-parallel stream reduce ...");
             });
   }
 
-  private Node parsePodToNode(Pod pod, Pipeline pipeline) {
-    return Node.builder()
-        .id(pod.getMetadata().getLabels().get(NODE_LABEL_KEY))
-        .pipeline(pipeline)
-        .build();
+  private Pipeline getOrCreatePipeline(Pod pod, HashMap<String, Pipeline> pipelines) {
+    return pipelines.getOrDefault(
+        getPipelineId(pod),
+        Pipeline.builder().id(getPipelineId(pod)).nodes(new ArrayList<>()).build());
   }
 
-  //  public Pipeline getPipeline() {}
+  private Node parsePodToNode(Pod pod) {
+    return Node.builder().id(getNodeId(pod)).pipeline(getPipelineId(pod)).build();
+  }
+
+  private Node parsePodToIngestNode(Pod pod) {
+    return Node.builder().id(getNodeId(pod)).pipeline(getPipelineId(pod)).build();
+  }
+
+  private String getPipelineId(Pod pod) {
+    return pod.getMetadata().getLabels().get(PIPELINE_LABEL_KEY);
+  }
+
+  private String getNodeId(Pod pod) {
+    return pod.getMetadata().getLabels().get(NODE_LABEL_KEY);
+  }
 }

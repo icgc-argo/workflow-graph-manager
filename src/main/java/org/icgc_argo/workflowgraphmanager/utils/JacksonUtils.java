@@ -20,9 +20,11 @@ package org.icgc_argo.workflowgraphmanager.utils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.Map;
 import lombok.NonNull;
+import lombok.SneakyThrows;
 import org.springframework.core.ParameterizedTypeReference;
 
 // TODO: Move these into Graph-LIB
@@ -43,5 +45,14 @@ public class JacksonUtils {
 
   public static <T> T parse(@NonNull Map<String, Object> sourceMap, Class<T> toValueType) {
     return MAPPER.convertValue(sourceMap, toValueType);
+  }
+
+  @SneakyThrows
+  public static <T> T readValue(InputStream src, Class<T> valueType) {
+    return MAPPER.readValue(src, valueType);
+  }
+
+  public static <T> T parse(@NonNull Object obj, @NonNull TypeReference<T> type) {
+    return MAPPER.convertValue(obj, type);
   }
 }

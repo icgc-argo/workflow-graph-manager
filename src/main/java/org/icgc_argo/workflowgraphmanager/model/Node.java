@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.util.List;
 import java.util.Map;
-
 import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
@@ -46,7 +45,7 @@ public class Node {
 
   //  private String workflow; // todo: Make Workflow an entity
 
-  private Pipeline pipeline;
+  private String pipeline;
 
   private List<Queue> queues;
 
