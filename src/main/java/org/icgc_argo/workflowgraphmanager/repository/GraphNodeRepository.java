@@ -23,6 +23,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
@@ -65,10 +66,23 @@ public class GraphNodeRepository {
         .getItems()
         .stream()
         .map(
-            pod ->
-                pod.getMetadata().getLabels().get(APP_LABEL_KEY).equalsIgnoreCase(APP_GRAPH_NODE)
-                    ? parsePodToNode(pod)
-                    : parsePodToIngestNode(pod));
+            pod -> {
+              if (pod.getMetadata()
+                  .getLabels()
+                  .get(APP_LABEL_KEY)
+                  .equalsIgnoreCase(APP_GRAPH_NODE)) {
+                return parsePodToNode(pod);
+              } else if (pod.getMetadata()
+                  .getLabels()
+                  .get(APP_LABEL_KEY)
+                  .equalsIgnoreCase(APP_GRAPH_INGEST_NODE)) {
+                return parsePodToIngestNode(pod);
+              } else {
+                log.warn("Unknown Workflow Graph Node Type, pod description: {}", pod);
+                return null;
+              }
+            })
+        .filter(Objects::nonNull);
   }
 
   public HashMap<String, Pipeline> getPipelines() {
