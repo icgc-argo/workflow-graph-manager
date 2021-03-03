@@ -90,6 +90,7 @@ public class PipelineRepository {
 
                           // Add/Replace the pipeline with the newly updated one
                           val pipelineId = getPipelineId(pod);
+
                           if (pipelines.containsKey(pipelineId)) {
                             pipelines.replace(pipelineId, pipeline);
                           } else {
