@@ -5,7 +5,6 @@ scalar Long
 
 type Pipeline @key(fields: "id") {
     id: ID!
-    config: JSON
     nodes: [Node]
     queues: [Queue]
     messages: [Message]
