@@ -18,16 +18,19 @@
 
 package org.icgc_argo.workflowgraphmanager.core;
 
-import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
-
 import lombok.extern.slf4j.Slf4j;
-import org.icgc_argo.workflowgraphmanager.graphql.model.Pipeline;
 import org.icgc_argo.workflowgraphmanager.repository.GraphNodeRepository;
+import org.icgc_argo.workflowgraphmanager.repository.model.Pipeline;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.SynchronousSink;
+
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The Sonar Service is responsible for building and maintaining an in-memory store that represents
@@ -46,13 +49,16 @@ public class Sonar {
     this.graphNodeRepository = graphNodeRepository;
   }
 
+  @Bean
   public Disposable doShallowUpdate() {
-    return Flux.generate(graphNodeRepository::getPipelines, (state, sink) -> {
-      sink.next();
-      return graphNodeRepository.getPipelines();
-    }).subscribe();
+    return Flux.generate(
+            (SynchronousSink<HashMap<String, Pipeline>> sink) -> {
+              sink.next(graphNodeRepository.getPipelines());
+            })
+        .delayElements(Duration.ofSeconds(10)) // todo: make configurable
+        .doOnNext(this::shallowUpdate)
+        .subscribe();
   }
-
 
   public Pipeline getPipelineById(String pipeline) {
     return store.get(pipeline);
@@ -68,7 +74,9 @@ public class Sonar {
    * @param state - list of pipelines without details deeper than the name of the queues associated
    *     with a node
    */
-  private void shallowUpdate(HashMap<String, Pipeline> state) {}
+  private void shallowUpdate(HashMap<String, Pipeline> state) {
+    log.info("Ping with new state: {}", state);
+  }
 
   /**
    * TBD (not sure about this yet) Populates the deeper levels of the state tree, queues and below,
@@ -80,4 +88,3 @@ public class Sonar {
    */
   private void deepUpdate(HashMap<String, Pipeline> state) {}
 }
-
