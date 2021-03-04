@@ -21,15 +21,14 @@ package org.icgc_argo.workflowgraphmanager.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.InputStream;
+import java.lang.reflect.Type;
+import java.util.Map;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.icgc_argo.workflowgraphmanager.repository.model.GraphNodeConfig;
 import org.springframework.core.ParameterizedTypeReference;
-
-import java.io.InputStream;
-import java.lang.reflect.Type;
-import java.util.Map;
 
 // TODO: Move these into Graph-LIB
 @Slf4j

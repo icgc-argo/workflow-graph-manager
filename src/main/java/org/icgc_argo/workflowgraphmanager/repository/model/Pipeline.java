@@ -18,6 +18,7 @@
 
 package org.icgc_argo.workflowgraphmanager.repository.model;
 
+import java.util.List;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
@@ -25,8 +26,6 @@ import org.icgc_argo.workflowgraphmanager.graphql.model.GraphLog;
 import org.icgc_argo.workflowgraphmanager.graphql.model.Queue;
 import org.icgc_argo.workflowgraphmanager.graphql.model.base.Message;
 import org.icgc_argo.workflowgraphmanager.repository.model.base.GraphNodeABC;
-
-import java.util.List;
 
 @Data
 @Builder

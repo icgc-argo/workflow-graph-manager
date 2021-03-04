@@ -18,10 +18,9 @@
 
 package org.icgc_argo.workflowgraphmanager.repository.model;
 
+import java.util.List;
 import lombok.*;
 import org.icgc_argo.workflow_graph_lib.polyglot.enums.GraphFunctionLanguage;
-
-import java.util.List;
 
 @Data
 @Builder

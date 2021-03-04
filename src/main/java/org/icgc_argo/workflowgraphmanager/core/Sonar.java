@@ -18,6 +18,9 @@
 
 package org.icgc_argo.workflowgraphmanager.core;
 
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
 import org.icgc_argo.workflowgraphmanager.repository.GraphNodeRepository;
 import org.icgc_argo.workflowgraphmanager.repository.model.Pipeline;
@@ -27,10 +30,6 @@ import org.springframework.context.annotation.Configuration;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.SynchronousSink;
-
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The Sonar Service is responsible for building and maintaining an in-memory store that represents

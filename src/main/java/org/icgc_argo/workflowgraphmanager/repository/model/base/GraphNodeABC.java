@@ -18,14 +18,13 @@
 
 package org.icgc_argo.workflowgraphmanager.repository.model.base;
 
+import java.util.List;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
 import org.icgc_argo.workflowgraphmanager.graphql.model.GraphLog;
 import org.icgc_argo.workflowgraphmanager.graphql.model.Queue;
 import org.icgc_argo.workflowgraphmanager.graphql.model.base.Message;
-
-import java.util.List;
 
 @Data
 @SuperBuilder

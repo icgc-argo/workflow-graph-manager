@@ -18,22 +18,21 @@
 
 package org.icgc_argo.workflowgraphmanager.repository;
 
+import static org.icgc_argo.workflowgraphmanager.utils.JacksonUtils.jsonStringToNodeConfig;
+
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.icgc_argo.workflowgraphmanager.repository.model.*;
 import org.icgc_argo.workflowgraphmanager.repository.model.base.GraphNodeABC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.icgc_argo.workflowgraphmanager.utils.JacksonUtils.jsonStringToNodeConfig;
 
 @Slf4j
 @Component
@@ -60,11 +59,7 @@ public class GraphNodeRepository {
   }
 
   public Stream<GraphNodeABC> getNodes() {
-    return kubernetesClient
-        .pods()
-        .withLabel(TYPE_LABEL_KEY, TYPE_LABEL_VAL)
-        .list()
-        .getItems()
+    return kubernetesClient.pods().withLabel(TYPE_LABEL_KEY, TYPE_LABEL_VAL).list().getItems()
         .stream()
         .map(
             pod -> {
@@ -115,13 +110,8 @@ public class GraphNodeRepository {
         .reduce(
             new GraphNodeConfig(),
             (acc, curr) ->
-                kubernetesClient
-                    .configMaps()
-                    .withName(curr.getConfigMap().getName())
-                    .get()
-                    .getData()
-                    .values()
-                    .stream()
+                kubernetesClient.configMaps().withName(curr.getConfigMap().getName()).get()
+                    .getData().values().stream()
                     .reduce(
                         new GraphNodeConfig(),
                         (config, configString) -> jsonStringToNodeConfig(configString),

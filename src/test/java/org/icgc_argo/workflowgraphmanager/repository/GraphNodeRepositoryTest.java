@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import lombok.val;
 import org.icgc_argo.workflow_graph_lib.utils.JacksonUtils;
 import org.junit.jupiter.api.Test;
@@ -71,11 +70,11 @@ public class GraphNodeRepositoryTest {
   @Test
   public void graphNodeConfigTest() {
     val simplePipelineJson =
-            readValue(this.getClass().getResourceAsStream("fixtures/single-pipeline.json"), Map.class);
+        readValue(this.getClass().getResourceAsStream("fixtures/single-pipeline.json"), Map.class);
 
     loadK8sWithBaseResourcesAnd(
-            ((List<Map<String, Object>>) simplePipelineJson.get("items"))
-                    .stream().map(podJson -> JacksonUtils.convertValue(podJson, Pod.class)));
+        ((List<Map<String, Object>>) simplePipelineJson.get("items"))
+            .stream().map(podJson -> JacksonUtils.convertValue(podJson, Pod.class)));
 
     val pod = client.pods().withName("align-node-workflow-graph-node-86cf986995-c5gvk").get();
     val config = graphNodeRepository.getGraphNodeConfig(pod);
@@ -87,11 +86,11 @@ public class GraphNodeRepositoryTest {
   @Test
   public void graphIngestNodeConfigTest() {
     val simplePipelineJson =
-            readValue(this.getClass().getResourceAsStream("fixtures/single-pipeline.json"), Map.class);
+        readValue(this.getClass().getResourceAsStream("fixtures/single-pipeline.json"), Map.class);
 
     loadK8sWithBaseResourcesAnd(
-            ((List<Map<String, Object>>) simplePipelineJson.get("items"))
-                    .stream().map(podJson -> JacksonUtils.convertValue(podJson, Pod.class)));
+        ((List<Map<String, Object>>) simplePipelineJson.get("items"))
+            .stream().map(podJson -> JacksonUtils.convertValue(podJson, Pod.class)));
 
     val pod = client.pods().withName("ingest-workflow-graph-ingest-769f477677-64cp8").get();
     val config = graphNodeRepository.getGraphIngestNodeConfig(pod);
@@ -102,7 +101,12 @@ public class GraphNodeRepositoryTest {
 
   private void loadK8sWithBaseResourcesAnd(Stream<Pod> pods) {
     // load config map
-    client.configMaps().create(readValue(this.getClass().getResourceAsStream("fixtures/align-node-config.json"), ConfigMap.class));
+    client
+        .configMaps()
+        .create(
+            readValue(
+                this.getClass().getResourceAsStream("fixtures/align-node-config.json"),
+                ConfigMap.class));
 
     // read decoy pods
     val decoyPodsJson =
