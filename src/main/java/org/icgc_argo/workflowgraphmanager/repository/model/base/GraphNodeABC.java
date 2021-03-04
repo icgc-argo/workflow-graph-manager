@@ -16,25 +16,27 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflowgraphmanager.repository.model;
+package org.icgc_argo.workflowgraphmanager.repository.model.base;
 
-import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
+import lombok.experimental.SuperBuilder;
 import org.icgc_argo.workflowgraphmanager.graphql.model.GraphLog;
 import org.icgc_argo.workflowgraphmanager.graphql.model.Queue;
 import org.icgc_argo.workflowgraphmanager.graphql.model.base.Message;
-import org.icgc_argo.workflowgraphmanager.repository.model.base.GraphNodeABC;
 
 import java.util.List;
 
 @Data
-@Builder
-public class Pipeline {
-
+@SuperBuilder
+public abstract class GraphNodeABC {
   @NonNull private String id;
 
-  @NonNull private List<GraphNodeABC> graphNodes;
+  private Boolean enabled;
+
+  private Integer capacity;
+
+  private String pipeline;
 
   private List<Queue> queues;
 

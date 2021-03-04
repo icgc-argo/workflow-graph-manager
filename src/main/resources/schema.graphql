@@ -14,7 +14,7 @@ type Pipeline @key(fields: "id") {
 type Node @key(fields: "id") {
     id: ID!
     config: JSON
-    enabled: Boolean # is the node "turned on"
+    enabled: Boolean # is the graphNode "turned on"
     capacity: Int # maximum runs allowed in running queue
     workflow: Workflow  # TODO: This type should go in lib
     pipeline: Pipeline
@@ -29,7 +29,7 @@ type Queue @key(fields: "id") {
     id: ID!
     exchange: String
     pipeline: Pipeline
-    node: Node
+    graphNode: Node
     messages: [Message]
     logs: [GraphLog]
 }
@@ -39,7 +39,7 @@ type Queue @key(fields: "id") {
 interface Message {
     id: ID!
     pipeline: Pipeline
-    node: Node
+    graphNode: Node
     queue: Queue
     logs: [GraphLog]
 }
@@ -47,7 +47,7 @@ interface Message {
 type GraphEvent implements Message @key(fields: "id") {
     id: ID!
     pipeline: Pipeline
-    node: Node
+    graphNode: Node
     queue: Queue
     logs: [GraphLog]
     analysisId: ID
@@ -67,7 +67,7 @@ type AnalysisFile {
 type GraphRun implements Message @key(fields: "id") {
     id: ID!
     pipeline: Pipeline
-    node: Node
+    graphNode: Node
     queue: Queue
     logs: [GraphLog]
     runId: ID
@@ -80,7 +80,7 @@ type GraphLog @key(fields: "id") {
     graphMessageId: ID
     log: String
     queue: Queue
-    node: Node
+    graphNode: Node
     pipeline: Pipeline
     timestamp: Long
 }
@@ -96,7 +96,7 @@ type PipelineAggs {
 }
 
 type NodeAggs {
-    node: Node
+    graphNode: Node
     queuedCount: Int
     runningCount: Int
     completeCount: Int
@@ -114,14 +114,14 @@ type Workflow @key(fields: "id") @extends {
 type Run @key(fields: "runId") @extends {
     runId: ID! @external
     pipeline: Pipeline @requires(fields: "workflow")
-    node: Node @requires(fields: "workflow")
+    graphNode: Node @requires(fields: "workflow")
 }
 
 # Stubbed external type (from Song Search)
 type Analysis @key(fields: "analysisId") @extends {
     analysisId: ID! @external
     pipeline: Pipeline
-    node: Node
+    graphNode: Node
 }
 
 # temp filter that does nothing currently
@@ -132,7 +132,7 @@ input StubFilter {
 enum GraphLogFilter {
     graphMessageId,
     queue,
-    node,
+    graphNode,
     pipeline,
     timestamp
 }
@@ -156,7 +156,7 @@ input GraphLogSort {
 enum GraphLogSortField {
     graphMessageId,
     queue,
-    node,
+    graphNode,
     pipeline,
     timestamp
 }

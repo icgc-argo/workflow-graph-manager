@@ -20,17 +20,23 @@ package org.icgc_argo.workflowgraphmanager.repository;
 
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.icgc_argo.workflowgraphmanager.repository.model.GraphIngestNode;
+import org.icgc_argo.workflowgraphmanager.repository.model.GraphNode;
+import org.icgc_argo.workflowgraphmanager.repository.model.GraphNodeConfig;
+import org.icgc_argo.workflowgraphmanager.repository.model.Pipeline;
+import org.icgc_argo.workflowgraphmanager.repository.model.base.GraphNodeABC;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-import org.icgc_argo.workflowgraphmanager.repository.model.Node;
-import org.icgc_argo.workflowgraphmanager.repository.model.Pipeline;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+
+import static org.icgc_argo.workflowgraphmanager.utils.JacksonUtils.jsonStringToNodeConfig;
 
 @Slf4j
 @Component
@@ -56,7 +62,7 @@ public class GraphNodeRepository {
     this.kubernetesClient = kubernetesClient;
   }
 
-  public Stream<Node> getNodes() {
+  public Stream<GraphNodeABC> getNodes() {
     return kubernetesClient
         .pods()
         .withLabel(TYPE_LABEL_KEY, TYPE_LABEL_VAL)
@@ -87,12 +93,12 @@ public class GraphNodeRepository {
     return getNodes()
         .reduce(
             new HashMap<>(),
-            (HashMap<String, Pipeline> pipelines, Node node) -> {
-              val pipeline = getOrCreatePipeline(node, pipelines);
+            (HashMap<String, Pipeline> pipelines, GraphNodeABC graphNode) -> {
+              val pipeline = getOrCreatePipeline(graphNode, pipelines);
 
               // Add the new node to the list of nodes for the pipeline
-              pipeline.setNodes(
-                  Stream.concat(Stream.of(node), pipeline.getNodes().stream())
+              pipeline.setGraphNodes(
+                  Stream.concat(Stream.of(graphNode), pipeline.getGraphNodes().stream())
                       .collect(Collectors.toList()));
 
               if (pipelines.containsKey(pipeline.getId())) {
@@ -103,18 +109,40 @@ public class GraphNodeRepository {
 
               return pipelines;
             },
-            (pipelinesA, pipelinesB) -> {
-              throw new RuntimeException(
-                  "Beware, here there be dragons ... in the form of reducer combinators somehow being called on a non-parallel stream reduce ...");
-            });
+            this::handleReduceHashMapConflict);
   }
 
-  private Node parsePodToNode(Pod pod) {
-    return Node.builder().id(getNodeId(pod)).pipeline(getPipelineId(pod)).build();
+  // TODO: the node config may be better served as a class?
+  GraphNodeConfig getNodeConfig(Pod pod) {
+    return pod.getSpec().getVolumes().stream()
+        .filter(vol -> vol.getName().endsWith("-config"))
+        .reduce(
+            new GraphNodeConfig(),
+            (acc, curr) ->
+                kubernetesClient
+                    .configMaps()
+                    .withName(curr.getConfigMap().getName())
+                    .get()
+                    .getData()
+                    .values()
+                    .stream()
+                    .reduce(
+                        new GraphNodeConfig(),
+                        (config, configString) -> jsonStringToNodeConfig(configString),
+                        this::handleReduceHashMapConflict),
+            this::handleReduceHashMapConflict);
   }
 
-  private Node parsePodToIngestNode(Pod pod) {
-    return Node.builder().id(getNodeId(pod)).pipeline(getPipelineId(pod)).build();
+  private GraphNode parsePodToNode(Pod pod) {
+    return GraphNode.builder()
+        .id(getNodeId(pod))
+        .pipeline(getPipelineId(pod))
+        .config(getNodeConfig(pod))
+        .build();
+  }
+
+  private GraphIngestNode parsePodToIngestNode(Pod pod) {
+    return GraphIngestNode.builder().id(getNodeId(pod)).pipeline(getPipelineId(pod)).build();
   }
 
   private String getPipelineId(Pod pod) {
@@ -125,9 +153,20 @@ public class GraphNodeRepository {
     return pod.getMetadata().getLabels().get(NODE_LABEL_KEY);
   }
 
-  private Pipeline getOrCreatePipeline(Node node, HashMap<String, Pipeline> pipelines) {
+  private Pipeline getOrCreatePipeline(
+      GraphNodeABC graphNode, HashMap<String, Pipeline> pipelines) {
     return pipelines.getOrDefault(
-        node.getPipeline(),
-        Pipeline.builder().id(node.getPipeline()).nodes(new ArrayList<>()).build());
+        graphNode.getPipeline(),
+        Pipeline.builder().id(graphNode.getPipeline()).graphNodes(new ArrayList<>()).build());
+  }
+
+  private <K, V> HashMap<K, V> handleReduceHashMapConflict(HashMap<K, V> a, HashMap<K, V> b) {
+    throw new RuntimeException(
+        "Beware, here there be dragons ... in the form of reducer combinators somehow being called on a non-parallel stream reduce ...");
+  }
+
+  private GraphNodeConfig handleReduceHashMapConflict(GraphNodeConfig a, GraphNodeConfig b) {
+    throw new RuntimeException(
+        "Beware, here there be dragons ... in the form of reducer combinators somehow being called on a non-parallel stream reduce ...");
   }
 }

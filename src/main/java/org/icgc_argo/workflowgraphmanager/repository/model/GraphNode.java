@@ -18,34 +18,15 @@
 
 package org.icgc_argo.workflowgraphmanager.repository.model;
 
-import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NonNull;
-import org.icgc_argo.workflowgraphmanager.graphql.model.GraphLog;
-import org.icgc_argo.workflowgraphmanager.graphql.model.Queue;
-import org.icgc_argo.workflowgraphmanager.graphql.model.base.Message;
-
-import java.util.List;
-import java.util.Map;
+import lombok.experimental.SuperBuilder;
+import org.icgc_argo.workflowgraphmanager.repository.model.base.GraphNodeABC;
 
 @Data
-@Builder
-public class Node {
-  @NonNull private String id;
-
-  @NonNull private Map<String, Object> config;
-
-  private Boolean enabled;
-
-  private Integer capacity;
-
-  private String workflow;
-
-  private String pipeline;
-
-  private List<Queue> queues;
-
-  private List<Message> messages;
-
-  private List<GraphLog> logs;
+@SuperBuilder
+@EqualsAndHashCode(callSuper = true)
+public class GraphNode extends GraphNodeABC {
+  @NonNull private GraphNodeConfig config;
 }

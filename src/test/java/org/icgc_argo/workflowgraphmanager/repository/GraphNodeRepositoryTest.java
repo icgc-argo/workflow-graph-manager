@@ -21,6 +21,7 @@ package org.icgc_argo.workflowgraphmanager.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc_argo.workflowgraphmanager.utils.JacksonUtils.readValue;
 
+import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.server.mock.EnableKubernetesMockClient;
@@ -51,7 +52,7 @@ public class GraphNodeRepositoryTest {
     val simplePipelineJson =
         readValue(this.getClass().getResourceAsStream("fixtures/single-pipeline.json"), Map.class);
 
-    loadK8sWithDecoysAnd(
+    loadK8sWithBaseResourcesAnd(
         ((List<Map<String, Object>>) simplePipelineJson.get("items"))
             .stream().map(podJson -> JacksonUtils.convertValue(podJson, Pod.class)));
 
@@ -60,15 +61,34 @@ public class GraphNodeRepositoryTest {
 
     // Test nodes list is correct
     assertThat(nodes.size()).isEqualTo(2);
-    // add test cases
 
     // Test pipeline is correct
     assertThat(pipelines.keySet().size()).isEqualTo(1);
-    assertThat(pipelines.keySet().contains("test-pipeline")).isTrue();
-    assertThat(pipelines.get("test-pipeline").getNodes().size()).isEqualTo(2);
+    assertThat(pipelines.containsKey("test-pipeline")).isTrue();
+    assertThat(pipelines.get("test-pipeline").getGraphNodes().size()).isEqualTo(2);
   }
 
-  private void loadK8sWithDecoysAnd(Stream<Pod> pods) {
+  @Test
+  public void nodeConfigTest() {
+    val simplePipelineJson =
+            readValue(this.getClass().getResourceAsStream("fixtures/single-pipeline.json"), Map.class);
+
+    loadK8sWithBaseResourcesAnd(
+            ((List<Map<String, Object>>) simplePipelineJson.get("items"))
+                    .stream().map(podJson -> JacksonUtils.convertValue(podJson, Pod.class)));
+
+    val pod = client.pods().withName("align-node-workflow-graph-node-86cf986995-c5gvk").get();
+    val graphNodeConfig = graphNodeRepository.getNodeConfig(pod);
+
+    assertThat(graphNodeConfig.getPipelineId()).isEqualTo("test-pipeline");
+    assertThat(graphNodeConfig.getNodeId()).isEqualTo("align-node");
+  }
+
+  private void loadK8sWithBaseResourcesAnd(Stream<Pod> pods) {
+    // load config map
+    client.configMaps().create(readValue(this.getClass().getResourceAsStream("fixtures/align-node-config.json"), ConfigMap.class));
+
+    // read decoy pods
     val decoyPodsJson =
         readValue(this.getClass().getResourceAsStream("fixtures/decoy-pods.json"), Map.class);
 

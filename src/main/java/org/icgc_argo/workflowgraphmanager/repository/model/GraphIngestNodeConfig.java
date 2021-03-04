@@ -18,27 +18,5 @@
 
 package org.icgc_argo.workflowgraphmanager.repository.model;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.NonNull;
-import org.icgc_argo.workflowgraphmanager.graphql.model.GraphLog;
-import org.icgc_argo.workflowgraphmanager.graphql.model.Queue;
-import org.icgc_argo.workflowgraphmanager.graphql.model.base.Message;
-import org.icgc_argo.workflowgraphmanager.repository.model.base.GraphNodeABC;
-
-import java.util.List;
-
-@Data
-@Builder
-public class Pipeline {
-
-  @NonNull private String id;
-
-  @NonNull private List<GraphNodeABC> graphNodes;
-
-  private List<Queue> queues;
-
-  private List<Message> messages;
-
-  private List<GraphLog> logs;
+public class GraphIngestNodeConfig {
 }
