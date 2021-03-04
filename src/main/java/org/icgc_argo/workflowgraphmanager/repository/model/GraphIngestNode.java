@@ -20,6 +20,7 @@ package org.icgc_argo.workflowgraphmanager.repository.model;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
 import org.icgc_argo.workflowgraphmanager.repository.model.base.GraphNodeABC;
 
@@ -27,5 +28,5 @@ import org.icgc_argo.workflowgraphmanager.repository.model.base.GraphNodeABC;
 @SuperBuilder
 @EqualsAndHashCode(callSuper = true)
 public class GraphIngestNode extends GraphNodeABC {
-  private GraphIngestNodeConfig config;
+  @NonNull GraphIngestNodeConfig config;
 }

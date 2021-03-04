@@ -69,7 +69,7 @@ public class GraphNodeRepositoryTest {
   }
 
   @Test
-  public void nodeConfigTest() {
+  public void graphNodeConfigTest() {
     val simplePipelineJson =
             readValue(this.getClass().getResourceAsStream("fixtures/single-pipeline.json"), Map.class);
 
@@ -78,10 +78,26 @@ public class GraphNodeRepositoryTest {
                     .stream().map(podJson -> JacksonUtils.convertValue(podJson, Pod.class)));
 
     val pod = client.pods().withName("align-node-workflow-graph-node-86cf986995-c5gvk").get();
-    val graphNodeConfig = graphNodeRepository.getNodeConfig(pod);
+    val config = graphNodeRepository.getGraphNodeConfig(pod);
 
-    assertThat(graphNodeConfig.getPipelineId()).isEqualTo("test-pipeline");
-    assertThat(graphNodeConfig.getNodeId()).isEqualTo("align-node");
+    assertThat(config.getPipelineId()).isEqualTo("test-pipeline");
+    assertThat(config.getNodeId()).isEqualTo("align-node");
+  }
+
+  @Test
+  public void graphIngestNodeConfigTest() {
+    val simplePipelineJson =
+            readValue(this.getClass().getResourceAsStream("fixtures/single-pipeline.json"), Map.class);
+
+    loadK8sWithBaseResourcesAnd(
+            ((List<Map<String, Object>>) simplePipelineJson.get("items"))
+                    .stream().map(podJson -> JacksonUtils.convertValue(podJson, Pod.class)));
+
+    val pod = client.pods().withName("ingest-workflow-graph-ingest-769f477677-64cp8").get();
+    val config = graphNodeRepository.getGraphIngestNodeConfig(pod);
+
+    assertThat(config.getInboundKafkaTopic()).isEqualTo("wfg-test");
+    assertThat(config.getOutboundRabbitExchangeQueue()).isEqualTo("start");
   }
 
   private void loadK8sWithBaseResourcesAnd(Stream<Pod> pods) {
