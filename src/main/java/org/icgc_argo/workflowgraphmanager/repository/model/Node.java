@@ -16,12 +16,36 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflowgraphmanager.model;
+package org.icgc_argo.workflowgraphmanager.repository.model;
 
+import lombok.Builder;
 import lombok.Data;
+import lombok.NonNull;
+import org.icgc_argo.workflowgraphmanager.graphql.model.GraphLog;
+import org.icgc_argo.workflowgraphmanager.graphql.model.Queue;
+import org.icgc_argo.workflowgraphmanager.graphql.model.base.Message;
+
+import java.util.List;
+import java.util.Map;
 
 @Data
-public class Sort {
-  String fieldName;
-  String order;
+@Builder
+public class Node {
+  @NonNull private String id;
+
+  @NonNull private Map<String, Object> config;
+
+  private Boolean enabled;
+
+  private Integer capacity;
+
+  private String workflow;
+
+  private String pipeline;
+
+  private List<Queue> queues;
+
+  private List<Message> messages;
+
+  private List<GraphLog> logs;
 }

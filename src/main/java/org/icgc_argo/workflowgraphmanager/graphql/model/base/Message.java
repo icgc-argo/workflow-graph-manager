@@ -16,17 +16,17 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflowgraphmanager.model.base;
+package org.icgc_argo.workflowgraphmanager.graphql.model.base;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.util.List;
 import lombok.Data;
-import org.icgc_argo.workflowgraphmanager.model.GraphLog;
-import org.icgc_argo.workflowgraphmanager.model.Node;
-import org.icgc_argo.workflowgraphmanager.model.Pipeline;
-import org.icgc_argo.workflowgraphmanager.model.Queue;
+import org.icgc_argo.workflowgraphmanager.graphql.model.GraphLog;
+import org.icgc_argo.workflowgraphmanager.graphql.model.Node;
+import org.icgc_argo.workflowgraphmanager.graphql.model.Pipeline;
+import org.icgc_argo.workflowgraphmanager.graphql.model.Queue;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)

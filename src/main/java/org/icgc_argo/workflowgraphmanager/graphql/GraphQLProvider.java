@@ -36,7 +36,7 @@ import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.icgc_argo.workflowgraphmanager.config.websecurity.AuthProperties;
 import org.icgc_argo.workflowgraphmanager.graphql.security.VerifyAuthQueryExecutionStrategyDecorator;
-import org.icgc_argo.workflowgraphmanager.model.GraphLog;
+import org.icgc_argo.workflowgraphmanager.graphql.model.GraphLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;

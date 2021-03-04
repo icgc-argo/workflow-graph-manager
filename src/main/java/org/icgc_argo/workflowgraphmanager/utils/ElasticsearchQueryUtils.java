@@ -30,7 +30,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
-import org.icgc_argo.workflowgraphmanager.model.Sort;
+import org.icgc_argo.workflowgraphmanager.graphql.model.Sort;
 
 public class ElasticsearchQueryUtils {
   /**

@@ -16,7 +16,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflowgraphmanager.model;
+package org.icgc_argo.workflowgraphmanager.graphql.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.util.List;
 import java.util.Map;
 import lombok.*;
-import org.icgc_argo.workflowgraphmanager.model.base.Message;
+import org.icgc_argo.workflowgraphmanager.graphql.model.base.Message;
 import org.icgc_argo.workflowgraphmanager.utils.JacksonUtils;
 
 @Data

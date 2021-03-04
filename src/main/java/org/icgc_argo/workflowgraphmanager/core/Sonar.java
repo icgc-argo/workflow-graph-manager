@@ -19,17 +19,13 @@
 package org.icgc_argo.workflowgraphmanager.core;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-import org.icgc_argo.workflowgraphmanager.model.Pipeline;
+import org.icgc_argo.workflowgraphmanager.graphql.model.Pipeline;
 import org.icgc_argo.workflowgraphmanager.repository.GraphNodeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 

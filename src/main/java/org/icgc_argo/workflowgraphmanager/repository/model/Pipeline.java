@@ -16,31 +16,28 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflowgraphmanager.model;
+package org.icgc_argo.workflowgraphmanager.repository.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import java.util.Map;
+import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NonNull;
-import lombok.SneakyThrows;
-import org.icgc_argo.workflowgraphmanager.model.base.Message;
-import org.icgc_argo.workflowgraphmanager.utils.JacksonUtils;
+import org.icgc_argo.workflowgraphmanager.graphql.model.GraphLog;
+import org.icgc_argo.workflowgraphmanager.graphql.model.Queue;
+import org.icgc_argo.workflowgraphmanager.graphql.model.base.Message;
+
+import java.util.List;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class GraphRun extends Message {
+@Builder
+public class Pipeline {
 
-  private String runId;
+  @NonNull private String id;
 
-  private String run; // todo: Make Run an entity (in lib?)
+  @NonNull private List<Node> nodes;
 
-  @SneakyThrows
-  public static GraphRun parse(@NonNull Map<String, Object> sourceMap) {
-    return JacksonUtils.parse(sourceMap, GraphRun.class);
-  }
+  private List<Queue> queues;
+
+  private List<Message> messages;
+
+  private List<GraphLog> logs;
 }

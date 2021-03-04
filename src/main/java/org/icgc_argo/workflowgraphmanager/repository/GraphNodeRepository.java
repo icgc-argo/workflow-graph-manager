@@ -22,15 +22,13 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.icgc_argo.workflow_graph_lib.utils.PatternMatch;
-import org.icgc_argo.workflowgraphmanager.model.Node;
-import org.icgc_argo.workflowgraphmanager.model.Pipeline;
+import org.icgc_argo.workflowgraphmanager.repository.model.Node;
+import org.icgc_argo.workflowgraphmanager.repository.model.Pipeline;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

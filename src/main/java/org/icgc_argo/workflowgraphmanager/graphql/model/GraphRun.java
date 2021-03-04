@@ -16,38 +16,31 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflowgraphmanager.model;
+package org.icgc_argo.workflowgraphmanager.graphql.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.util.Map;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.SneakyThrows;
+import org.icgc_argo.workflowgraphmanager.graphql.model.base.Message;
 import org.icgc_argo.workflowgraphmanager.utils.JacksonUtils;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class GraphLog {
+public class GraphRun extends Message {
 
-  private String id;
+  private String runId;
 
-  private String graphMessageId;
-
-  private String log;
-
-  private Queue queue;
-
-  private Node node;
-
-  private Pipeline pipeline;
-
-  private Long timestamp;
+  private String run; // todo: Make Run an entity (in lib?)
 
   @SneakyThrows
-  public static GraphLog parse(@NonNull Map<String, Object> sourceMap) {
-    return JacksonUtils.parse(sourceMap, GraphLog.class);
+  public static GraphRun parse(@NonNull Map<String, Object> sourceMap) {
+    return JacksonUtils.parse(sourceMap, GraphRun.class);
   }
 }

@@ -16,11 +16,45 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflowgraphmanager.model;
+package org.icgc_argo.workflowgraphmanager.graphql.model;
 
-import lombok.Value;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import java.util.List;
+import java.util.Map;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import org.icgc_argo.workflowgraphmanager.graphql.model.base.Message;
+import org.icgc_argo.workflowgraphmanager.utils.JacksonUtils;
 
-@Value
-public class AggregationResult {
-  Long totalHits;
+@Data
+@Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+public class Node {
+  @NonNull private String id;
+
+  private Map<String, Object> config;
+
+  private Boolean enabled;
+
+  private Integer capacity;
+
+  private String workflow; // todo: Make Workflow an entity
+
+  private Pipeline pipeline;
+
+  private List<Queue> queues;
+
+  private List<Message> messages;
+
+  private List<GraphLog> logs;
+
+  @SneakyThrows
+  public static Node parse(@NonNull Map<String, Object> sourceMap) {
+    return JacksonUtils.parse(sourceMap, Node.class);
+  }
 }
