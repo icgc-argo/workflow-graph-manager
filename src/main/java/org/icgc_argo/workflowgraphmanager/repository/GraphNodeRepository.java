@@ -23,8 +23,10 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.icgc_argo.workflowgraphmanager.repository.model.*;
-import org.icgc_argo.workflowgraphmanager.repository.model.base.GraphNodeABC;
+import org.icgc_argo.workflowgraphmanager.repository.model.GraphIngestNodeConfig;
+import org.icgc_argo.workflowgraphmanager.repository.model.GraphNode;
+import org.icgc_argo.workflowgraphmanager.repository.model.GraphNodeConfig;
+import org.icgc_argo.workflowgraphmanager.repository.model.Pipeline;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -60,7 +62,7 @@ public class GraphNodeRepository {
     this.kubernetesClient = kubernetesClient;
   }
 
-  public Stream<GraphNodeABC> getNodes() {
+  public Stream<GraphNode<?>> getNodes() {
     return kubernetesClient
         .pods()
         .withLabel(TYPE_LABEL_KEY, TYPE_LABEL_VAL)
@@ -91,7 +93,7 @@ public class GraphNodeRepository {
     return getNodes()
         .reduce(
             new HashMap<>(),
-            (HashMap<String, Pipeline> pipelines, GraphNodeABC graphNode) -> {
+            (HashMap<String, Pipeline> pipelines, GraphNode<?> graphNode) -> {
               val pipeline = getOrCreatePipeline(graphNode, pipelines);
 
               // Add the new node to the list of nodes for the pipeline
@@ -149,16 +151,16 @@ public class GraphNodeRepository {
             this::handleReduceHashMapConflict);
   }
 
-  private GraphNode parsePodToNode(Pod pod) {
-    return GraphNode.builder()
+  private GraphNode<GraphNodeConfig> parsePodToNode(Pod pod) {
+    return GraphNode.<GraphNodeConfig>builder()
         .id(getNodeId(pod))
         .pipeline(getPipelineId(pod))
         .config(getGraphNodeConfig(pod))
         .build();
   }
 
-  private GraphIngestNode parsePodToIngestNode(Pod pod) {
-    return GraphIngestNode.builder()
+  private GraphNode<GraphIngestNodeConfig> parsePodToIngestNode(Pod pod) {
+    return GraphNode.<GraphIngestNodeConfig>builder()
         .id(getNodeId(pod))
         .pipeline(getPipelineId(pod))
         .config(getGraphIngestNodeConfig(pod))
@@ -174,7 +176,7 @@ public class GraphNodeRepository {
   }
 
   private Pipeline getOrCreatePipeline(
-      GraphNodeABC graphNode, HashMap<String, Pipeline> pipelines) {
+      GraphNode<?> graphNode, HashMap<String, Pipeline> pipelines) {
     return pipelines.getOrDefault(
         graphNode.getPipeline(),
         Pipeline.builder().id(graphNode.getPipeline()).graphNodes(new ArrayList<>()).build());

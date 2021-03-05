@@ -18,15 +18,14 @@
 
 package org.icgc_argo.workflowgraphmanager.repository.model;
 
+import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NonNull;
-import lombok.experimental.SuperBuilder;
-import org.icgc_argo.workflowgraphmanager.repository.model.base.GraphNodeABC;
 
 @Data
-@SuperBuilder
-@EqualsAndHashCode(callSuper = true)
-public class GraphNode extends GraphNodeABC {
-  @NonNull private GraphNodeConfig config;
+@Builder
+public class GraphNode<T> {
+  @NonNull private String id;
+  @NonNull private String pipeline;
+  @NonNull private T config;
 }

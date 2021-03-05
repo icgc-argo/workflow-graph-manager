@@ -41,7 +41,7 @@ import reactor.core.publisher.SynchronousSink;
 @Slf4j
 @Configuration
 public class Sonar {
-  private GraphNodeRepository graphNodeRepository;
+  private final GraphNodeRepository graphNodeRepository;
   private ConcurrentHashMap<String, Pipeline> store;
 
   public Sonar(@Autowired GraphNodeRepository graphNodeRepository) {
