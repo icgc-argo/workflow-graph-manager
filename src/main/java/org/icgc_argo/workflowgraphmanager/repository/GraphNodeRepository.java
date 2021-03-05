@@ -18,21 +18,23 @@
 
 package org.icgc_argo.workflowgraphmanager.repository;
 
-import static org.icgc_argo.workflowgraphmanager.utils.JacksonUtils.jsonStringToNodeConfig;
-
+import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.icgc_argo.workflowgraphmanager.repository.model.*;
 import org.icgc_argo.workflowgraphmanager.repository.model.base.GraphNodeABC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.icgc_argo.workflowgraphmanager.utils.JacksonUtils.jsonStringToNodeConfig;
 
 @Slf4j
 @Component
@@ -59,7 +61,11 @@ public class GraphNodeRepository {
   }
 
   public Stream<GraphNodeABC> getNodes() {
-    return kubernetesClient.pods().withLabel(TYPE_LABEL_KEY, TYPE_LABEL_VAL).list().getItems()
+    return kubernetesClient
+        .pods()
+        .withLabel(TYPE_LABEL_KEY, TYPE_LABEL_VAL)
+        .list()
+        .getItems()
         .stream()
         .map(
             pod -> {
@@ -107,15 +113,18 @@ public class GraphNodeRepository {
   GraphNodeConfig getGraphNodeConfig(Pod pod) {
     return pod.getSpec().getVolumes().stream()
         .filter(vol -> vol.getName().endsWith("-config"))
+        .flatMap(
+            vol ->
+                kubernetesClient
+                    .configMaps()
+                    .withName(vol.getConfigMap().getName())
+                    .get()
+                    .getData()
+                    .values()
+                    .stream())
         .reduce(
             new GraphNodeConfig(),
-            (acc, curr) ->
-                kubernetesClient.configMaps().withName(curr.getConfigMap().getName()).get()
-                    .getData().values().stream()
-                    .reduce(
-                        new GraphNodeConfig(),
-                        (config, configString) -> jsonStringToNodeConfig(configString),
-                        this::handleReduceHashMapConflict),
+            (config, configString) -> jsonStringToNodeConfig(configString),
             this::handleReduceHashMapConflict);
   }
 
@@ -123,22 +132,18 @@ public class GraphNodeRepository {
   GraphIngestNodeConfig getGraphIngestNodeConfig(Pod pod) {
     return pod.getSpec().getContainers().stream()
         .filter(container -> container.getName().equalsIgnoreCase("workflow-graph-ingest"))
+        .flatMap(container -> container.getEnv().stream())
+        .filter(
+            keyVal ->
+                keyVal
+                    .getName()
+                    .equalsIgnoreCase("SPRING_CLOUD_STREAM_BINDINGS_INBOUND_DESTINATION"))
+        .map(EnvVar::getValue)
         .reduce(
             new GraphIngestNodeConfig(),
             (acc, curr) ->
                 GraphIngestNodeConfig.builder()
-                    .inboundKafkaTopic(
-                        curr.getEnv().stream()
-                            .filter(
-                                keyVal ->
-                                    keyVal
-                                        .getName()
-                                        .equalsIgnoreCase(
-                                            "SPRING_CLOUD_STREAM_BINDINGS_INBOUND_DESTINATION"))
-                            .reduce(
-                                "",
-                                (ret, env) -> env.getValue(),
-                                this::handleReduceHashMapConflict))
+                    .inboundKafkaTopic(curr)
                     .outboundRabbitExchangeQueue("start") // todo: especially too magical here
                     .build(),
             this::handleReduceHashMapConflict);
