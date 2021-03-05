@@ -61,15 +61,53 @@ public class GraphNodeRepositoryTest {
     val pipelines = graphNodeRepository.getPipelines();
 
     // Test nodes list is correct
+    assertThat(nodes.size()).isEqualTo(2);
     assertThat(nodes.stream().anyMatch(node -> node.getId().equalsIgnoreCase("start"))).isTrue();
     assertThat(nodes.stream().anyMatch(node -> node.getId().equalsIgnoreCase("align-node")))
         .isTrue();
-    assertThat(nodes.size()).isEqualTo(2);
 
     // Test pipeline is correct
     assertThat(pipelines.keySet().size()).isEqualTo(1);
     assertThat(pipelines.containsKey("test-pipeline")).isTrue();
-    assertThat(pipelines.get("test-pipeline").getGraphNodes().size()).isEqualTo(2);
+    assertThat(pipelines.get("test-pipeline").getGraphNodes()).hasSameElementsAs(nodes);
+  }
+
+  @Test
+  public void multiPipelinePipelineTest() {
+    val multiPipelineJson =
+        readValue(this.getClass().getResourceAsStream("fixtures/multi-pipeline.json"), Map.class);
+
+    loadK8sWithBaseResourcesAnd(
+        ((List<Map<String, Object>>) multiPipelineJson.get("items"))
+            .stream().map(podJson -> JacksonUtils.convertValue(podJson, Pod.class)));
+
+    val nodes = graphNodeRepository.getNodes().collect(Collectors.toList());
+    val pipelines = graphNodeRepository.getPipelines();
+
+    // Test nodes list is correct
+    assertThat(nodes.size()).isEqualTo(6);
+    assertThat(nodes.stream().anyMatch(node -> node.getId().equalsIgnoreCase("start"))).isTrue();
+    assertThat(nodes.stream().anyMatch(node -> node.getId().equalsIgnoreCase("align-node")))
+        .isTrue();
+    assertThat(nodes.stream().anyMatch(node -> node.getId().equalsIgnoreCase("start-two")))
+        .isTrue();
+    assertThat(nodes.stream().anyMatch(node -> node.getId().equalsIgnoreCase("align-node-two")))
+        .isTrue();
+    assertThat(nodes.stream().anyMatch(node -> node.getId().equalsIgnoreCase("start-three")))
+        .isTrue();
+    assertThat(nodes.stream().anyMatch(node -> node.getId().equalsIgnoreCase("align-node-three")))
+        .isTrue();
+
+    // Test pipeline is correct
+    assertThat(pipelines.keySet().size()).isEqualTo(3);
+    assertThat(
+            pipelines
+                .keySet()
+                .containsAll(List.of("test-pipeline", "test-pipeline-two", "test-pipeline-three")))
+        .isTrue();
+    assertThat(pipelines.get("test-pipeline").getGraphNodes()).hasSameElementsAs(nodes.stream().filter(node -> node.getPipeline().equalsIgnoreCase("test-pipeline")).collect(Collectors.toList()));
+    assertThat(pipelines.get("test-pipeline-two").getGraphNodes()).hasSameElementsAs(nodes.stream().filter(node -> node.getPipeline().equalsIgnoreCase("test-pipeline-two")).collect(Collectors.toList()));
+    assertThat(pipelines.get("test-pipeline-three").getGraphNodes()).hasSameElementsAs(nodes.stream().filter(node -> node.getPipeline().equalsIgnoreCase("test-pipeline-three")).collect(Collectors.toList()));
   }
 
   @Test
@@ -135,13 +173,23 @@ public class GraphNodeRepositoryTest {
   }
 
   private void loadK8sWithBaseResourcesAnd(Stream<Pod> pods) {
-    // load config map
-    client
-        .configMaps()
-        .create(
-            readValue(
-                this.getClass().getResourceAsStream("fixtures/align-node-config.json"),
-                ConfigMap.class));
+    // clear all pods
+    client.pods().delete();
+
+    // load all configmaps
+    List.of(
+            "configmaps/align-node-config.json",
+            "configmaps/align-node-two-config.json",
+            "configmaps/align-node-three-config.json")
+        .forEach(
+            configMapName -> {
+              // load config map
+              client
+                  .configMaps()
+                  .create(
+                      readValue(
+                          this.getClass().getResourceAsStream(configMapName), ConfigMap.class));
+            });
 
     // read decoy pods
     val decoyPodsJson =
