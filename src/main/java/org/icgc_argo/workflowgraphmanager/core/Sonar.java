@@ -22,8 +22,9 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
+import org.icgc_argo.workflowgraphmanager.graphql.model.Pipeline;
 import org.icgc_argo.workflowgraphmanager.repository.GraphNodeRepository;
-import org.icgc_argo.workflowgraphmanager.repository.model.Pipeline;
+import org.icgc_argo.workflowgraphmanager.repository.model.GraphPipeline;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,7 +52,7 @@ public class Sonar {
   @Bean
   public Disposable doShallowUpdate() {
     return Flux.generate(
-            (SynchronousSink<HashMap<String, Pipeline>> sink) -> {
+            (SynchronousSink<HashMap<String, GraphPipeline>> sink) -> {
               sink.next(graphNodeRepository.getPipelines());
             })
         .delayElements(Duration.ofSeconds(10)) // todo: make configurable
@@ -73,7 +74,7 @@ public class Sonar {
    * @param state - list of pipelines without details deeper than the name of the queues associated
    *     with a node
    */
-  private void shallowUpdate(HashMap<String, Pipeline> state) {
+  private void shallowUpdate(HashMap<String, GraphPipeline> state) {
     log.info("Ping with new state: {}", state);
   }
 
@@ -85,5 +86,5 @@ public class Sonar {
    * @param state - list of pipelines without details deeper than the name of the queues associated
    *     with a node
    */
-  private void deepUpdate(HashMap<String, Pipeline> state) {}
+  private void deepUpdate(HashMap<String, GraphPipeline> state) {}
 }

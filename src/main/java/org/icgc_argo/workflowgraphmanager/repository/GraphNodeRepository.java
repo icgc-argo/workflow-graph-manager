@@ -26,7 +26,7 @@ import lombok.val;
 import org.icgc_argo.workflowgraphmanager.repository.model.GraphIngestNodeConfig;
 import org.icgc_argo.workflowgraphmanager.repository.model.GraphNode;
 import org.icgc_argo.workflowgraphmanager.repository.model.GraphNodeConfig;
-import org.icgc_argo.workflowgraphmanager.repository.model.Pipeline;
+import org.icgc_argo.workflowgraphmanager.repository.model.GraphPipeline;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -89,11 +89,11 @@ public class GraphNodeRepository {
         .filter(Objects::nonNull);
   }
 
-  public HashMap<String, Pipeline> getPipelines() {
+  public HashMap<String, GraphPipeline> getPipelines() {
     return getNodes()
         .reduce(
             new HashMap<>(),
-            (HashMap<String, Pipeline> pipelines, GraphNode<?> graphNode) -> {
+            (HashMap<String, GraphPipeline> pipelines, GraphNode<?> graphNode) -> {
               val pipeline = getOrCreatePipeline(graphNode, pipelines);
 
               // Add the new node to the list of nodes for the pipeline
@@ -175,11 +175,11 @@ public class GraphNodeRepository {
     return pod.getMetadata().getLabels().get(NODE_LABEL_KEY);
   }
 
-  private Pipeline getOrCreatePipeline(
-      GraphNode<?> graphNode, HashMap<String, Pipeline> pipelines) {
+  private GraphPipeline getOrCreatePipeline(
+      GraphNode<?> graphNode, HashMap<String, GraphPipeline> pipelines) {
     return pipelines.getOrDefault(
         graphNode.getPipeline(),
-        Pipeline.builder().id(graphNode.getPipeline()).graphNodes(new ArrayList<>()).build());
+        GraphPipeline.builder().id(graphNode.getPipeline()).graphNodes(new ArrayList<>()).build());
   }
 
   private <T> T handleReduceHashMapConflict(T a, T b) {

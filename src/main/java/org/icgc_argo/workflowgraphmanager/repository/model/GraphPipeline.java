@@ -29,15 +29,9 @@ import java.util.List;
 
 @Data
 @Builder
-public class Pipeline {
+public class GraphPipeline {
 
   @NonNull private String id;
 
   @NonNull private List<GraphNode<?>> graphNodes;
-
-  private List<Queue> queues;
-
-  private List<Message> messages;
-
-  private List<GraphLog> logs;
 }
