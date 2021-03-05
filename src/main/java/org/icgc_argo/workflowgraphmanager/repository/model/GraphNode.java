@@ -22,10 +22,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
 
+import java.util.List;
+
 @Data
 @Builder
 public class GraphNode<T> {
   @NonNull private String id;
   @NonNull private String pipeline;
   @NonNull private T config;
+  @NonNull private List<GraphExchangesQueue> graphExchangesQueueList;
 }

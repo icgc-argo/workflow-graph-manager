@@ -18,21 +18,23 @@
 
 package org.icgc_argo.workflowgraphmanager.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.icgc_argo.workflowgraphmanager.utils.JacksonUtils.readValue;
-
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.server.mock.EnableKubernetesMockClient;
+import lombok.val;
+import org.icgc_argo.workflow_graph_lib.utils.JacksonUtils;
+import org.icgc_argo.workflowgraphmanager.repository.model.GraphExchangesQueue;
+import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
+
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import lombok.val;
-import org.icgc_argo.workflow_graph_lib.utils.JacksonUtils;
-import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ActiveProfiles;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.icgc_argo.workflowgraphmanager.utils.JacksonUtils.readValue;
 
 @ActiveProfiles("test")
 @EnableKubernetesMockClient(crud = true)
@@ -59,6 +61,9 @@ public class GraphNodeRepositoryTest {
     val pipelines = graphNodeRepository.getPipelines();
 
     // Test nodes list is correct
+    assertThat(nodes.stream().anyMatch(node -> node.getId().equalsIgnoreCase("start"))).isTrue();
+    assertThat(nodes.stream().anyMatch(node -> node.getId().equalsIgnoreCase("align-node")))
+        .isTrue();
     assertThat(nodes.size()).isEqualTo(2);
 
     // Test pipeline is correct
@@ -97,6 +102,36 @@ public class GraphNodeRepositoryTest {
 
     assertThat(config.getInboundKafkaTopic()).isEqualTo("wfg-test");
     assertThat(config.getOutboundRabbitExchangeQueue()).isEqualTo("start");
+  }
+
+  @Test
+  public void graphNodeQueueTest() {
+    val simplePipelineJson =
+        readValue(this.getClass().getResourceAsStream("fixtures/single-pipeline.json"), Map.class);
+
+    loadK8sWithBaseResourcesAnd(
+        ((List<Map<String, Object>>) simplePipelineJson.get("items"))
+            .stream().map(podJson -> JacksonUtils.convertValue(podJson, Pod.class)));
+
+    val nodes = graphNodeRepository.getNodes().collect(Collectors.toList());
+
+    val ingestPod =
+        nodes.stream().filter(node -> node.getId().equalsIgnoreCase("start")).findFirst().get();
+    val nodePod =
+        nodes.stream()
+            .filter(node -> node.getId().equalsIgnoreCase("align-node"))
+            .findFirst()
+            .get();
+
+    assertThat(ingestPod.getGraphExchangesQueueList())
+        .containsOnly(GraphExchangesQueue.fromExchangeString("start"));
+
+    assertThat(nodePod.getGraphExchangesQueueList())
+        .containsExactly(
+            new GraphExchangesQueue("start", "align-node"),
+            new GraphExchangesQueue("queued-align-node", "align-node"),
+            new GraphExchangesQueue("align-node-running", "align-node-running"),
+            new GraphExchangesQueue("align-node-complete", "align-node-complete"));
   }
 
   private void loadK8sWithBaseResourcesAnd(Stream<Pod> pods) {

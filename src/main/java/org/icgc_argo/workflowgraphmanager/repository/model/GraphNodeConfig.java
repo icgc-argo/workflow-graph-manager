@@ -37,23 +37,15 @@ public class GraphNodeConfig {
   private String activationFunction;
 
   // Declares new subscribers on fanout exchange(s)
-  private List<TopologyProperties> input;
+  private List<GraphExchangesQueue> input;
 
   // Direct exchange internal to this Node
-  private TopologyProperties running;
+  private GraphExchangesQueue running;
 
   // Complete exchange with self-archiving complete queue
-  private TopologyProperties complete;
+  private GraphExchangesQueue complete;
 
   private WorkflowProperties workflow;
-
-  @Data
-  @AllArgsConstructor
-  @NoArgsConstructor
-  public static class TopologyProperties {
-    private String exchange;
-    private String queue;
-  }
 
   @Data
   @AllArgsConstructor

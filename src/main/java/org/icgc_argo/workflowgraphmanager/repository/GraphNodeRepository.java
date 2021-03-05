@@ -32,10 +32,12 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.icgc_argo.workflowgraphmanager.repository.model.GraphExchangesQueue.fromExchangeString;
 import static org.icgc_argo.workflowgraphmanager.utils.JacksonUtils.jsonStringToNodeConfig;
 
 @Slf4j
@@ -152,18 +154,29 @@ public class GraphNodeRepository {
   }
 
   private GraphNode<GraphNodeConfig> parsePodToNode(Pod pod) {
+    val config = getGraphNodeConfig(pod);
+    val queues =
+        Stream.concat(
+                config.getInput().stream(), Stream.of(config.getRunning(), config.getComplete()))
+            .collect(Collectors.toList());
+
     return GraphNode.<GraphNodeConfig>builder()
         .id(getNodeId(pod))
         .pipeline(getPipelineId(pod))
-        .config(getGraphNodeConfig(pod))
+        .config(config)
+        .graphExchangesQueueList(queues)
         .build();
   }
 
   private GraphNode<GraphIngestNodeConfig> parsePodToIngestNode(Pod pod) {
+    val config = getGraphIngestNodeConfig(pod);
+    val queues = List.of(fromExchangeString(config.getOutboundRabbitExchangeQueue()));
+
     return GraphNode.<GraphIngestNodeConfig>builder()
         .id(getNodeId(pod))
         .pipeline(getPipelineId(pod))
-        .config(getGraphIngestNodeConfig(pod))
+        .config(config)
+        .graphExchangesQueueList(queues)
         .build();
   }
 

@@ -18,17 +18,18 @@
 
 package org.icgc_argo.workflowgraphmanager.repository.model;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NonNull;
-
-import java.util.List;
+import lombok.NoArgsConstructor;
 
 @Data
-@Builder
-public class GraphPipeline {
+@AllArgsConstructor
+@NoArgsConstructor
+public class GraphExchangesQueue {
+  private String exchange;
+  private String queue;
 
-  @NonNull private String id;
-
-  @NonNull private List<GraphNode<?>> graphNodes;
+  public static GraphExchangesQueue fromExchangeString(String exchange) {
+    return new GraphExchangesQueue(exchange, exchange);
+  }
 }
