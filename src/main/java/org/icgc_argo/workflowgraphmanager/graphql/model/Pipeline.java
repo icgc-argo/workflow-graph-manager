@@ -27,6 +27,7 @@ import org.icgc_argo.workflowgraphmanager.graphql.model.base.Message;
 import org.icgc_argo.workflowgraphmanager.repository.model.GraphPipeline;
 import org.icgc_argo.workflowgraphmanager.utils.JacksonUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -41,11 +42,11 @@ public class Pipeline {
 
   @NonNull private List<Node> nodes;
 
-  private List<Queue> queues;
+  @NonNull private List<Queue> queues;
 
-  private List<Message> messages;
+  @NonNull private List<Message> messages;
 
-  private List<GraphLog> logs;
+  @NonNull private List<GraphLog> logs;
 
   @SneakyThrows
   public static Pipeline parse(@NonNull Map<String, Object> sourceMap) {
@@ -59,14 +60,24 @@ public class Pipeline {
                 graphNode ->
                     Node.builder()
                         .id(graphNode.getId())
+                        .pipeline(graphPipeline.getId())
                         .config(JacksonUtils.parse(graphNode.getConfig(), new TypeReference<>() {}))
                         .queues(
                             graphNode.getGraphExchangesQueueList().stream()
                                 .map(Queue::parse)
                                 .collect(Collectors.toList()))
+                        .messages(Collections.emptyList())
+                        .logs(Collections.emptyList())
                         .build())
             .collect(Collectors.toList());
 
-    return Pipeline.builder().id(graphPipeline.getId()).nodes(nodes).build();
+    return Pipeline.builder()
+        .id(graphPipeline.getId())
+        .nodes(nodes)
+        .queues(
+            nodes.stream().flatMap(node -> node.getQueues().stream()).collect(Collectors.toList()))
+        .messages(Collections.emptyList())
+        .logs(Collections.emptyList())
+        .build();
   }
 }

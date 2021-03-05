@@ -19,7 +19,10 @@
 package org.icgc_argo.workflowgraphmanager.core;
 
 import lombok.extern.slf4j.Slf4j;
+import org.icgc_argo.workflowgraphmanager.graphql.model.Node;
 import org.icgc_argo.workflowgraphmanager.graphql.model.Pipeline;
+import org.icgc_argo.workflowgraphmanager.graphql.model.Queue;
+import org.icgc_argo.workflowgraphmanager.graphql.model.base.GraphEntity;
 import org.icgc_argo.workflowgraphmanager.repository.GraphNodeRepository;
 import org.icgc_argo.workflowgraphmanager.repository.model.GraphPipeline;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +34,9 @@ import reactor.core.publisher.SynchronousSink;
 
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * The Sonar Service is responsible for building and maintaining an in-memory store that represents
@@ -96,9 +101,14 @@ public class Sonar {
                 store.merge(
                     pipelineId,
                     Pipeline.parse(state.get(pipelineId)),
-                    (existing, update) -> {
-                      return update; // todo: merge logic here
-                    }));
+                    (existing, update) ->
+                        Pipeline.builder()
+                            .id(update.getId())
+                            .nodes(shallowMergeNodes(existing.getNodes(), update.getNodes()))
+                            .queues(shallowMergeQueues(existing.getQueues(), update.getQueues()))
+                            .messages(filterForActiveNodes(existing.getMessages(), update))
+                            .logs(filterForActiveNodes(existing.getLogs(), update))
+                            .build()));
     log.debug("Sonar shallowUpdate store update complete, new store: {}", store);
     log.info("Sonar shallowUpdate complete!");
   }
@@ -112,4 +122,31 @@ public class Sonar {
    *     with a node
    */
   private void deepUpdate(HashMap<String, GraphPipeline> state) {}
+
+  private List<Node> shallowMergeNodes(List<Node> existing, List<Node> update) {
+    return update;
+  }
+
+  private List<Queue> shallowMergeQueues(List<Queue> existing, List<Queue> update) {
+    return update;
+  }
+
+  /**
+   * Filters a list of GraphEntity, returning only the messages that that have a nodeId which is
+   * part of the pipeline passed in as the second argument
+   *
+   * @param graphEntities - list of entities to filter
+   * @param pipeline - pipeline containing nodes which are used for the filter
+   * @return a filtered list of entities that have an associated node in the referenced pipeline
+   */
+  private <T extends GraphEntity> List<T> filterForActiveNodes(
+      List<T> graphEntities, Pipeline pipeline) {
+    return graphEntities.stream()
+        .filter(
+            graphEntity ->
+                pipeline.getNodes().stream()
+                    .map(Node::getId)
+                    .anyMatch(nodeId -> nodeId.equalsIgnoreCase(graphEntity.getNode().getId())))
+        .collect(Collectors.toList());
+  }
 }

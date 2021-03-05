@@ -16,46 +16,18 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflowgraphmanager.graphql.model;
+package org.icgc_argo.workflowgraphmanager.graphql.model.base;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import org.icgc_argo.workflowgraphmanager.graphql.model.base.Message;
-import org.icgc_argo.workflowgraphmanager.utils.JacksonUtils;
+import org.icgc_argo.workflowgraphmanager.graphql.model.Node;
+import org.icgc_argo.workflowgraphmanager.graphql.model.Pipeline;
+import org.icgc_argo.workflowgraphmanager.graphql.model.Queue;
 
-import java.util.List;
-import java.util.Map;
+public interface GraphEntity {
+  String getId();
 
-@Data
-@Builder
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class Node {
-  @NonNull private String id;
+  Pipeline getPipeline();
 
-  @NonNull private Map<String, Object> config;
+  Node getNode();
 
-  @NonNull private String pipeline;
-
-  @NonNull private List<Queue> queues;
-
-  @NonNull private List<Message> messages;
-
-  @NonNull private List<GraphLog> logs;
-
-  private Boolean enabled;
-
-  private Integer capacity;
-
-  private String workflow; // todo: Make Workflow an entity
-
-  @SneakyThrows
-  public static Node parse(@NonNull Map<String, Object> sourceMap) {
-    return JacksonUtils.parse(sourceMap, Node.class);
-  }
+  Queue getQueue();
 }
