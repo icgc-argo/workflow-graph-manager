@@ -27,15 +27,16 @@ import lombok.Data;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.icgc_argo.workflowgraphmanager.graphql.model.base.Message;
+import org.icgc_argo.workflowgraphmanager.repository.model.GraphExchangesQueue;
 import org.icgc_argo.workflowgraphmanager.utils.JacksonUtils;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class Queue {
-  private String id;
+  @NonNull private String id;
 
-  private String exchange;
+  @NonNull private String exchange;
 
   private Pipeline pipeline;
 
@@ -48,5 +49,9 @@ public class Queue {
   @SneakyThrows
   public static Queue parse(@NonNull Map<String, Object> sourceMap) {
     return JacksonUtils.parse(sourceMap, Queue.class);
+  }
+
+  public static Queue parse(@NonNull GraphExchangesQueue graphExchangesQueue) {
+    return new Queue(graphExchangesQueue.getQueue(), graphExchangesQueue.getExchange());
   }
 }

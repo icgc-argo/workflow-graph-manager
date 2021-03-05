@@ -48,6 +48,17 @@ public class Sonar {
 
   public Sonar(@Autowired GraphNodeRepository graphNodeRepository) {
     this.graphNodeRepository = graphNodeRepository;
+    initStore();
+  }
+
+  private void initStore() {
+    log.info("Sonar initializing store ...");
+    store = new ConcurrentHashMap<>();
+    graphNodeRepository
+        .getPipelines()
+        .forEach((key, pipeline) -> store.put(key, Pipeline.parse(pipeline)));
+    log.debug("Sonar store initialized: {}", store);
+    log.info("Sonar store initialization complete!");
   }
 
   @Bean
@@ -76,8 +87,8 @@ public class Sonar {
    *     with a node
    */
   private void shallowUpdate(HashMap<String, GraphPipeline> state) {
-    log.info("shallowUpdate received state update: {}", state);
-
+    log.info("Sonar starting shallowUpdate ...");
+    log.debug("Sonar shallowUpdate received state update: {}", state);
     state
         .keySet()
         .forEach(
@@ -86,8 +97,10 @@ public class Sonar {
                     pipelineId,
                     Pipeline.parse(state.get(pipelineId)),
                     (existing, update) -> {
-                      return update;
+                      return update; // todo: merge logic here
                     }));
+    log.debug("Sonar shallowUpdate store update complete, new store: {}", store);
+    log.info("Sonar shallowUpdate complete!");
   }
 
   /**

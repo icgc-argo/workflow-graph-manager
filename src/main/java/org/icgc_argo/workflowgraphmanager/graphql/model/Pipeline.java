@@ -60,6 +60,10 @@ public class Pipeline {
                     Node.builder()
                         .id(graphNode.getId())
                         .config(JacksonUtils.parse(graphNode.getConfig(), new TypeReference<>() {}))
+                        .queues(
+                            graphNode.getGraphExchangesQueueList().stream()
+                                .map(Queue::parse)
+                                .collect(Collectors.toList()))
                         .build())
             .collect(Collectors.toList());
 
