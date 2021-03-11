@@ -25,7 +25,10 @@ rdpc:
   graphK8sNamespace: rdpc-collab
 
 ---
-spring.profiles: secure
+spring:
+  config:
+    activate:
+      on-profile: secure
 auth:
   jwtPublicKeyUrl: "http://localhost:8081/oauth/token/public_key"
   jwtPublicKeyStr: "-----BEGIN PUBLIC KEY-----\nSET ME IF YOU DONT HAVE A URL, BUT URL TAKES PRIORITY\n-----END PUBLIC KEY-----"
