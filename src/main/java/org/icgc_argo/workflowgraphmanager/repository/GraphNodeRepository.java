@@ -48,7 +48,6 @@ public class GraphNodeRepository {
    * https://wiki.oicr.on.ca/display/icgcargotech/Kubernetes+Labelling
    */
   static final String TYPE_LABEL_KEY = "common.org.icgc.argo/type";
-
   static final String TYPE_LABEL_VAL = "workflow-graph";
 
   static final String APP_LABEL_KEY = "workflow-graph.org.icgc.argo/app";
@@ -116,7 +115,7 @@ public class GraphNodeRepository {
 
   GraphNodeConfig getGraphNodeConfig(Pod pod) {
     return pod.getSpec().getVolumes().stream()
-        .filter(vol -> vol.getName().endsWith("-config"))
+        .filter(vol -> vol.getName().endsWith("-config")) // todo: magical string
         .flatMap(
             vol ->
                 kubernetesClient

@@ -61,7 +61,7 @@ public class Sonar {
     store = new ConcurrentHashMap<>();
     graphNodeRepository
         .getPipelines()
-        .forEach((key, pipeline) -> store.put(key, Pipeline.parse(pipeline)));
+        .forEach((key, graphPipeline) -> store.put(key, Pipeline.parse(graphPipeline)));
     log.debug("Sonar store initialized: {}", store);
     log.info("Sonar store initialization complete!");
   }
