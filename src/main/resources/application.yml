@@ -17,8 +17,18 @@ elastic:
   graphLogInfoDebugIndex: graphlog_info_debug
   graphLogErrorWarningIndex: graphlog_error_warning
 
+# https://github.com/fabric8io/kubernetes-client#configuring-the-client
+kubernetes:
+  master: https://kubernetes.default.svc
+
+rdpc:
+  graphK8sNamespace: rdpc-collab
+
 ---
-spring.profiles: secure
+spring:
+  config:
+    activate:
+      on-profile: secure
 auth:
   jwtPublicKeyUrl: "http://localhost:8081/oauth/token/public_key"
   jwtPublicKeyStr: "-----BEGIN PUBLIC KEY-----\nSET ME IF YOU DONT HAVE A URL, BUT URL TAKES PRIORITY\n-----END PUBLIC KEY-----"

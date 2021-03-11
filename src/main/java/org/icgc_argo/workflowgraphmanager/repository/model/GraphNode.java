@@ -16,26 +16,18 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflowgraphmanager.graphql;
+package org.icgc_argo.workflowgraphmanager.repository.model;
 
-import graphql.TypeResolutionEnvironment;
-import graphql.schema.GraphQLObjectType;
-import graphql.schema.TypeResolver;
-import lombok.extern.slf4j.Slf4j;
-import org.icgc_argo.workflowgraphmanager.graphql.model.GraphEvent;
-import org.icgc_argo.workflowgraphmanager.graphql.model.GraphRun;
-import org.springframework.stereotype.Component;
+import java.util.List;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NonNull;
 
-@Slf4j
-@Component
-public class MessageTypeResolver implements TypeResolver {
-  public GraphQLObjectType getType(TypeResolutionEnvironment env) {
-    if (env.getObject() instanceof GraphEvent) {
-      return env.getSchema().getObjectType("GraphEvent");
-    } else if (env.getObject() instanceof GraphRun) {
-      return env.getSchema().getObjectType("GraphRun");
-    } else {
-      return null;
-    }
-  }
+@Data
+@Builder
+public class GraphNode<T> {
+  @NonNull private String id;
+  @NonNull private String pipeline;
+  @NonNull private T config;
+  @NonNull private List<GraphExchangesQueue> graphExchangesQueueList;
 }

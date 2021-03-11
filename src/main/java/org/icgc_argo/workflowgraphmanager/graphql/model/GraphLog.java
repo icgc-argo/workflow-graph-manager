@@ -16,26 +16,39 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflowgraphmanager.graphql;
+package org.icgc_argo.workflowgraphmanager.graphql.model;
 
-import graphql.TypeResolutionEnvironment;
-import graphql.schema.GraphQLObjectType;
-import graphql.schema.TypeResolver;
-import lombok.extern.slf4j.Slf4j;
-import org.icgc_argo.workflowgraphmanager.graphql.model.GraphEvent;
-import org.icgc_argo.workflowgraphmanager.graphql.model.GraphRun;
-import org.springframework.stereotype.Component;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import java.util.Map;
+import lombok.Data;
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import org.icgc_argo.workflowgraphmanager.graphql.model.base.GraphEntity;
+import org.icgc_argo.workflowgraphmanager.utils.JacksonUtils;
 
-@Slf4j
-@Component
-public class MessageTypeResolver implements TypeResolver {
-  public GraphQLObjectType getType(TypeResolutionEnvironment env) {
-    if (env.getObject() instanceof GraphEvent) {
-      return env.getSchema().getObjectType("GraphEvent");
-    } else if (env.getObject() instanceof GraphRun) {
-      return env.getSchema().getObjectType("GraphRun");
-    } else {
-      return null;
-    }
+@Data
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+public class GraphLog implements GraphEntity {
+
+  private String id;
+
+  private String graphMessageId;
+
+  private String log;
+
+  private Queue queue;
+
+  private Node node;
+
+  private Pipeline pipeline;
+
+  private Long timestamp;
+
+  @SneakyThrows
+  public static GraphLog parse(@NonNull Map<String, Object> sourceMap) {
+    return JacksonUtils.parse(sourceMap, GraphLog.class);
   }
 }

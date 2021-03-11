@@ -16,12 +16,29 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflowgraphmanager.model;
+package org.icgc_argo.workflowgraphmanager.graphql.model.base;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import java.util.List;
 import lombok.Data;
+import org.icgc_argo.workflowgraphmanager.graphql.model.GraphLog;
+import org.icgc_argo.workflowgraphmanager.graphql.model.Node;
+import org.icgc_argo.workflowgraphmanager.graphql.model.Pipeline;
+import org.icgc_argo.workflowgraphmanager.graphql.model.Queue;
 
 @Data
-public class Sort {
-  String fieldName;
-  String order;
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+public abstract class Message implements GraphEntity {
+  protected String id;
+
+  protected Pipeline pipeline;
+
+  protected Node node;
+
+  protected Queue queue;
+
+  protected List<GraphLog> logs;
 }

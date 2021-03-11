@@ -46,7 +46,7 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.icgc_argo.workflowgraphmanager.config.ElasticsearchProperties;
-import org.icgc_argo.workflowgraphmanager.model.Sort;
+import org.icgc_argo.workflowgraphmanager.graphql.model.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -65,7 +65,7 @@ public class GraphLogRepository {
 
   @Autowired
   public GraphLogRepository(
-      @Qualifier("GraphManagerClient") @NonNull RestHighLevelClient client,
+      @Qualifier("ElasticSearchClient") @NonNull RestHighLevelClient client,
       @NonNull ElasticsearchProperties elasticSearchProperties) {
     this.client = client;
     this.graphLogErrorWarningIndex = elasticSearchProperties.getGraphLogErrorWarningIndex();

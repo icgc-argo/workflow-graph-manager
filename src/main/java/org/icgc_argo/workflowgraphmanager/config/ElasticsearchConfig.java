@@ -33,8 +33,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
 @Slf4j
+@Configuration
 public class ElasticsearchConfig {
   private static final Integer connectTimeout = 15_000;
   private static final Integer connectionRequestTimeout = 15_000;
@@ -45,9 +45,9 @@ public class ElasticsearchConfig {
   public ElasticsearchConfig(@NonNull ElasticsearchProperties properties) {
     this.properties = properties;
     log.info(
-        String.format(
-            "Connecting to Elasticsearch host %s, port %s.",
-            properties.getHost(), properties.getPort()));
+        "Connecting to Elasticsearch host {}, port {}.",
+        properties.getHost(),
+        properties.getPort());
   }
 
   private RestHighLevelClient secureRestHighLevelClient() {
@@ -78,7 +78,7 @@ public class ElasticsearchConfig {
                 }));
   }
 
-  @Bean("GraphManagerClient")
+  @Bean("ElasticSearchClient")
   public RestHighLevelClient restHighLevelClient() {
 
     if (properties.getUseAuthentication()) {

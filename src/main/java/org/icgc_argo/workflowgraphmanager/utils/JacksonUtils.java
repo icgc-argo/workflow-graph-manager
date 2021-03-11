@@ -18,14 +18,20 @@
 
 package org.icgc_argo.workflowgraphmanager.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.Map;
 import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.icgc_argo.workflowgraphmanager.repository.model.GraphNodeConfig;
 import org.springframework.core.ParameterizedTypeReference;
 
 // TODO: Move these into Graph-LIB
+@Slf4j
 public class JacksonUtils {
   protected static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -43,5 +49,24 @@ public class JacksonUtils {
 
   public static <T> T parse(@NonNull Map<String, Object> sourceMap, Class<T> toValueType) {
     return MAPPER.convertValue(sourceMap, toValueType);
+  }
+
+  public static <T> T parse(@NonNull Object obj, @NonNull TypeReference<T> type) {
+    return MAPPER.convertValue(obj, type);
+  }
+
+  @SneakyThrows
+  public static <T> T readValue(InputStream src, Class<T> valueType) {
+    return MAPPER.readValue(src, valueType);
+  }
+
+  @SneakyThrows
+  public static GraphNodeConfig jsonStringToNodeConfig(String jsonString) {
+    try {
+      return MAPPER.readValue(jsonString, GraphNodeConfig.class);
+    } catch (JsonProcessingException e) {
+      log.error("Error parsing json to node config: ", e);
+      throw e;
+    }
   }
 }

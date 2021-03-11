@@ -16,25 +16,34 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflowgraphmanager.model;
+package org.icgc_argo.workflowgraphmanager.config;
 
-import java.util.List;
-import lombok.Value;
+import io.fabric8.kubernetes.client.Config;
+import io.fabric8.kubernetes.client.ConfigBuilder;
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClient;
+import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-@Value
-public class SearchResult<T> {
-  List<T> content;
-  Info info;
+@Slf4j
+@Configuration
+public class KubernetesConfig {
+  private final RdpcProperties rdpcProperties;
 
-  public SearchResult(List<T> content, Boolean hasNextFrom, Long totalHits) {
-    this.content = content;
-    this.info = new Info(hasNextFrom, totalHits, content.size());
+  @Autowired
+  public KubernetesConfig(@NonNull RdpcProperties rdpcProperties) {
+    this.rdpcProperties = rdpcProperties;
+    log.info(
+        "Connecting to Kubernetes, using namespace: {}", rdpcProperties.getGraphK8sNamespace());
   }
 
-  @Value
-  public static class Info {
-    Boolean hasNextFrom;
-    Long totalHits;
-    Integer contentCount;
+  @Bean("KubernetesClient")
+  public KubernetesClient kubernetesClient() {
+    Config config =
+        new ConfigBuilder().withNamespace(rdpcProperties.getGraphK8sNamespace()).build();
+    return new DefaultKubernetesClient(config);
   }
 }

@@ -16,26 +16,12 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflowgraphmanager.graphql;
+package org.icgc_argo.workflowgraphmanager.graphql.model;
 
-import graphql.TypeResolutionEnvironment;
-import graphql.schema.GraphQLObjectType;
-import graphql.schema.TypeResolver;
-import lombok.extern.slf4j.Slf4j;
-import org.icgc_argo.workflowgraphmanager.graphql.model.GraphEvent;
-import org.icgc_argo.workflowgraphmanager.graphql.model.GraphRun;
-import org.springframework.stereotype.Component;
+import lombok.Data;
 
-@Slf4j
-@Component
-public class MessageTypeResolver implements TypeResolver {
-  public GraphQLObjectType getType(TypeResolutionEnvironment env) {
-    if (env.getObject() instanceof GraphEvent) {
-      return env.getSchema().getObjectType("GraphEvent");
-    } else if (env.getObject() instanceof GraphRun) {
-      return env.getSchema().getObjectType("GraphRun");
-    } else {
-      return null;
-    }
-  }
+@Data
+public class Sort {
+  String fieldName;
+  String order;
 }

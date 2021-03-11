@@ -16,47 +16,25 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflowgraphmanager.model;
+package org.icgc_argo.workflowgraphmanager.graphql.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.util.List;
-import java.util.Map;
-import lombok.*;
-import org.icgc_argo.workflowgraphmanager.model.base.Message;
-import org.icgc_argo.workflowgraphmanager.utils.JacksonUtils;
+import lombok.Value;
 
-@Data
-@EqualsAndHashCode(callSuper = true)
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class GraphEvent extends Message {
-  private String analysisId;
+@Value
+public class SearchResult<T> {
+  List<T> content;
+  Info info;
 
-  private String analysisState;
-
-  private String analysisType;
-
-  private String studyId;
-
-  private String experimentalStrategy;
-
-  private List<String> donorIds;
-
-  private AnalysisFile files;
-
-  //  private String analysis; // todo: Make Analysis an entity
-
-  @SneakyThrows
-  public static GraphEvent parse(@NonNull Map<String, Object> sourceMap) {
-    return JacksonUtils.parse(sourceMap, GraphEvent.class);
+  public SearchResult(List<T> content, Boolean hasNextFrom, Long totalHits) {
+    this.content = content;
+    this.info = new Info(hasNextFrom, totalHits, content.size());
   }
 
-  @Data
-  @AllArgsConstructor
-  @NoArgsConstructor
-  private static class AnalysisFile {
-    private String dataType;
+  @Value
+  public static class Info {
+    Boolean hasNextFrom;
+    Long totalHits;
+    Integer contentCount;
   }
 }

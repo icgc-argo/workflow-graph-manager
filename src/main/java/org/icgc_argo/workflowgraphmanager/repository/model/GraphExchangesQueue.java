@@ -16,13 +16,20 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflowgraphmanager;
+package org.icgc_argo.workflowgraphmanager.repository.model;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@SpringBootTest
-public class WorkflowGraphManagerApplicationTests {
-  @Test
-  void contextLoads() {}
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class GraphExchangesQueue {
+  private String exchange;
+  private String queue;
+
+  public static GraphExchangesQueue fromExchangeString(String exchange) {
+    return new GraphExchangesQueue(exchange, exchange);
+  }
 }

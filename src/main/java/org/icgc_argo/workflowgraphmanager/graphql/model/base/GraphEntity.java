@@ -16,38 +16,18 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflowgraphmanager.model;
+package org.icgc_argo.workflowgraphmanager.graphql.model.base;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import java.util.Map;
-import lombok.Data;
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import org.icgc_argo.workflowgraphmanager.utils.JacksonUtils;
+import org.icgc_argo.workflowgraphmanager.graphql.model.Node;
+import org.icgc_argo.workflowgraphmanager.graphql.model.Pipeline;
+import org.icgc_argo.workflowgraphmanager.graphql.model.Queue;
 
-@Data
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class GraphLog {
+public interface GraphEntity {
+  String getId();
 
-  private String id;
+  Pipeline getPipeline();
 
-  private String graphMessageId;
+  Node getNode();
 
-  private String log;
-
-  private Queue queue;
-
-  private Node node;
-
-  private Pipeline pipeline;
-
-  private Long timestamp;
-
-  @SneakyThrows
-  public static GraphLog parse(@NonNull Map<String, Object> sourceMap) {
-    return JacksonUtils.parse(sourceMap, GraphLog.class);
-  }
+  Queue getQueue();
 }

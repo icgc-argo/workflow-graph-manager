@@ -1,0 +1,1597 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": {
+        "annotations": {
+          "container.apparmor.security.beta.kubernetes.io/workflow-graph-node": "runtime/default",
+          "kubernetes.io/psp": "restricted",
+          "seccomp.security.alpha.kubernetes.io/pod": "docker/default"
+        },
+        "creationTimestamp": "2021-02-12T17:31:29Z",
+        "generateName": "align-node-workflow-graph-node-86cf986995-",
+        "labels": {
+          "app.kubernetes.io/instance": "align-node",
+          "app.kubernetes.io/name": "workflow-graph-node",
+          "common.org.icgc.argo/type": "workflow-graph",
+          "pod-template-hash": "86cf986995",
+          "workflow-graph.org.icgc.argo/app": "workflow-graph-node",
+          "workflow-graph.org.icgc.argo/node-id": "align-node",
+          "workflow-graph.org.icgc.argo/pipeline-id": "test-pipeline"
+        },
+        "name": "align-node-workflow-graph-node-86cf986995-c5gvk",
+        "namespace": "test",
+        "ownerReferences": [
+          {
+            "apiVersion": "apps/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "ReplicaSet",
+            "name": "align-node-workflow-graph-node-86cf986995",
+            "uid": "3bbbf1bd-b5cf-4e74-a481-4680a2ad6cbb"
+          }
+        ],
+        "resourceVersion": "177715267",
+        "selfLink": "/api/v1/namespaces/test/pods/align-node-workflow-graph-node-86cf986995-c5gvk",
+        "uid": "16dcaac3-fb25-4f31-b059-03aee0c93a91"
+      },
+      "spec": {
+        "containers": [
+          {
+            "env": [
+              {
+                "name": "SERVER_PORT",
+                "value": "8080"
+              },
+              {
+                "name": "MANAGEMENT_PORT",
+                "value": "8081"
+              },
+              {
+                "name": "RDPC_URL",
+                "value": "http://rdpc-gateway.test/graphql"
+              },
+              {
+                "name": "RABBIT_ENDPOINTS_STANDALONE_HOST",
+                "value": "wfg-rabbit-rabbitmq-headless.test"
+              },
+              {
+                "name": "NODE_JSONCONFIGPATH",
+                "value": "/srv/node-config/node-config.json"
+              },
+              {
+                "name": "LOG4J2_KAFKA_BROKERS",
+                "value": "kafka-headless:9092"
+              },
+              {
+                "name": "LOGGING_LEVEL_ORG_ICGC_ARGO_WORKFLOWGRAPHNODE",
+                "value": "DEBUG"
+              },
+              {
+                "name": "OAUTH_CLIENTCREDENTIALS_CLIENTID",
+                "value": "wfg"
+              },
+              {
+                "name": "OAUTH_CLIENTCREDENTIALS_PUBLICKEYURI",
+                "value": "https://ego.qa.argo.cancercollaboratory.org/api/oauth/token/public_key"
+              },
+              {
+                "name": "OAUTH_CLIENTCREDENTIALS_TOKENURI",
+                "value": "https://ego.qa.argo.cancercollaboratory.org/api/oauth/token"
+              },
+              {
+                "name": "RABBIT_SCHEMA_REGISTRYURL",
+                "value": "http://registry.test"
+              },
+              {
+                "name": "SPRING_PROFILES_ACTIVE",
+                "value": "registry,oauth,kafka"
+              },
+              {
+                "name": "RABBIT_ENDPOINTS_STANDALONE_USERNAME",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "username",
+                    "name": "wfg-rabbit-rabbitmq-admin"
+                  }
+                }
+              },
+              {
+                "name": "RABBIT_ENDPOINTS_STANDALONE_PASSWORD",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "password",
+                    "name": "wfg-rabbit-rabbitmq-admin"
+                  }
+                }
+              },
+              {
+                "name": "OAUTH_CLIENTCREDENTIALS_CLIENTSECRET",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "secret",
+                    "name": "wfg-node-client-secret"
+                  }
+                }
+              }
+            ],
+            "image": "ghcr.io/icgc-argo/workflow-graph-node:0.4.0",
+            "imagePullPolicy": "IfNotPresent",
+            "livenessProbe": {
+              "failureThreshold": 1,
+              "httpGet": {
+                "path": "/actuator/health",
+                "port": 8080,
+                "scheme": "HTTP"
+              },
+              "initialDelaySeconds": 60,
+              "periodSeconds": 8,
+              "successThreshold": 1,
+              "timeoutSeconds": 2
+            },
+            "name": "workflow-graph-node",
+            "ports": [
+              {
+                "containerPort": 8080,
+                "name": "http",
+                "protocol": "TCP"
+              }
+            ],
+            "readinessProbe": {
+              "failureThreshold": 2,
+              "httpGet": {
+                "path": "/actuator/health",
+                "port": 8080,
+                "scheme": "HTTP"
+              },
+              "initialDelaySeconds": 30,
+              "periodSeconds": 3,
+              "successThreshold": 1,
+              "timeoutSeconds": 2
+            },
+            "resources": {},
+            "securityContext": {
+              "allowPrivilegeEscalation": false,
+              "capabilities": {
+                "drop": [
+                  "ALL"
+                ]
+              }
+            },
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "volumeMounts": [
+              {
+                "mountPath": "/srv/node-config",
+                "name": "align-node-workflow-graph-node-config"
+              },
+              {
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                "name": "align-node-workflow-graph-node-token-7d4n6",
+                "readOnly": true
+              }
+            ]
+          }
+        ],
+        "dnsPolicy": "ClusterFirst",
+        "enableServiceLinks": true,
+        "nodeName": "k8s-node-rdpc-dev-2",
+        "priority": 0,
+        "restartPolicy": "Always",
+        "schedulerName": "default-scheduler",
+        "securityContext": {
+          "fsGroup": 1,
+          "runAsGroup": 9999,
+          "runAsNonRoot": true,
+          "runAsUser": 9999,
+          "supplementalGroups": [
+            1
+          ]
+        },
+        "serviceAccount": "align-node-workflow-graph-node",
+        "serviceAccountName": "align-node-workflow-graph-node",
+        "terminationGracePeriodSeconds": 30,
+        "tolerations": [
+          {
+            "effect": "NoExecute",
+            "key": "node.kubernetes.io/not-ready",
+            "operator": "Exists",
+            "tolerationSeconds": 300
+          },
+          {
+            "effect": "NoExecute",
+            "key": "node.kubernetes.io/unreachable",
+            "operator": "Exists",
+            "tolerationSeconds": 300
+          }
+        ],
+        "volumes": [
+          {
+            "configMap": {
+              "defaultMode": 420,
+              "items": [
+                {
+                  "key": "align-node-config.json",
+                  "path": "node-config.json"
+                }
+              ],
+              "name": "align-node"
+            },
+            "name": "align-node-workflow-graph-node-config"
+          },
+          {
+            "name": "align-node-workflow-graph-node-token-7d4n6",
+            "secret": {
+              "defaultMode": 420,
+              "secretName": "align-node-workflow-graph-node-token-7d4n6"
+            }
+          }
+        ]
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastProbeTime": null,
+            "lastTransitionTime": "2021-02-12T17:31:29Z",
+            "status": "True",
+            "type": "Initialized"
+          },
+          {
+            "lastProbeTime": null,
+            "lastTransitionTime": "2021-02-12T17:32:03Z",
+            "status": "True",
+            "type": "Ready"
+          },
+          {
+            "lastProbeTime": null,
+            "lastTransitionTime": "2021-02-12T17:32:03Z",
+            "status": "True",
+            "type": "ContainersReady"
+          },
+          {
+            "lastProbeTime": null,
+            "lastTransitionTime": "2021-02-12T17:31:29Z",
+            "status": "True",
+            "type": "PodScheduled"
+          }
+        ],
+        "containerStatuses": [
+          {
+            "containerID": "docker://ec6fd66786c15b167976a2ca8dbe6c47ea848b7ca53ca5816047df6d7b14cb61",
+            "image": "ghcr.io/icgc-argo/workflow-graph-node:0.4.0",
+            "imageID": "docker-pullable://ghcr.io/icgc-argo/workflow-graph-node@sha256:ead44450e88e6232a47417dc6f3cd16e305d1341d11076cad7908c1d4323da98",
+            "lastState": {},
+            "name": "workflow-graph-node",
+            "ready": true,
+            "restartCount": 0,
+            "started": true,
+            "state": {
+              "running": {
+                "startedAt": "2021-02-12T17:31:31Z"
+              }
+            }
+          }
+        ],
+        "hostIP": "10.10.0.119",
+        "phase": "Running",
+        "podIP": "10.233.120.222",
+        "podIPs": [
+          {
+            "ip": "10.233.120.222"
+          }
+        ],
+        "qosClass": "BestEffort",
+        "startTime": "2021-02-12T17:31:29Z"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": {
+        "annotations": {
+          "container.apparmor.security.beta.kubernetes.io/workflow-graph-ingest": "runtime/default",
+          "kubernetes.io/psp": "restricted",
+          "seccomp.security.alpha.kubernetes.io/pod": "docker/default"
+        },
+        "creationTimestamp": "2021-02-12T17:32:08Z",
+        "generateName": "ingest-workflow-graph-ingest-769f477677-",
+        "labels": {
+          "app.kubernetes.io/instance": "ingest",
+          "app.kubernetes.io/name": "workflow-graph-ingest",
+          "common.org.icgc.argo/type": "workflow-graph",
+          "pod-template-hash": "769f477677",
+          "workflow-graph.org.icgc.argo/app": "workflow-graph-ingest-node",
+          "workflow-graph.org.icgc.argo/node-id": "start",
+          "workflow-graph.org.icgc.argo/pipeline-id": "test-pipeline"
+        },
+        "name": "ingest-workflow-graph-ingest-769f477677-64cp8",
+        "namespace": "test",
+        "ownerReferences": [
+          {
+            "apiVersion": "apps/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "ReplicaSet",
+            "name": "ingest-workflow-graph-ingest-769f477677",
+            "uid": "df9faa9d-771f-4f97-9787-07b73e73514d"
+          }
+        ],
+        "resourceVersion": "177715594",
+        "selfLink": "/api/v1/namespaces/test/pods/ingest-workflow-graph-ingest-769f477677-64cp8",
+        "uid": "602f69e7-d584-4937-8440-00dbdc8c27dc"
+      },
+      "spec": {
+        "containers": [
+          {
+            "env": [
+              {
+                "name": "SERVER_PORT",
+                "value": "8082"
+              },
+              {
+                "name": "SPRING_RABBITMQ_HOST",
+                "value": "wfg-rabbit-rabbitmq-headless.test"
+              },
+              {
+                "name": "SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS",
+                "value": "kafka-headless.test:9092"
+              },
+              {
+                "name": "SPRING_CLOUD_STREAM_BINDINGS_INBOUND_DESTINATION",
+                "value": "wfg-test"
+              },
+              {
+                "name": "SPRING_CLOUD_STREAM_KAFKA_BINDINGS_INBOUND_CONSUMER_DLQNAME",
+                "value": "wfg-test-dql"
+              },
+              {
+                "name": "SPRING_CLOUD_STREAM_KAFKA_BINDINGS_INBOUND_CONSUMER_ENABLEDLQ",
+                "value": "true"
+              },
+              {
+                "name": "SPRING_RABBITMQ_USERNAME",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "username",
+                    "name": "wfg-rabbit-rabbitmq-admin"
+                  }
+                }
+              },
+              {
+                "name": "SPRING_RABBITMQ_PASSWORD",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "password",
+                    "name": "wfg-rabbit-rabbitmq-admin"
+                  }
+                }
+              }
+            ],
+            "image": "ghcr.io/icgc-argo/workflow-graph-ingest-node:0.1.0",
+            "imagePullPolicy": "Always",
+            "livenessProbe": {
+              "failureThreshold": 1,
+              "httpGet": {
+                "path": "/actuator/health",
+                "port": 8082,
+                "scheme": "HTTP"
+              },
+              "initialDelaySeconds": 60,
+              "periodSeconds": 8,
+              "successThreshold": 1,
+              "timeoutSeconds": 2
+            },
+            "name": "workflow-graph-ingest",
+            "ports": [
+              {
+                "containerPort": 8082,
+                "name": "http",
+                "protocol": "TCP"
+              }
+            ],
+            "readinessProbe": {
+              "failureThreshold": 2,
+              "httpGet": {
+                "path": "/actuator/health",
+                "port": 8082,
+                "scheme": "HTTP"
+              },
+              "initialDelaySeconds": 30,
+              "periodSeconds": 3,
+              "successThreshold": 1,
+              "timeoutSeconds": 2
+            },
+            "resources": {
+              "limits": {
+                "cpu": "2",
+                "memory": "1Gi"
+              },
+              "requests": {
+                "cpu": "1",
+                "memory": "512Mi"
+              }
+            },
+            "securityContext": {
+              "allowPrivilegeEscalation": false,
+              "capabilities": {
+                "drop": [
+                  "ALL"
+                ]
+              }
+            },
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "volumeMounts": [
+              {
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                "name": "ingest-workflow-graph-ingest-token-q9wck",
+                "readOnly": true
+              }
+            ]
+          }
+        ],
+        "dnsPolicy": "ClusterFirst",
+        "enableServiceLinks": true,
+        "nodeName": "k8s-node-rdpc-dev-1",
+        "priority": 0,
+        "restartPolicy": "Always",
+        "schedulerName": "default-scheduler",
+        "securityContext": {
+          "fsGroup": 1,
+          "runAsGroup": 9999,
+          "runAsNonRoot": true,
+          "runAsUser": 9999,
+          "supplementalGroups": [
+            1
+          ]
+        },
+        "serviceAccount": "ingest-workflow-graph-ingest",
+        "serviceAccountName": "ingest-workflow-graph-ingest",
+        "terminationGracePeriodSeconds": 30,
+        "tolerations": [
+          {
+            "effect": "NoExecute",
+            "key": "node.kubernetes.io/not-ready",
+            "operator": "Exists",
+            "tolerationSeconds": 300
+          },
+          {
+            "effect": "NoExecute",
+            "key": "node.kubernetes.io/unreachable",
+            "operator": "Exists",
+            "tolerationSeconds": 300
+          }
+        ],
+        "volumes": [
+          {
+            "name": "ingest-workflow-graph-ingest-token-q9wck",
+            "secret": {
+              "defaultMode": 420,
+              "secretName": "ingest-workflow-graph-ingest-token-q9wck"
+            }
+          }
+        ]
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastProbeTime": null,
+            "lastTransitionTime": "2021-02-12T17:32:08Z",
+            "status": "True",
+            "type": "Initialized"
+          },
+          {
+            "lastProbeTime": null,
+            "lastTransitionTime": "2021-02-12T17:32:44Z",
+            "status": "True",
+            "type": "Ready"
+          },
+          {
+            "lastProbeTime": null,
+            "lastTransitionTime": "2021-02-12T17:32:44Z",
+            "status": "True",
+            "type": "ContainersReady"
+          },
+          {
+            "lastProbeTime": null,
+            "lastTransitionTime": "2021-02-12T17:32:08Z",
+            "status": "True",
+            "type": "PodScheduled"
+          }
+        ],
+        "containerStatuses": [
+          {
+            "containerID": "docker://685ed43759166701eb441bd094539c8597410b0ff0adc5e53bccebab2836693b",
+            "image": "ghcr.io/icgc-argo/workflow-graph-ingest-node:0.1.0",
+            "imageID": "docker-pullable://ghcr.io/icgc-argo/workflow-graph-ingest-node@sha256:c6cb0c19385c13a39b826753fc4d7e46ed3326aa80493811fc5a37ff8ba91aed",
+            "lastState": {},
+            "name": "workflow-graph-ingest",
+            "ready": true,
+            "restartCount": 0,
+            "started": true,
+            "state": {
+              "running": {
+                "startedAt": "2021-02-12T17:32:12Z"
+              }
+            }
+          }
+        ],
+        "hostIP": "10.10.3.23",
+        "phase": "Running",
+        "podIP": "10.233.89.246",
+        "podIPs": [
+          {
+            "ip": "10.233.89.246"
+          }
+        ],
+        "qosClass": "Burstable",
+        "startTime": "2021-02-12T17:32:08Z"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": {
+        "annotations": {
+          "container.apparmor.security.beta.kubernetes.io/workflow-graph-node": "runtime/default",
+          "kubernetes.io/psp": "restricted",
+          "seccomp.security.alpha.kubernetes.io/pod": "docker/default"
+        },
+        "creationTimestamp": "2021-02-12T17:31:29Z",
+        "generateName": "align-node-two-workflow-graph-node-86cf986995-",
+        "labels": {
+          "app.kubernetes.io/instance": "align-node-two",
+          "app.kubernetes.io/name": "workflow-graph-node",
+          "common.org.icgc.argo/type": "workflow-graph",
+          "pod-template-hash": "86cf986995",
+          "workflow-graph.org.icgc.argo/app": "workflow-graph-node",
+          "workflow-graph.org.icgc.argo/node-id": "align-node-two",
+          "workflow-graph.org.icgc.argo/pipeline-id": "test-pipeline-two"
+        },
+        "name": "align-node-two-workflow-graph-node-32hbf2342h-c423g",
+        "namespace": "test",
+        "ownerReferences": [
+          {
+            "apiVersion": "apps/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "ReplicaSet",
+            "name": "align-node-two-workflow-graph-node-86cf986995",
+            "uid": "3bbbf1bd-b5cf-4e74-a481-4680a2ad6cbb"
+          }
+        ],
+        "resourceVersion": "177715267",
+        "selfLink": "/api/v1/namespaces/test/pods/align-node-two-workflow-graph-node-32hbf2342h-c423g",
+        "uid": "16dcaac3-4f31-fb25-b059-03aee0c93a91"
+      },
+      "spec": {
+        "containers": [
+          {
+            "env": [
+              {
+                "name": "SERVER_PORT",
+                "value": "8080"
+              },
+              {
+                "name": "MANAGEMENT_PORT",
+                "value": "8081"
+              },
+              {
+                "name": "RDPC_URL",
+                "value": "http://rdpc-gateway.test/graphql"
+              },
+              {
+                "name": "RABBIT_ENDPOINTS_STANDALONE_HOST",
+                "value": "wfg-rabbit-rabbitmq-headless.test"
+              },
+              {
+                "name": "NODE_JSONCONFIGPATH",
+                "value": "/srv/node-config/node-config.json"
+              },
+              {
+                "name": "LOG4J2_KAFKA_BROKERS",
+                "value": "kafka-headless:9092"
+              },
+              {
+                "name": "LOGGING_LEVEL_ORG_ICGC_ARGO_WORKFLOWGRAPHNODE",
+                "value": "DEBUG"
+              },
+              {
+                "name": "OAUTH_CLIENTCREDENTIALS_CLIENTID",
+                "value": "wfg"
+              },
+              {
+                "name": "OAUTH_CLIENTCREDENTIALS_PUBLICKEYURI",
+                "value": "https://ego.qa.argo.cancercollaboratory.org/api/oauth/token/public_key"
+              },
+              {
+                "name": "OAUTH_CLIENTCREDENTIALS_TOKENURI",
+                "value": "https://ego.qa.argo.cancercollaboratory.org/api/oauth/token"
+              },
+              {
+                "name": "RABBIT_SCHEMA_REGISTRYURL",
+                "value": "http://registry.test"
+              },
+              {
+                "name": "SPRING_PROFILES_ACTIVE",
+                "value": "registry,oauth,kafka"
+              },
+              {
+                "name": "RABBIT_ENDPOINTS_STANDALONE_USERNAME",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "username",
+                    "name": "wfg-rabbit-rabbitmq-admin"
+                  }
+                }
+              },
+              {
+                "name": "RABBIT_ENDPOINTS_STANDALONE_PASSWORD",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "password",
+                    "name": "wfg-rabbit-rabbitmq-admin"
+                  }
+                }
+              },
+              {
+                "name": "OAUTH_CLIENTCREDENTIALS_CLIENTSECRET",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "secret",
+                    "name": "wfg-node-client-secret"
+                  }
+                }
+              }
+            ],
+            "image": "ghcr.io/icgc-argo/workflow-graph-node:0.4.0",
+            "imagePullPolicy": "IfNotPresent",
+            "livenessProbe": {
+              "failureThreshold": 1,
+              "httpGet": {
+                "path": "/actuator/health",
+                "port": 8080,
+                "scheme": "HTTP"
+              },
+              "initialDelaySeconds": 60,
+              "periodSeconds": 8,
+              "successThreshold": 1,
+              "timeoutSeconds": 2
+            },
+            "name": "workflow-graph-node",
+            "ports": [
+              {
+                "containerPort": 8080,
+                "name": "http",
+                "protocol": "TCP"
+              }
+            ],
+            "readinessProbe": {
+              "failureThreshold": 2,
+              "httpGet": {
+                "path": "/actuator/health",
+                "port": 8080,
+                "scheme": "HTTP"
+              },
+              "initialDelaySeconds": 30,
+              "periodSeconds": 3,
+              "successThreshold": 1,
+              "timeoutSeconds": 2
+            },
+            "resources": {},
+            "securityContext": {
+              "allowPrivilegeEscalation": false,
+              "capabilities": {
+                "drop": [
+                  "ALL"
+                ]
+              }
+            },
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "volumeMounts": [
+              {
+                "mountPath": "/srv/node-config",
+                "name": "align-node-two-workflow-graph-node-config"
+              },
+              {
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                "name": "align-node-two-workflow-graph-node-token-7d4n6",
+                "readOnly": true
+              }
+            ]
+          }
+        ],
+        "dnsPolicy": "ClusterFirst",
+        "enableServiceLinks": true,
+        "nodeName": "k8s-node-rdpc-dev-2",
+        "priority": 0,
+        "restartPolicy": "Always",
+        "schedulerName": "default-scheduler",
+        "securityContext": {
+          "fsGroup": 1,
+          "runAsGroup": 9999,
+          "runAsNonRoot": true,
+          "runAsUser": 9999,
+          "supplementalGroups": [
+            1
+          ]
+        },
+        "serviceAccount": "align-node-two-workflow-graph-node",
+        "serviceAccountName": "align-node-two-workflow-graph-node",
+        "terminationGracePeriodSeconds": 30,
+        "tolerations": [
+          {
+            "effect": "NoExecute",
+            "key": "node.kubernetes.io/not-ready",
+            "operator": "Exists",
+            "tolerationSeconds": 300
+          },
+          {
+            "effect": "NoExecute",
+            "key": "node.kubernetes.io/unreachable",
+            "operator": "Exists",
+            "tolerationSeconds": 300
+          }
+        ],
+        "volumes": [
+          {
+            "configMap": {
+              "defaultMode": 420,
+              "items": [
+                {
+                  "key": "align-node-two-config.json",
+                  "path": "node-config.json"
+                }
+              ],
+              "name": "align-node-two"
+            },
+            "name": "align-node-two-workflow-graph-node-config"
+          },
+          {
+            "name": "align-node-two-workflow-graph-node-token-7d4n6",
+            "secret": {
+              "defaultMode": 420,
+              "secretName": "align-node-two-workflow-graph-node-token-7d4n6"
+            }
+          }
+        ]
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastProbeTime": null,
+            "lastTransitionTime": "2021-02-12T17:31:29Z",
+            "status": "True",
+            "type": "Initialized"
+          },
+          {
+            "lastProbeTime": null,
+            "lastTransitionTime": "2021-02-12T17:32:03Z",
+            "status": "True",
+            "type": "Ready"
+          },
+          {
+            "lastProbeTime": null,
+            "lastTransitionTime": "2021-02-12T17:32:03Z",
+            "status": "True",
+            "type": "ContainersReady"
+          },
+          {
+            "lastProbeTime": null,
+            "lastTransitionTime": "2021-02-12T17:31:29Z",
+            "status": "True",
+            "type": "PodScheduled"
+          }
+        ],
+        "containerStatuses": [
+          {
+            "containerID": "docker://ec6fd66786c15b167976a2ca8dbe6c47ea848b7ca53ca5816047df6d7b14cb61",
+            "image": "ghcr.io/icgc-argo/workflow-graph-node:0.4.0",
+            "imageID": "docker-pullable://ghcr.io/icgc-argo/workflow-graph-node@sha256:ead44450e88e6232a47417dc6f3cd16e305d1341d11076cad7908c1d4323da98",
+            "lastState": {},
+            "name": "workflow-graph-node",
+            "ready": true,
+            "restartCount": 0,
+            "started": true,
+            "state": {
+              "running": {
+                "startedAt": "2021-02-12T17:31:31Z"
+              }
+            }
+          }
+        ],
+        "hostIP": "10.10.0.119",
+        "phase": "Running",
+        "podIP": "10.233.120.222",
+        "podIPs": [
+          {
+            "ip": "10.233.120.222"
+          }
+        ],
+        "qosClass": "BestEffort",
+        "startTime": "2021-02-12T17:31:29Z"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": {
+        "annotations": {
+          "container.apparmor.security.beta.kubernetes.io/workflow-graph-ingest": "runtime/default",
+          "kubernetes.io/psp": "restricted",
+          "seccomp.security.alpha.kubernetes.io/pod": "docker/default"
+        },
+        "creationTimestamp": "2021-02-12T17:32:08Z",
+        "generateName": "ingest-two-workflow-graph-ingest-769f477677-",
+        "labels": {
+          "app.kubernetes.io/instance": "ingest-two",
+          "app.kubernetes.io/name": "workflow-graph-ingest",
+          "common.org.icgc.argo/type": "workflow-graph",
+          "pod-template-hash": "769f477677",
+          "workflow-graph.org.icgc.argo/app": "workflow-graph-ingest-node",
+          "workflow-graph.org.icgc.argo/node-id": "start-two",
+          "workflow-graph.org.icgc.argo/pipeline-id": "test-pipeline-two"
+        },
+        "name": "ingest-workflow-graph-ingest-7695677677-12cp8",
+        "namespace": "test",
+        "ownerReferences": [
+          {
+            "apiVersion": "apps/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "ReplicaSet",
+            "name": "ingest-workflow-graph-ingest-769f477677",
+            "uid": "df9faa9d-771f-4f97-9787-07b73e73514d"
+          }
+        ],
+        "resourceVersion": "177715594",
+        "selfLink": "/api/v1/namespaces/test/pods/ingest-workflow-graph-ingest-7695677677-12cp8",
+        "uid": "602f69e7-d584-4937-8440-00dbdc8c27dc"
+      },
+      "spec": {
+        "containers": [
+          {
+            "env": [
+              {
+                "name": "SERVER_PORT",
+                "value": "8082"
+              },
+              {
+                "name": "SPRING_RABBITMQ_HOST",
+                "value": "wfg-rabbit-rabbitmq-headless.test"
+              },
+              {
+                "name": "SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS",
+                "value": "kafka-headless.test:9092"
+              },
+              {
+                "name": "SPRING_CLOUD_STREAM_BINDINGS_INBOUND_DESTINATION",
+                "value": "wfg-test"
+              },
+              {
+                "name": "SPRING_CLOUD_STREAM_KAFKA_BINDINGS_INBOUND_CONSUMER_DLQNAME",
+                "value": "wfg-test-dql"
+              },
+              {
+                "name": "SPRING_CLOUD_STREAM_KAFKA_BINDINGS_INBOUND_CONSUMER_ENABLEDLQ",
+                "value": "true"
+              },
+              {
+                "name": "SPRING_RABBITMQ_USERNAME",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "username",
+                    "name": "wfg-rabbit-rabbitmq-admin"
+                  }
+                }
+              },
+              {
+                "name": "SPRING_RABBITMQ_PASSWORD",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "password",
+                    "name": "wfg-rabbit-rabbitmq-admin"
+                  }
+                }
+              }
+            ],
+            "image": "ghcr.io/icgc-argo/workflow-graph-ingest-node:0.1.0",
+            "imagePullPolicy": "Always",
+            "livenessProbe": {
+              "failureThreshold": 1,
+              "httpGet": {
+                "path": "/actuator/health",
+                "port": 8082,
+                "scheme": "HTTP"
+              },
+              "initialDelaySeconds": 60,
+              "periodSeconds": 8,
+              "successThreshold": 1,
+              "timeoutSeconds": 2
+            },
+            "name": "workflow-graph-ingest-two",
+            "ports": [
+              {
+                "containerPort": 8082,
+                "name": "http",
+                "protocol": "TCP"
+              }
+            ],
+            "readinessProbe": {
+              "failureThreshold": 2,
+              "httpGet": {
+                "path": "/actuator/health",
+                "port": 8082,
+                "scheme": "HTTP"
+              },
+              "initialDelaySeconds": 30,
+              "periodSeconds": 3,
+              "successThreshold": 1,
+              "timeoutSeconds": 2
+            },
+            "resources": {
+              "limits": {
+                "cpu": "2",
+                "memory": "1Gi"
+              },
+              "requests": {
+                "cpu": "1",
+                "memory": "512Mi"
+              }
+            },
+            "securityContext": {
+              "allowPrivilegeEscalation": false,
+              "capabilities": {
+                "drop": [
+                  "ALL"
+                ]
+              }
+            },
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "volumeMounts": [
+              {
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                "name": "ingest-workflow-graph-ingest-token-q9wck",
+                "readOnly": true
+              }
+            ]
+          }
+        ],
+        "dnsPolicy": "ClusterFirst",
+        "enableServiceLinks": true,
+        "nodeName": "k8s-node-rdpc-dev-1",
+        "priority": 0,
+        "restartPolicy": "Always",
+        "schedulerName": "default-scheduler",
+        "securityContext": {
+          "fsGroup": 1,
+          "runAsGroup": 9999,
+          "runAsNonRoot": true,
+          "runAsUser": 9999,
+          "supplementalGroups": [
+            1
+          ]
+        },
+        "serviceAccount": "ingest-workflow-graph-ingest",
+        "serviceAccountName": "ingest-workflow-graph-ingest",
+        "terminationGracePeriodSeconds": 30,
+        "tolerations": [
+          {
+            "effect": "NoExecute",
+            "key": "node.kubernetes.io/not-ready",
+            "operator": "Exists",
+            "tolerationSeconds": 300
+          },
+          {
+            "effect": "NoExecute",
+            "key": "node.kubernetes.io/unreachable",
+            "operator": "Exists",
+            "tolerationSeconds": 300
+          }
+        ],
+        "volumes": [
+          {
+            "name": "ingest-workflow-graph-ingest-token-q9wck",
+            "secret": {
+              "defaultMode": 420,
+              "secretName": "ingest-workflow-graph-ingest-token-q9wck"
+            }
+          }
+        ]
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastProbeTime": null,
+            "lastTransitionTime": "2021-02-12T17:32:08Z",
+            "status": "True",
+            "type": "Initialized"
+          },
+          {
+            "lastProbeTime": null,
+            "lastTransitionTime": "2021-02-12T17:32:44Z",
+            "status": "True",
+            "type": "Ready"
+          },
+          {
+            "lastProbeTime": null,
+            "lastTransitionTime": "2021-02-12T17:32:44Z",
+            "status": "True",
+            "type": "ContainersReady"
+          },
+          {
+            "lastProbeTime": null,
+            "lastTransitionTime": "2021-02-12T17:32:08Z",
+            "status": "True",
+            "type": "PodScheduled"
+          }
+        ],
+        "containerStatuses": [
+          {
+            "containerID": "docker://685ed43759166701eb441bd094539c8597410b0ff0adc5e53bccebab2836693b",
+            "image": "ghcr.io/icgc-argo/workflow-graph-ingest-node:0.1.0",
+            "imageID": "docker-pullable://ghcr.io/icgc-argo/workflow-graph-ingest-node@sha256:c6cb0c19385c13a39b826753fc4d7e46ed3326aa80493811fc5a37ff8ba91aed",
+            "lastState": {},
+            "name": "workflow-graph-ingest",
+            "ready": true,
+            "restartCount": 0,
+            "started": true,
+            "state": {
+              "running": {
+                "startedAt": "2021-02-12T17:32:12Z"
+              }
+            }
+          }
+        ],
+        "hostIP": "10.10.3.23",
+        "phase": "Running",
+        "podIP": "10.233.89.246",
+        "podIPs": [
+          {
+            "ip": "10.233.89.246"
+          }
+        ],
+        "qosClass": "Burstable",
+        "startTime": "2021-02-12T17:32:08Z"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": {
+        "annotations": {
+          "container.apparmor.security.beta.kubernetes.io/workflow-graph-node": "runtime/default",
+          "kubernetes.io/psp": "restricted",
+          "seccomp.security.alpha.kubernetes.io/pod": "docker/default"
+        },
+        "creationTimestamp": "2021-02-12T17:31:29Z",
+        "generateName": "align-node-three-workflow-graph-node-86cf986995-",
+        "labels": {
+          "app.kubernetes.io/instance": "align-node-three",
+          "app.kubernetes.io/name": "workflow-graph-node",
+          "common.org.icgc.argo/type": "workflow-graph",
+          "pod-template-hash": "86cf986995",
+          "workflow-graph.org.icgc.argo/app": "workflow-graph-node",
+          "workflow-graph.org.icgc.argo/node-id": "align-node-three",
+          "workflow-graph.org.icgc.argo/pipeline-id": "test-pipeline-three"
+        },
+        "name": "align-node-three-workflow-graph-node-32hbf2342h-c423g",
+        "namespace": "test",
+        "ownerReferences": [
+          {
+            "apiVersion": "apps/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "ReplicaSet",
+            "name": "align-node-three-workflow-graph-node-86cf986995",
+            "uid": "b1bbf1bd-b5cf-4e74-a481-4680a2ad6ccd"
+          }
+        ],
+        "resourceVersion": "177715267",
+        "selfLink": "/api/v1/namespaces/test/pods/align-node-three-workflow-graph-node-32hbf2342h-c423g",
+        "uid": "acdcaac3-4f31-fb25-b059-03aee0c93ag8"
+      },
+      "spec": {
+        "containers": [
+          {
+            "env": [
+              {
+                "name": "SERVER_PORT",
+                "value": "8080"
+              },
+              {
+                "name": "MANAGEMENT_PORT",
+                "value": "8081"
+              },
+              {
+                "name": "RDPC_URL",
+                "value": "http://rdpc-gateway.test/graphql"
+              },
+              {
+                "name": "RABBIT_ENDPOINTS_STANDALONE_HOST",
+                "value": "wfg-rabbit-rabbitmq-headless.test"
+              },
+              {
+                "name": "NODE_JSONCONFIGPATH",
+                "value": "/srv/node-config/node-config.json"
+              },
+              {
+                "name": "LOG4J2_KAFKA_BROKERS",
+                "value": "kafka-headless:9092"
+              },
+              {
+                "name": "LOGGING_LEVEL_ORG_ICGC_ARGO_WORKFLOWGRAPHNODE",
+                "value": "DEBUG"
+              },
+              {
+                "name": "OAUTH_CLIENTCREDENTIALS_CLIENTID",
+                "value": "wfg"
+              },
+              {
+                "name": "OAUTH_CLIENTCREDENTIALS_PUBLICKEYURI",
+                "value": "https://ego.qa.argo.cancercollaboratory.org/api/oauth/token/public_key"
+              },
+              {
+                "name": "OAUTH_CLIENTCREDENTIALS_TOKENURI",
+                "value": "https://ego.qa.argo.cancercollaboratory.org/api/oauth/token"
+              },
+              {
+                "name": "RABBIT_SCHEMA_REGISTRYURL",
+                "value": "http://registry.test"
+              },
+              {
+                "name": "SPRING_PROFILES_ACTIVE",
+                "value": "registry,oauth,kafka"
+              },
+              {
+                "name": "RABBIT_ENDPOINTS_STANDALONE_USERNAME",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "username",
+                    "name": "wfg-rabbit-rabbitmq-admin"
+                  }
+                }
+              },
+              {
+                "name": "RABBIT_ENDPOINTS_STANDALONE_PASSWORD",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "password",
+                    "name": "wfg-rabbit-rabbitmq-admin"
+                  }
+                }
+              },
+              {
+                "name": "OAUTH_CLIENTCREDENTIALS_CLIENTSECRET",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "secret",
+                    "name": "wfg-node-client-secret"
+                  }
+                }
+              }
+            ],
+            "image": "ghcr.io/icgc-argo/workflow-graph-node:0.4.0",
+            "imagePullPolicy": "IfNotPresent",
+            "livenessProbe": {
+              "failureThreshold": 1,
+              "httpGet": {
+                "path": "/actuator/health",
+                "port": 8080,
+                "scheme": "HTTP"
+              },
+              "initialDelaySeconds": 60,
+              "periodSeconds": 8,
+              "successThreshold": 1,
+              "timeoutSeconds": 2
+            },
+            "name": "workflow-graph-node",
+            "ports": [
+              {
+                "containerPort": 8080,
+                "name": "http",
+                "protocol": "TCP"
+              }
+            ],
+            "readinessProbe": {
+              "failureThreshold": 2,
+              "httpGet": {
+                "path": "/actuator/health",
+                "port": 8080,
+                "scheme": "HTTP"
+              },
+              "initialDelaySeconds": 30,
+              "periodSeconds": 3,
+              "successThreshold": 1,
+              "timeoutSeconds": 2
+            },
+            "resources": {},
+            "securityContext": {
+              "allowPrivilegeEscalation": false,
+              "capabilities": {
+                "drop": [
+                  "ALL"
+                ]
+              }
+            },
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "volumeMounts": [
+              {
+                "mountPath": "/srv/node-config",
+                "name": "align-node-three-workflow-graph-node-config"
+              },
+              {
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                "name": "align-node-three-workflow-graph-node-token-7d4n6",
+                "readOnly": true
+              }
+            ]
+          }
+        ],
+        "dnsPolicy": "ClusterFirst",
+        "enableServiceLinks": true,
+        "nodeName": "k8s-node-rdpc-dev-2",
+        "priority": 0,
+        "restartPolicy": "Always",
+        "schedulerName": "default-scheduler",
+        "securityContext": {
+          "fsGroup": 1,
+          "runAsGroup": 9999,
+          "runAsNonRoot": true,
+          "runAsUser": 9999,
+          "supplementalGroups": [
+            1
+          ]
+        },
+        "serviceAccount": "align-node-three-workflow-graph-node",
+        "serviceAccountName": "align-node-three-workflow-graph-node",
+        "terminationGracePeriodSeconds": 30,
+        "tolerations": [
+          {
+            "effect": "NoExecute",
+            "key": "node.kubernetes.io/not-ready",
+            "operator": "Exists",
+            "tolerationSeconds": 300
+          },
+          {
+            "effect": "NoExecute",
+            "key": "node.kubernetes.io/unreachable",
+            "operator": "Exists",
+            "tolerationSeconds": 300
+          }
+        ],
+        "volumes": [
+          {
+            "configMap": {
+              "defaultMode": 420,
+              "items": [
+                {
+                  "key": "align-node-three-config.json",
+                  "path": "node-config.json"
+                }
+              ],
+              "name": "align-node-three"
+            },
+            "name": "align-node-three-workflow-graph-node-config"
+          },
+          {
+            "name": "align-node-three-workflow-graph-node-token-7d4n6",
+            "secret": {
+              "defaultMode": 420,
+              "secretName": "align-node-three-workflow-graph-node-token-7d4n6"
+            }
+          }
+        ]
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastProbeTime": null,
+            "lastTransitionTime": "2021-02-12T17:31:29Z",
+            "status": "True",
+            "type": "Initialized"
+          },
+          {
+            "lastProbeTime": null,
+            "lastTransitionTime": "2021-02-12T17:32:03Z",
+            "status": "True",
+            "type": "Ready"
+          },
+          {
+            "lastProbeTime": null,
+            "lastTransitionTime": "2021-02-12T17:32:03Z",
+            "status": "True",
+            "type": "ContainersReady"
+          },
+          {
+            "lastProbeTime": null,
+            "lastTransitionTime": "2021-02-12T17:31:29Z",
+            "status": "True",
+            "type": "PodScheduled"
+          }
+        ],
+        "containerStatuses": [
+          {
+            "containerID": "docker://ec6fd66786c15b167976a2ca8dbe6c47ea848b7ca53ca5816047df6d7b14cb61",
+            "image": "ghcr.io/icgc-argo/workflow-graph-node:0.4.0",
+            "imageID": "docker-pullable://ghcr.io/icgc-argo/workflow-graph-node@sha256:ead44450e88e6232a47417dc6f3cd16e305d1341d11076cad7908c1d4323da98",
+            "lastState": {},
+            "name": "workflow-graph-node",
+            "ready": true,
+            "restartCount": 0,
+            "started": true,
+            "state": {
+              "running": {
+                "startedAt": "2021-02-12T17:31:31Z"
+              }
+            }
+          }
+        ],
+        "hostIP": "10.10.0.119",
+        "phase": "Running",
+        "podIP": "10.233.120.222",
+        "podIPs": [
+          {
+            "ip": "10.233.120.222"
+          }
+        ],
+        "qosClass": "BestEffort",
+        "startTime": "2021-02-12T17:31:29Z"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": {
+        "annotations": {
+          "container.apparmor.security.beta.kubernetes.io/workflow-graph-ingest": "runtime/default",
+          "kubernetes.io/psp": "restricted",
+          "seccomp.security.alpha.kubernetes.io/pod": "docker/default"
+        },
+        "creationTimestamp": "2021-02-12T17:32:08Z",
+        "generateName": "ingest-three-workflow-graph-ingest-769f477677-",
+        "labels": {
+          "app.kubernetes.io/instance": "ingest-three",
+          "app.kubernetes.io/name": "workflow-graph-ingest",
+          "common.org.icgc.argo/type": "workflow-graph",
+          "pod-template-hash": "769f477677",
+          "workflow-graph.org.icgc.argo/app": "workflow-graph-ingest-node",
+          "workflow-graph.org.icgc.argo/node-id": "start-three",
+          "workflow-graph.org.icgc.argo/pipeline-id": "test-pipeline-three"
+        },
+        "name": "ingest-workflow-graph-ingest-7695677677-12cp8",
+        "namespace": "test",
+        "ownerReferences": [
+          {
+            "apiVersion": "apps/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "ReplicaSet",
+            "name": "ingest-workflow-graph-ingest-769f477677",
+            "uid": "gh9faa9d-771f-4f97-9787-07b73e73515g"
+          }
+        ],
+        "resourceVersion": "177715594",
+        "selfLink": "/api/v1/namespaces/test/pods/ingest-workflow-graph-ingest-7695677677-12cp8",
+        "uid": "g12f69e7-d584-4937-8440-00dbdc8c27ad"
+      },
+      "spec": {
+        "containers": [
+          {
+            "env": [
+              {
+                "name": "SERVER_PORT",
+                "value": "8082"
+              },
+              {
+                "name": "SPRING_RABBITMQ_HOST",
+                "value": "wfg-rabbit-rabbitmq-headless.test"
+              },
+              {
+                "name": "SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS",
+                "value": "kafka-headless.test:9092"
+              },
+              {
+                "name": "SPRING_CLOUD_STREAM_BINDINGS_INBOUND_DESTINATION",
+                "value": "wfg-test"
+              },
+              {
+                "name": "SPRING_CLOUD_STREAM_KAFKA_BINDINGS_INBOUND_CONSUMER_DLQNAME",
+                "value": "wfg-test-dql"
+              },
+              {
+                "name": "SPRING_CLOUD_STREAM_KAFKA_BINDINGS_INBOUND_CONSUMER_ENABLEDLQ",
+                "value": "true"
+              },
+              {
+                "name": "SPRING_RABBITMQ_USERNAME",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "username",
+                    "name": "wfg-rabbit-rabbitmq-admin"
+                  }
+                }
+              },
+              {
+                "name": "SPRING_RABBITMQ_PASSWORD",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "password",
+                    "name": "wfg-rabbit-rabbitmq-admin"
+                  }
+                }
+              }
+            ],
+            "image": "ghcr.io/icgc-argo/workflow-graph-ingest-node:0.1.0",
+            "imagePullPolicy": "Always",
+            "livenessProbe": {
+              "failureThreshold": 1,
+              "httpGet": {
+                "path": "/actuator/health",
+                "port": 8082,
+                "scheme": "HTTP"
+              },
+              "initialDelaySeconds": 60,
+              "periodSeconds": 8,
+              "successThreshold": 1,
+              "timeoutSeconds": 2
+            },
+            "name": "workflow-graph-ingest-three",
+            "ports": [
+              {
+                "containerPort": 8082,
+                "name": "http",
+                "protocol": "TCP"
+              }
+            ],
+            "readinessProbe": {
+              "failureThreshold": 2,
+              "httpGet": {
+                "path": "/actuator/health",
+                "port": 8082,
+                "scheme": "HTTP"
+              },
+              "initialDelaySeconds": 30,
+              "periodSeconds": 3,
+              "successThreshold": 1,
+              "timeoutSeconds": 2
+            },
+            "resources": {
+              "limits": {
+                "cpu": "2",
+                "memory": "1Gi"
+              },
+              "requests": {
+                "cpu": "1",
+                "memory": "512Mi"
+              }
+            },
+            "securityContext": {
+              "allowPrivilegeEscalation": false,
+              "capabilities": {
+                "drop": [
+                  "ALL"
+                ]
+              }
+            },
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "volumeMounts": [
+              {
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                "name": "ingest-workflow-graph-ingest-token-q9wck",
+                "readOnly": true
+              }
+            ]
+          }
+        ],
+        "dnsPolicy": "ClusterFirst",
+        "enableServiceLinks": true,
+        "nodeName": "k8s-node-rdpc-dev-1",
+        "priority": 0,
+        "restartPolicy": "Always",
+        "schedulerName": "default-scheduler",
+        "securityContext": {
+          "fsGroup": 1,
+          "runAsGroup": 9999,
+          "runAsNonRoot": true,
+          "runAsUser": 9999,
+          "supplementalGroups": [
+            1
+          ]
+        },
+        "serviceAccount": "ingest-workflow-graph-ingest",
+        "serviceAccountName": "ingest-workflow-graph-ingest",
+        "terminationGracePeriodSeconds": 30,
+        "tolerations": [
+          {
+            "effect": "NoExecute",
+            "key": "node.kubernetes.io/not-ready",
+            "operator": "Exists",
+            "tolerationSeconds": 300
+          },
+          {
+            "effect": "NoExecute",
+            "key": "node.kubernetes.io/unreachable",
+            "operator": "Exists",
+            "tolerationSeconds": 300
+          }
+        ],
+        "volumes": [
+          {
+            "name": "ingest-workflow-graph-ingest-token-q9wck",
+            "secret": {
+              "defaultMode": 420,
+              "secretName": "ingest-workflow-graph-ingest-token-q9wck"
+            }
+          }
+        ]
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastProbeTime": null,
+            "lastTransitionTime": "2021-02-12T17:32:08Z",
+            "status": "True",
+            "type": "Initialized"
+          },
+          {
+            "lastProbeTime": null,
+            "lastTransitionTime": "2021-02-12T17:32:44Z",
+            "status": "True",
+            "type": "Ready"
+          },
+          {
+            "lastProbeTime": null,
+            "lastTransitionTime": "2021-02-12T17:32:44Z",
+            "status": "True",
+            "type": "ContainersReady"
+          },
+          {
+            "lastProbeTime": null,
+            "lastTransitionTime": "2021-02-12T17:32:08Z",
+            "status": "True",
+            "type": "PodScheduled"
+          }
+        ],
+        "containerStatuses": [
+          {
+            "containerID": "docker://685ed43759166701eb441bd094539c8597410b0ff0adc5e53bccebab2836693b",
+            "image": "ghcr.io/icgc-argo/workflow-graph-ingest-node:0.1.0",
+            "imageID": "docker-pullable://ghcr.io/icgc-argo/workflow-graph-ingest-node@sha256:c6cb0c19385c13a39b826753fc4d7e46ed3326aa80493811fc5a37ff8ba91aed",
+            "lastState": {},
+            "name": "workflow-graph-ingest",
+            "ready": true,
+            "restartCount": 0,
+            "started": true,
+            "state": {
+              "running": {
+                "startedAt": "2021-02-12T17:32:12Z"
+              }
+            }
+          }
+        ],
+        "hostIP": "10.10.3.23",
+        "phase": "Running",
+        "podIP": "10.233.89.246",
+        "podIPs": [
+          {
+            "ip": "10.233.89.246"
+          }
+        ],
+        "qosClass": "Burstable",
+        "startTime": "2021-02-12T17:32:08Z"
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": "",
+    "selfLink": ""
+  }
+}
