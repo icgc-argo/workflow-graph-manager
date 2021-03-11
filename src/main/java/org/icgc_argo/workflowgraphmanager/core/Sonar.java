@@ -18,6 +18,11 @@
 
 package org.icgc_argo.workflowgraphmanager.core;
 
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.icgc_argo.workflowgraphmanager.graphql.model.Node;
 import org.icgc_argo.workflowgraphmanager.graphql.model.Pipeline;
@@ -28,15 +33,10 @@ import org.icgc_argo.workflowgraphmanager.repository.model.GraphPipeline;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.SynchronousSink;
-
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * The Sonar Service is responsible for building and maintaining an in-memory store that represents
@@ -67,6 +67,7 @@ public class Sonar {
   }
 
   @Bean
+  @Profile("sonar")
   public Disposable doShallowUpdate() {
     return Flux.generate(
             (SynchronousSink<HashMap<String, GraphPipeline>> sink) -> {

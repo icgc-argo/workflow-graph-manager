@@ -21,13 +21,12 @@ package org.icgc_argo.workflowgraphmanager.graphql.model.base;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import java.util.List;
 import lombok.Data;
 import org.icgc_argo.workflowgraphmanager.graphql.model.GraphLog;
 import org.icgc_argo.workflowgraphmanager.graphql.model.Node;
 import org.icgc_argo.workflowgraphmanager.graphql.model.Pipeline;
 import org.icgc_argo.workflowgraphmanager.graphql.model.Queue;
-
-import java.util.List;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)

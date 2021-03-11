@@ -18,4 +18,7 @@
 
 package org.icgc_argo.workflowgraphmanager.core;
 
+import org.springframework.test.context.ActiveProfiles;
+
+@ActiveProfiles("test")
 public class SonarTest {}

@@ -18,23 +18,22 @@
 
 package org.icgc_argo.workflowgraphmanager.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.icgc_argo.workflowgraphmanager.utils.JacksonUtils.readValue;
+
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.server.mock.EnableKubernetesMockClient;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.val;
 import org.icgc_argo.workflow_graph_lib.utils.JacksonUtils;
 import org.icgc_argo.workflowgraphmanager.repository.model.GraphExchangesQueue;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.icgc_argo.workflowgraphmanager.utils.JacksonUtils.readValue;
 
 @ActiveProfiles("test")
 @EnableKubernetesMockClient(crud = true)
@@ -105,9 +104,21 @@ public class GraphNodeRepositoryTest {
                 .keySet()
                 .containsAll(List.of("test-pipeline", "test-pipeline-two", "test-pipeline-three")))
         .isTrue();
-    assertThat(pipelines.get("test-pipeline").getGraphNodes()).hasSameElementsAs(nodes.stream().filter(node -> node.getPipeline().equalsIgnoreCase("test-pipeline")).collect(Collectors.toList()));
-    assertThat(pipelines.get("test-pipeline-two").getGraphNodes()).hasSameElementsAs(nodes.stream().filter(node -> node.getPipeline().equalsIgnoreCase("test-pipeline-two")).collect(Collectors.toList()));
-    assertThat(pipelines.get("test-pipeline-three").getGraphNodes()).hasSameElementsAs(nodes.stream().filter(node -> node.getPipeline().equalsIgnoreCase("test-pipeline-three")).collect(Collectors.toList()));
+    assertThat(pipelines.get("test-pipeline").getGraphNodes())
+        .hasSameElementsAs(
+            nodes.stream()
+                .filter(node -> node.getPipeline().equalsIgnoreCase("test-pipeline"))
+                .collect(Collectors.toList()));
+    assertThat(pipelines.get("test-pipeline-two").getGraphNodes())
+        .hasSameElementsAs(
+            nodes.stream()
+                .filter(node -> node.getPipeline().equalsIgnoreCase("test-pipeline-two"))
+                .collect(Collectors.toList()));
+    assertThat(pipelines.get("test-pipeline-three").getGraphNodes())
+        .hasSameElementsAs(
+            nodes.stream()
+                .filter(node -> node.getPipeline().equalsIgnoreCase("test-pipeline-three"))
+                .collect(Collectors.toList()));
   }
 
   @Test
