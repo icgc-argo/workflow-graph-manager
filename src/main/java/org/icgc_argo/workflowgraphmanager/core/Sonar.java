@@ -33,7 +33,6 @@ import org.icgc_argo.workflowgraphmanager.repository.model.GraphPipeline;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.SynchronousSink;
@@ -67,7 +66,6 @@ public class Sonar {
   }
 
   @Bean
-  @Profile("sonar")
   public Disposable doShallowUpdate() {
     return Flux.generate(
             (SynchronousSink<HashMap<String, GraphPipeline>> sink) -> {

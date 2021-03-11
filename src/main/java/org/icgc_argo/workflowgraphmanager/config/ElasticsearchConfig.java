@@ -33,8 +33,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
 @Slf4j
+@Configuration
 public class ElasticsearchConfig {
   private static final Integer connectTimeout = 15_000;
   private static final Integer connectionRequestTimeout = 15_000;
