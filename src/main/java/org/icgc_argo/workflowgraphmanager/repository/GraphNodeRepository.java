@@ -18,9 +18,16 @@
 
 package org.icgc_argo.workflowgraphmanager.repository;
 
+import static org.icgc_argo.workflowgraphmanager.repository.model.GraphExchangesQueue.fromExchangeString;
+import static org.icgc_argo.workflowgraphmanager.utils.JacksonUtils.jsonStringToNodeConfig;
+
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.icgc_argo.workflowgraphmanager.repository.model.GraphIngestNodeConfig;
@@ -29,14 +36,6 @@ import org.icgc_argo.workflowgraphmanager.repository.model.GraphNodeConfig;
 import org.icgc_argo.workflowgraphmanager.utils.CommonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.icgc_argo.workflowgraphmanager.repository.model.GraphExchangesQueue.fromExchangeString;
-import static org.icgc_argo.workflowgraphmanager.utils.JacksonUtils.jsonStringToNodeConfig;
 
 @Slf4j
 @Component
@@ -63,11 +62,7 @@ public class GraphNodeRepository {
   }
 
   public Stream<GraphNode<?>> getNodes() {
-    return kubernetesClient
-        .pods()
-        .withLabel(TYPE_LABEL_KEY, TYPE_LABEL_VAL)
-        .list()
-        .getItems()
+    return kubernetesClient.pods().withLabel(TYPE_LABEL_KEY, TYPE_LABEL_VAL).list().getItems()
         .stream()
         .map(
             pod -> {
@@ -94,13 +89,8 @@ public class GraphNodeRepository {
         .filter(vol -> vol.getName().endsWith("-config")) // todo: magical string
         .flatMap(
             vol ->
-                kubernetesClient
-                    .configMaps()
-                    .withName(vol.getConfigMap().getName())
-                    .get()
-                    .getData()
-                    .values()
-                    .stream())
+                kubernetesClient.configMaps().withName(vol.getConfigMap().getName()).get().getData()
+                    .values().stream())
         .reduce(
             new GraphNodeConfig(),
             (config, configString) -> jsonStringToNodeConfig(configString),

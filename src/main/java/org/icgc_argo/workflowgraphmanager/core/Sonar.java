@@ -18,6 +18,14 @@
 
 package org.icgc_argo.workflowgraphmanager.core;
 
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.icgc_argo.workflowgraphmanager.graphql.model.Node;
@@ -35,14 +43,6 @@ import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.SynchronousSink;
 
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 /**
  * The Sonar Service is responsible for building and maintaining an in-memory store that represents
  * the current state of all pipelines deployed withing a single kubernetes namespace. After the
@@ -56,24 +56,30 @@ public class Sonar {
   private final GraphNodeRepository graphNodeRepository;
 
   // State
-  private ConcurrentHashMap<String, Pipeline> pipelines;
-  private ConcurrentHashMap<String, Node> nodes;
+  private final ConcurrentHashMap<String, Node> nodes;
+  private final ConcurrentHashMap<String, Pipeline> pipelines;
+  private final ConcurrentHashMap<String, Queue> queues;
 
   public Sonar(@Autowired GraphNodeRepository graphNodeRepository) {
     this.graphNodeRepository = graphNodeRepository;
-    initStore();
-  }
 
-  private void initStore() {
+    // Init Stores
     log.info("Sonar initializing entity state stores ...");
-    pipelines = new ConcurrentHashMap<>();
-    nodes = new ConcurrentHashMap<>();
-    graphNodeRepository
-        .getNodes()
-        .forEach(graphNode -> nodes.put(graphNode.getId(), Node.parse(graphNode)));
+
+    nodes =
+        graphNodeRepository
+            .getNodes()
+            .collect(
+                Collectors.toMap(
+                    GraphNode::getId, Node::parse, (prev, next) -> next, ConcurrentHashMap::new));
     log.debug("Sonar nodes store initialized: {}", nodes);
-    pipelines.putAll(assemblePipelinesFromNodes());
+
+    pipelines = new ConcurrentHashMap<>(assemblePipelinesFromNodes(nodes.values()));
     log.debug("Sonar pipelines store initialized: {}", pipelines);
+
+    queues = new ConcurrentHashMap<>(extractQueuesFromNodes(nodes.values()));
+    log.debug("Sonar queues store initialized: {}", queues);
+
     log.info("Sonar state stores initialization complete!");
   }
 
@@ -104,8 +110,8 @@ public class Sonar {
     return new ArrayList<>(nodes.values());
   }
 
-  HashMap<String, Pipeline> assemblePipelinesFromNodes() {
-    return nodes.values().stream()
+  HashMap<String, Pipeline> assemblePipelinesFromNodes(Collection<Node> nodes) {
+    return nodes.stream()
         .reduce(
             new HashMap<>(),
             (HashMap<String, Pipeline> pipelines, Node node) -> {
@@ -125,6 +131,13 @@ public class Sonar {
               return pipelines;
             },
             CommonUtils::handleReduceHashMapConflict);
+  }
+
+  HashMap<String, Queue> extractQueuesFromNodes(Collection<Node> nodes) {
+    return nodes.stream()
+        .flatMap(node -> node.getQueues().stream())
+        .collect(
+            Collectors.toMap(Queue::getId, queue -> queue, (prev, next) -> next, HashMap::new));
   }
 
   /**
@@ -153,7 +166,7 @@ public class Sonar {
                         .logs(filterForActiveQueues(existing.getLogs(), update))
                         .build()));
     log.debug("Sonar shallowUpdate of nodes complete, new nodes store: {}", nodes);
-    rebuildPipelines();
+    rebuildStores(nodes.values());
     log.info("Sonar shallowUpdate complete!");
   }
 
@@ -167,12 +180,24 @@ public class Sonar {
    */
   private void deepUpdate(HashMap<String, GraphPipeline> state) {}
 
-  private List<Node> shallowMergeNodes(List<Node> existing, List<Node> update) {
-    return update;
-  }
-
-  private List<Queue> shallowMergeQueues(List<Queue> existing, List<Queue> update) {
-    return update;
+  /**
+   * Merge existing queues with new ones in order to maintain as much deep state as possible
+   *
+   * @param existing - list of existing queues in a node
+   * @param updates - list of latest list of queues
+   * @return a merged list of queues so that if the update contains an existing queue, the existing
+   *     value is reused, if not then the update us used. If the update does not contain and
+   *     existing queue it will be dropped.
+   */
+  private List<Queue> shallowMergeQueues(List<Queue> existing, List<Queue> updates) {
+    return updates.stream()
+        .map(
+            update ->
+                existing.stream()
+                    .filter(existingQueue -> existingQueue.getId().equalsIgnoreCase(update.getId()))
+                    .findFirst()
+                    .orElse(update))
+        .collect(Collectors.toList());
   }
 
   /**
@@ -193,12 +218,16 @@ public class Sonar {
         .collect(Collectors.toList());
   }
 
-  private Pipeline getOrCreatePipeline(Node node, HashMap<String, Pipeline> pipelines) {
+  private static Pipeline getOrCreatePipeline(Node node, HashMap<String, Pipeline> pipelines) {
     return pipelines.getOrDefault(node.getPipeline(), Pipeline.parse(node.getPipeline(), node));
   }
 
-  private void rebuildPipelines() {
-    pipelines.clear();
-    pipelines.putAll(assemblePipelinesFromNodes());
+  private void rebuildStores(Collection<Node> nodes) {
+    // clear all existing states
+    List.of(pipelines, queues).forEach(ConcurrentHashMap::clear);
+
+    // rebuild from nodes
+    pipelines.putAll(assemblePipelinesFromNodes(nodes));
+    queues.putAll(extractQueuesFromNodes(nodes));
   }
 }
