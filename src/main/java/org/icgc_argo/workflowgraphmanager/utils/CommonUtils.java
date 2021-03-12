@@ -19,9 +19,11 @@
 package org.icgc_argo.workflowgraphmanager.utils;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.icgc_argo.workflowgraphmanager.repository.GraphNodeRepository;
+
+import java.util.Map;
 
 @Slf4j
 public class CommonUtils {
@@ -37,5 +39,10 @@ public class CommonUtils {
       }
     }
     return newMap.build();
+  }
+
+  public static <S, T> T handleReduceHashMapConflict(T a, T b) {
+    throw new RuntimeException(
+        "Beware, here there be dragons ... in the form of reducer combinators somehow being called on a non-parallel stream reduce ...");
   }
 }

@@ -18,26 +18,25 @@
 
 package org.icgc_argo.workflowgraphmanager.repository;
 
-import static org.icgc_argo.workflowgraphmanager.repository.model.GraphExchangesQueue.fromExchangeString;
-import static org.icgc_argo.workflowgraphmanager.utils.JacksonUtils.jsonStringToNodeConfig;
-
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.icgc_argo.workflowgraphmanager.repository.model.GraphIngestNodeConfig;
 import org.icgc_argo.workflowgraphmanager.repository.model.GraphNode;
 import org.icgc_argo.workflowgraphmanager.repository.model.GraphNodeConfig;
-import org.icgc_argo.workflowgraphmanager.repository.model.GraphPipeline;
+import org.icgc_argo.workflowgraphmanager.utils.CommonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.icgc_argo.workflowgraphmanager.repository.model.GraphExchangesQueue.fromExchangeString;
+import static org.icgc_argo.workflowgraphmanager.utils.JacksonUtils.jsonStringToNodeConfig;
 
 @Slf4j
 @Component
@@ -64,7 +63,11 @@ public class GraphNodeRepository {
   }
 
   public Stream<GraphNode<?>> getNodes() {
-    return kubernetesClient.pods().withLabel(TYPE_LABEL_KEY, TYPE_LABEL_VAL).list().getItems()
+    return kubernetesClient
+        .pods()
+        .withLabel(TYPE_LABEL_KEY, TYPE_LABEL_VAL)
+        .list()
+        .getItems()
         .stream()
         .map(
             pod -> {
@@ -86,44 +89,26 @@ public class GraphNodeRepository {
         .filter(Objects::nonNull);
   }
 
-  public HashMap<String, GraphPipeline> getPipelines() {
-    return getNodes()
-        .reduce(
-            new HashMap<>(),
-            (HashMap<String, GraphPipeline> pipelines, GraphNode<?> graphNode) -> {
-              val pipeline = getOrCreatePipeline(graphNode, pipelines);
-
-              // Add the new node to the list of nodes for the pipeline
-              pipeline.setGraphNodes(
-                  Stream.concat(Stream.of(graphNode), pipeline.getGraphNodes().stream())
-                      .collect(Collectors.toList()));
-
-              if (pipelines.containsKey(pipeline.getId())) {
-                pipelines.replace(pipeline.getId(), pipeline);
-              } else {
-                pipelines.put(pipeline.getId(), pipeline);
-              }
-
-              return pipelines;
-            },
-            this::handleReduceHashMapConflict);
-  }
-
-  GraphNodeConfig getGraphNodeConfig(Pod pod) {
+  GraphNodeConfig parseGraphNodeConfig(Pod pod) {
     return pod.getSpec().getVolumes().stream()
         .filter(vol -> vol.getName().endsWith("-config")) // todo: magical string
         .flatMap(
             vol ->
-                kubernetesClient.configMaps().withName(vol.getConfigMap().getName()).get().getData()
-                    .values().stream())
+                kubernetesClient
+                    .configMaps()
+                    .withName(vol.getConfigMap().getName())
+                    .get()
+                    .getData()
+                    .values()
+                    .stream())
         .reduce(
             new GraphNodeConfig(),
             (config, configString) -> jsonStringToNodeConfig(configString),
-            this::handleReduceHashMapConflict);
+            CommonUtils::handleReduceHashMapConflict);
   }
 
   // TODO: look at magic string usage here
-  GraphIngestNodeConfig getGraphIngestNodeConfig(Pod pod) {
+  GraphIngestNodeConfig parseGraphIngestNodeConfig(Pod pod) {
     return pod.getSpec().getContainers().stream()
         .filter(container -> container.getName().equalsIgnoreCase("workflow-graph-ingest"))
         .flatMap(container -> container.getEnv().stream())
@@ -140,11 +125,11 @@ public class GraphNodeRepository {
                     .inboundKafkaTopic(curr)
                     .outboundRabbitExchangeQueue("start") // todo: especially too magical here
                     .build(),
-            this::handleReduceHashMapConflict);
+            CommonUtils::handleReduceHashMapConflict);
   }
 
   private GraphNode<GraphNodeConfig> parsePodToNode(Pod pod) {
-    val config = getGraphNodeConfig(pod);
+    val config = parseGraphNodeConfig(pod);
     val queues =
         Stream.concat(
                 config.getInput().stream(), Stream.of(config.getRunning(), config.getComplete()))
@@ -159,7 +144,7 @@ public class GraphNodeRepository {
   }
 
   private GraphNode<GraphIngestNodeConfig> parsePodToIngestNode(Pod pod) {
-    val config = getGraphIngestNodeConfig(pod);
+    val config = parseGraphIngestNodeConfig(pod);
     val queues = List.of(fromExchangeString(config.getOutboundRabbitExchangeQueue()));
 
     return GraphNode.<GraphIngestNodeConfig>builder()
@@ -176,17 +161,5 @@ public class GraphNodeRepository {
 
   private String getNodeId(Pod pod) {
     return pod.getMetadata().getLabels().get(NODE_LABEL_KEY);
-  }
-
-  private GraphPipeline getOrCreatePipeline(
-      GraphNode<?> graphNode, HashMap<String, GraphPipeline> pipelines) {
-    return pipelines.getOrDefault(
-        graphNode.getPipeline(),
-        GraphPipeline.builder().id(graphNode.getPipeline()).graphNodes(new ArrayList<>()).build());
-  }
-
-  private <T> T handleReduceHashMapConflict(T a, T b) {
-    throw new RuntimeException(
-        "Beware, here there be dragons ... in the form of reducer combinators somehow being called on a non-parallel stream reduce ...");
   }
 }

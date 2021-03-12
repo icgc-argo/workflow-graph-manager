@@ -18,7 +18,45 @@
 
 package org.icgc_argo.workflowgraphmanager.core;
 
+import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @ActiveProfiles("test")
-public class SonarTest {}
+public class SonarTest {
+    @Test
+    public void testSinglePipelineAssembly() {
+        // Test pipeline is correct
+//        assertThat(pipelines.keySet().size()).isEqualTo(1);
+//        assertThat(pipelines.containsKey("test-pipeline")).isTrue();
+//        assertThat(pipelines.get("test-pipeline").getGraphNodes()).hasSameElementsAs(nodes);
+    }
+
+    @Test
+    public void testMultiPipelineAssembly() {
+//        // Test pipeline is correct
+//        assertThat(pipelines.keySet().size()).isEqualTo(3);
+//        assertThat(
+//                pipelines
+//                        .keySet()
+//                        .containsAll(List.of("test-pipeline", "test-pipeline-two", "test-pipeline-three")))
+//                .isTrue();
+//        assertThat(pipelines.get("test-pipeline").getGraphNodes())
+//                .hasSameElementsAs(
+//                        nodes.stream()
+//                                .filter(node -> node.getPipeline().equalsIgnoreCase("test-pipeline"))
+//                                .collect(Collectors.toList()));
+//        assertThat(pipelines.get("test-pipeline-two").getGraphNodes())
+//                .hasSameElementsAs(
+//                        nodes.stream()
+//                                .filter(node -> node.getPipeline().equalsIgnoreCase("test-pipeline-two"))
+//                                .collect(Collectors.toList()));
+//        assertThat(pipelines.get("test-pipeline-three").getGraphNodes())
+//                .hasSameElementsAs(
+//                        nodes.stream()
+//                                .filter(node -> node.getPipeline().equalsIgnoreCase("test-pipeline-three"))
+//                                .collect(Collectors.toList()));
+    }
+}

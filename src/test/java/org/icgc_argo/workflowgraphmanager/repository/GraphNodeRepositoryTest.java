@@ -57,18 +57,12 @@ public class GraphNodeRepositoryTest {
             .stream().map(podJson -> JacksonUtils.convertValue(podJson, Pod.class)));
 
     val nodes = graphNodeRepository.getNodes().collect(Collectors.toList());
-    val pipelines = graphNodeRepository.getPipelines();
 
     // Test nodes list is correct
     assertThat(nodes.size()).isEqualTo(2);
     assertThat(nodes.stream().anyMatch(node -> node.getId().equalsIgnoreCase("start"))).isTrue();
     assertThat(nodes.stream().anyMatch(node -> node.getId().equalsIgnoreCase("align-node")))
         .isTrue();
-
-    // Test pipeline is correct
-    assertThat(pipelines.keySet().size()).isEqualTo(1);
-    assertThat(pipelines.containsKey("test-pipeline")).isTrue();
-    assertThat(pipelines.get("test-pipeline").getGraphNodes()).hasSameElementsAs(nodes);
   }
 
   @Test
@@ -81,7 +75,6 @@ public class GraphNodeRepositoryTest {
             .stream().map(podJson -> JacksonUtils.convertValue(podJson, Pod.class)));
 
     val nodes = graphNodeRepository.getNodes().collect(Collectors.toList());
-    val pipelines = graphNodeRepository.getPipelines();
 
     // Test nodes list is correct
     assertThat(nodes.size()).isEqualTo(6);
@@ -96,29 +89,6 @@ public class GraphNodeRepositoryTest {
         .isTrue();
     assertThat(nodes.stream().anyMatch(node -> node.getId().equalsIgnoreCase("align-node-three")))
         .isTrue();
-
-    // Test pipeline is correct
-    assertThat(pipelines.keySet().size()).isEqualTo(3);
-    assertThat(
-            pipelines
-                .keySet()
-                .containsAll(List.of("test-pipeline", "test-pipeline-two", "test-pipeline-three")))
-        .isTrue();
-    assertThat(pipelines.get("test-pipeline").getGraphNodes())
-        .hasSameElementsAs(
-            nodes.stream()
-                .filter(node -> node.getPipeline().equalsIgnoreCase("test-pipeline"))
-                .collect(Collectors.toList()));
-    assertThat(pipelines.get("test-pipeline-two").getGraphNodes())
-        .hasSameElementsAs(
-            nodes.stream()
-                .filter(node -> node.getPipeline().equalsIgnoreCase("test-pipeline-two"))
-                .collect(Collectors.toList()));
-    assertThat(pipelines.get("test-pipeline-three").getGraphNodes())
-        .hasSameElementsAs(
-            nodes.stream()
-                .filter(node -> node.getPipeline().equalsIgnoreCase("test-pipeline-three"))
-                .collect(Collectors.toList()));
   }
 
   @Test
@@ -131,7 +101,7 @@ public class GraphNodeRepositoryTest {
             .stream().map(podJson -> JacksonUtils.convertValue(podJson, Pod.class)));
 
     val pod = client.pods().withName("align-node-workflow-graph-node-86cf986995-c5gvk").get();
-    val config = graphNodeRepository.getGraphNodeConfig(pod);
+    val config = graphNodeRepository.parseGraphNodeConfig(pod);
 
     assertThat(config.getPipelineId()).isEqualTo("test-pipeline");
     assertThat(config.getNodeId()).isEqualTo("align-node");
@@ -147,7 +117,7 @@ public class GraphNodeRepositoryTest {
             .stream().map(podJson -> JacksonUtils.convertValue(podJson, Pod.class)));
 
     val pod = client.pods().withName("ingest-workflow-graph-ingest-769f477677-64cp8").get();
-    val config = graphNodeRepository.getGraphIngestNodeConfig(pod);
+    val config = graphNodeRepository.parseGraphIngestNodeConfig(pod);
 
     assertThat(config.getInboundKafkaTopic()).isEqualTo("wfg-test");
     assertThat(config.getOutboundRabbitExchangeQueue()).isEqualTo("start");

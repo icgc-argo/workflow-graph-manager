@@ -19,19 +19,23 @@
 package org.icgc_argo.workflowgraphmanager.graphql.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.icgc_argo.workflowgraphmanager.graphql.model.base.Message;
+import org.icgc_argo.workflowgraphmanager.utils.JacksonUtils;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import lombok.*;
-import org.icgc_argo.workflowgraphmanager.graphql.model.base.Message;
-import org.icgc_argo.workflowgraphmanager.repository.model.GraphPipeline;
-import org.icgc_argo.workflowgraphmanager.utils.JacksonUtils;
 
 @Data
+@Slf4j
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
@@ -52,29 +56,22 @@ public class Pipeline {
     return JacksonUtils.parse(sourceMap, Pipeline.class);
   }
 
-  public static Pipeline parse(@NonNull GraphPipeline graphPipeline) {
-    val nodes =
-        graphPipeline.getGraphNodes().stream()
-            .map(
-                graphNode ->
-                    Node.builder()
-                        .id(graphNode.getId())
-                        .pipeline(graphPipeline.getId())
-                        .config(JacksonUtils.parse(graphNode.getConfig(), new TypeReference<>() {}))
-                        .queues(
-                            graphNode.getGraphExchangesQueueList().stream()
-                                .map(Queue::parse)
-                                .collect(Collectors.toList()))
-                        .messages(Collections.emptyList())
-                        .logs(Collections.emptyList())
-                        .build())
-            .collect(Collectors.toList());
-
+  public static Pipeline parse(@NonNull String pipelineId, @NonNull List<Node> nodes) {
     return Pipeline.builder()
-        .id(graphPipeline.getId())
+        .id(pipelineId)
         .nodes(nodes)
         .queues(
             nodes.stream().flatMap(node -> node.getQueues().stream()).collect(Collectors.toList()))
+        .messages(Collections.emptyList())
+        .logs(Collections.emptyList())
+        .build();
+  }
+
+  public static Pipeline parse(@NonNull String pipelineId, @NonNull Node node) {
+    return Pipeline.builder()
+        .id(pipelineId)
+        .nodes(List.of(node))
+        .queues(node.getQueues())
         .messages(Collections.emptyList())
         .logs(Collections.emptyList())
         .build();
