@@ -34,7 +34,6 @@ import org.icgc_argo.workflowgraphmanager.graphql.model.Queue;
 import org.icgc_argo.workflowgraphmanager.graphql.model.base.GraphEntity;
 import org.icgc_argo.workflowgraphmanager.repository.GraphNodeRepository;
 import org.icgc_argo.workflowgraphmanager.repository.model.GraphNode;
-import org.icgc_argo.workflowgraphmanager.repository.model.GraphPipeline;
 import org.icgc_argo.workflowgraphmanager.utils.CommonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -44,10 +43,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.SynchronousSink;
 
 /**
- * The Sonar Service is responsible for building and maintaining an in-memory store that represents
- * the current state of all pipelines deployed withing a single kubernetes namespace. After the
- * initial construction it will ping the various repositories for partial state updates in order to
- * maintain a near-realtime view of the current state of all aforementioned pipelines. Ref:
+ * The Sonar Service is responsible for building and maintaining in-memory state stores that
+ * represent the current state of all graph entities deployed within a single kubernetes namespace.
+ * After the initial construction it will ping the various repositories for partial state updates in
+ * order to maintain a near-realtime view of the current state of all aforementioned pipelines. Ref:
  * https://wiki.oicr.on.ca/pages/viewpage.action?pageId=154539008
  */
 @Slf4j
@@ -55,7 +54,7 @@ import reactor.core.publisher.SynchronousSink;
 public class Sonar {
   private final GraphNodeRepository graphNodeRepository;
 
-  // State
+  // State Stores
   private final ConcurrentHashMap<String, Node> nodes;
   private final ConcurrentHashMap<String, Pipeline> pipelines;
   private final ConcurrentHashMap<String, Queue> queues;
@@ -110,7 +109,7 @@ public class Sonar {
     return new ArrayList<>(nodes.values());
   }
 
-  HashMap<String, Pipeline> assemblePipelinesFromNodes(Collection<Node> nodes) {
+  private HashMap<String, Pipeline> assemblePipelinesFromNodes(Collection<Node> nodes) {
     return nodes.stream()
         .reduce(
             new HashMap<>(),
@@ -133,7 +132,7 @@ public class Sonar {
             CommonUtils::handleReduceHashMapConflict);
   }
 
-  HashMap<String, Queue> extractQueuesFromNodes(Collection<Node> nodes) {
+  private HashMap<String, Queue> extractQueuesFromNodes(Collection<Node> nodes) {
     return nodes.stream()
         .flatMap(node -> node.getQueues().stream())
         .collect(
@@ -160,6 +159,7 @@ public class Sonar {
                 (existing, update) ->
                     Node.builder()
                         .id(update.getId())
+                        .config(update.getConfig())
                         .pipeline(update.getPipeline())
                         .queues(shallowMergeQueues(existing.getQueues(), update.getQueues()))
                         .messages(filterForActiveQueues(existing.getMessages(), update))
@@ -169,16 +169,6 @@ public class Sonar {
     rebuildStores(nodes.values());
     log.info("Sonar shallowUpdate complete!");
   }
-
-  /**
-   * TBD (not sure about this yet) Populates the deeper levels of the state tree, queues and below,
-   * information which is gleamed via the RabbitMQ management API. A deep update will use as input
-   * the complete state. New data WILL ALWAYS OVERWRITE existing data in a merge scenario.
-   *
-   * @param state - list of pipelines without details deeper than the name of the queues associated
-   *     with a node
-   */
-  private void deepUpdate(HashMap<String, GraphPipeline> state) {}
 
   /**
    * Merge existing queues with new ones in order to maintain as much deep state as possible

@@ -19,18 +19,12 @@
 package org.icgc_argo.workflowgraphmanager.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.icgc_argo.workflowgraphmanager.utils.JacksonUtils.readValue;
+import static org.icgc_argo.workflowgraphmanager.TestUtils.loadK8sWithBaseResourcesAnd;
 
-import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.server.mock.EnableKubernetesMockClient;
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.val;
-import org.icgc_argo.workflow_graph_lib.utils.JacksonUtils;
 import org.icgc_argo.workflowgraphmanager.repository.model.GraphExchangesQueue;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
@@ -49,12 +43,7 @@ public class GraphNodeRepositoryTest {
 
   @Test
   public void singlePipelineTest() {
-    val simplePipelineJson =
-        readValue(this.getClass().getResourceAsStream("fixtures/single-pipeline.json"), Map.class);
-
-    loadK8sWithBaseResourcesAnd(
-        ((List<Map<String, Object>>) simplePipelineJson.get("items"))
-            .stream().map(podJson -> JacksonUtils.convertValue(podJson, Pod.class)));
+    loadK8sWithBaseResourcesAnd(client, "fixtures/single-pipeline.json");
 
     val nodes = graphNodeRepository.getNodes().collect(Collectors.toList());
 
@@ -67,12 +56,7 @@ public class GraphNodeRepositoryTest {
 
   @Test
   public void multiPipelinePipelineTest() {
-    val multiPipelineJson =
-        readValue(this.getClass().getResourceAsStream("fixtures/multi-pipeline.json"), Map.class);
-
-    loadK8sWithBaseResourcesAnd(
-        ((List<Map<String, Object>>) multiPipelineJson.get("items"))
-            .stream().map(podJson -> JacksonUtils.convertValue(podJson, Pod.class)));
+    loadK8sWithBaseResourcesAnd(client, "fixtures/multi-pipeline.json");
 
     val nodes = graphNodeRepository.getNodes().collect(Collectors.toList());
 
@@ -93,12 +77,7 @@ public class GraphNodeRepositoryTest {
 
   @Test
   public void graphNodeConfigTest() {
-    val simplePipelineJson =
-        readValue(this.getClass().getResourceAsStream("fixtures/single-pipeline.json"), Map.class);
-
-    loadK8sWithBaseResourcesAnd(
-        ((List<Map<String, Object>>) simplePipelineJson.get("items"))
-            .stream().map(podJson -> JacksonUtils.convertValue(podJson, Pod.class)));
+    loadK8sWithBaseResourcesAnd(client, "fixtures/single-pipeline.json");
 
     val pod = client.pods().withName("align-node-workflow-graph-node-86cf986995-c5gvk").get();
     val config = graphNodeRepository.parseGraphNodeConfig(pod);
@@ -109,12 +88,7 @@ public class GraphNodeRepositoryTest {
 
   @Test
   public void graphIngestNodeConfigTest() {
-    val simplePipelineJson =
-        readValue(this.getClass().getResourceAsStream("fixtures/single-pipeline.json"), Map.class);
-
-    loadK8sWithBaseResourcesAnd(
-        ((List<Map<String, Object>>) simplePipelineJson.get("items"))
-            .stream().map(podJson -> JacksonUtils.convertValue(podJson, Pod.class)));
+    loadK8sWithBaseResourcesAnd(client, "fixtures/single-pipeline.json");
 
     val pod = client.pods().withName("ingest-workflow-graph-ingest-769f477677-64cp8").get();
     val config = graphNodeRepository.parseGraphIngestNodeConfig(pod);
@@ -125,12 +99,7 @@ public class GraphNodeRepositoryTest {
 
   @Test
   public void graphNodeQueueTest() {
-    val simplePipelineJson =
-        readValue(this.getClass().getResourceAsStream("fixtures/single-pipeline.json"), Map.class);
-
-    loadK8sWithBaseResourcesAnd(
-        ((List<Map<String, Object>>) simplePipelineJson.get("items"))
-            .stream().map(podJson -> JacksonUtils.convertValue(podJson, Pod.class)));
+    loadK8sWithBaseResourcesAnd(client, "fixtures/single-pipeline.json");
 
     val nodes = graphNodeRepository.getNodes().collect(Collectors.toList());
 
@@ -151,34 +120,5 @@ public class GraphNodeRepositoryTest {
             new GraphExchangesQueue("queued-align-node", "align-node"),
             new GraphExchangesQueue("align-node-running", "align-node-running"),
             new GraphExchangesQueue("align-node-complete", "align-node-complete"));
-  }
-
-  private void loadK8sWithBaseResourcesAnd(Stream<Pod> pods) {
-    // clear all pods
-    client.pods().delete();
-
-    // load all configmaps
-    List.of(
-            "configmaps/align-node-config.json",
-            "configmaps/align-node-two-config.json",
-            "configmaps/align-node-three-config.json")
-        .forEach(
-            configMapName -> {
-              // load config map
-              client
-                  .configMaps()
-                  .create(
-                      readValue(
-                          this.getClass().getResourceAsStream(configMapName), ConfigMap.class));
-            });
-
-    // read decoy pods
-    val decoyPodsJson =
-        readValue(this.getClass().getResourceAsStream("fixtures/decoy-pods.json"), Map.class);
-
-    // Merge pods with decoy stream and load mock K8s
-    Stream.concat(pods, ((List<Map<String, Object>>) decoyPodsJson.get("items")).stream())
-        .map(podJson -> JacksonUtils.convertValue(podJson, Pod.class))
-        .forEach(pod -> client.pods().create(pod));
   }
 }

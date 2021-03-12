@@ -18,46 +18,61 @@
 
 package org.icgc_argo.workflowgraphmanager.core;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.icgc_argo.workflowgraphmanager.TestUtils.loadK8sWithBaseResourcesAnd;
+
+import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.server.mock.EnableKubernetesMockClient;
+import java.util.List;
+import java.util.stream.Collectors;
+import lombok.val;
+import org.icgc_argo.workflowgraphmanager.graphql.model.Pipeline;
+import org.icgc_argo.workflowgraphmanager.repository.GraphNodeRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("test")
+@EnableKubernetesMockClient(crud = true)
 public class SonarTest {
-  @Test
-  public void testSinglePipelineAssembly() {
-    // Test pipeline is correct
-    //        assertThat(pipelines.keySet().size()).isEqualTo(1);
-    //        assertThat(pipelines.containsKey("test-pipeline")).isTrue();
-    //        assertThat(pipelines.get("test-pipeline").getGraphNodes()).hasSameElementsAs(nodes);
+  static KubernetesClient client;
+  private final GraphNodeRepository graphNodeRepository;
+  private final Sonar sonar;
+
+  public SonarTest() {
+    loadK8sWithBaseResourcesAnd(client, "fixtures/multi-pipeline.json");
+    this.graphNodeRepository = new GraphNodeRepository(client);
+    this.sonar = new Sonar(graphNodeRepository);
   }
 
   @Test
-  public void testMultiPipelineAssembly() {
-    //        // Test pipeline is correct
-    //        assertThat(pipelines.keySet().size()).isEqualTo(3);
-    //        assertThat(
-    //                pipelines
-    //                        .keySet()
-    //                        .containsAll(List.of("test-pipeline", "test-pipeline-two",
-    // "test-pipeline-three")))
-    //                .isTrue();
-    //        assertThat(pipelines.get("test-pipeline").getGraphNodes())
-    //                .hasSameElementsAs(
-    //                        nodes.stream()
-    //                                .filter(node ->
-    // node.getPipeline().equalsIgnoreCase("test-pipeline"))
-    //                                .collect(Collectors.toList()));
-    //        assertThat(pipelines.get("test-pipeline-two").getGraphNodes())
-    //                .hasSameElementsAs(
-    //                        nodes.stream()
-    //                                .filter(node ->
-    // node.getPipeline().equalsIgnoreCase("test-pipeline-two"))
-    //                                .collect(Collectors.toList()));
-    //        assertThat(pipelines.get("test-pipeline-three").getGraphNodes())
-    //                .hasSameElementsAs(
-    //                        nodes.stream()
-    //                                .filter(node ->
-    // node.getPipeline().equalsIgnoreCase("test-pipeline-three"))
-    //                                .collect(Collectors.toList()));
+  public void testPipelinesAssembly() {
+    val pipelines = sonar.getPipelines();
+
+    assertThat(pipelines.size()).isEqualTo(3);
+
+    assertThat(
+            pipelines.stream()
+                .map(Pipeline::getId)
+                .collect(Collectors.toList())
+                .containsAll(List.of("test-pipeline", "test-pipeline-two", "test-pipeline-three")))
+        .isTrue();
+
+    assertThat(sonar.getPipelineById("test-pipeline").getNodes())
+        .hasSameElementsAs(
+            sonar.getNodes().stream()
+                .filter(node -> node.getPipeline().equalsIgnoreCase("test-pipeline"))
+                .collect(Collectors.toList()));
+
+    assertThat(sonar.getPipelineById("test-pipeline-two").getNodes())
+        .hasSameElementsAs(
+            sonar.getNodes().stream()
+                .filter(node -> node.getPipeline().equalsIgnoreCase("test-pipeline-two"))
+                .collect(Collectors.toList()));
+
+    assertThat(sonar.getPipelineById("test-pipeline-three").getNodes())
+        .hasSameElementsAs(
+            sonar.getNodes().stream()
+                .filter(node -> node.getPipeline().equalsIgnoreCase("test-pipeline-three"))
+                .collect(Collectors.toList()));
   }
 }
