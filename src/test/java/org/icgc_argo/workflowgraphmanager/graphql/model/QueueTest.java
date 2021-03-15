@@ -36,8 +36,9 @@ public class QueueTest {
   public void parseTest() {
     val expected =
         Queue.builder()
-            .id("start")
+            .id(String.format("%s.%s.%s.%s", "test-pipeline", "test-node", "start", "start"))
             .exchange("start")
+            .queue("start")
             .pipeline("test-pipeline")
             .node("test-node")
             .build();

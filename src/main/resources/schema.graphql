@@ -28,6 +28,7 @@ type Node @key(fields: "id") {
 type Queue @key(fields: "id") {
     id: ID!
     exchange: String
+    queue: String
     pipeline: Pipeline
     node: Node
     messages: [Message]

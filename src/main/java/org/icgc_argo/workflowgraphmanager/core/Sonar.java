@@ -148,7 +148,7 @@ public class Sonar {
     return nodes.stream()
         .flatMap(node -> node.getQueues().stream())
         .collect(
-            Collectors.toMap(Queue::getFQQN, queue -> queue, (prev, next) -> next, HashMap::new));
+            Collectors.toMap(Queue::getId, queue -> queue, (prev, next) -> next, HashMap::new));
   }
 
   /**

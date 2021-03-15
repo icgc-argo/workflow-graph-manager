@@ -42,6 +42,8 @@ public class Queue {
 
   @NonNull private String exchange;
 
+  @NonNull private String queue;
+
   @NonNull private String pipeline;
 
   @NonNull private String node;
@@ -58,18 +60,17 @@ public class Queue {
   public static Queue parse(
       @NonNull GraphExchangesQueue graphExchangesQueue, @NonNull GraphNode<?> graphNode) {
     return Queue.builder()
-        .id(graphExchangesQueue.getQueue())
+        .id(
+            String.format(
+                "%s.%s.%s.%s",
+                graphNode.getPipeline(),
+                graphNode.getId(),
+                graphExchangesQueue.getExchange(),
+                graphExchangesQueue.getQueue()))
         .exchange(graphExchangesQueue.getExchange())
+        .queue(graphExchangesQueue.getQueue())
         .pipeline(graphNode.getPipeline())
         .node(graphNode.getId())
         .build();
-  }
-
-  /**
-   * Returns the fully-qualified-queue-name which is composite of Pipeline.Node.Exchange.QueueId
-   * @return FQQN string
-   */
-  public String getFQQN() {
-    return String.format("%s.%s.%s.%s", pipeline, node, exchange, id);
   }
 }

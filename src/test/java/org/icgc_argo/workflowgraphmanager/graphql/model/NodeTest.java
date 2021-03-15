@@ -61,8 +61,9 @@ public class NodeTest {
                 .map(
                     queueId ->
                         Queue.builder()
-                            .id(queueId)
+                            .id(String.format("%s.%s.%s.%s", pipelineId, nodeId, queueId, queueId))
                             .exchange(queueId)
+                            .queue(queueId)
                             .pipeline(pipelineId)
                             .node(nodeId)
                             .build())

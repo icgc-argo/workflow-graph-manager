@@ -68,11 +68,11 @@ public class SonarTest {
     assertThat(pipelineOne.getQueues().stream().map(Queue::getId))
         .containsExactlyInAnyOrderElementsOf(
             List.of(
-                "start",
-                "align-node-start",
-                "queued-align-node",
-                "align-node-running",
-                "align-node-complete"));
+                "test-pipeline.start.start.start",
+                "test-pipeline.align-node.start.align-node-start",
+                "test-pipeline.align-node.queued-align-node.queued-align-node",
+                "test-pipeline.align-node.align-node-running.align-node-running",
+                "test-pipeline.align-node.align-node-complete.align-node-complete"));
 
     val pipelineTwo = sonar.getPipelineById("test-pipeline-two");
     assertThat(pipelineTwo.getNodes())
@@ -83,11 +83,11 @@ public class SonarTest {
     assertThat(pipelineTwo.getQueues().stream().map(Queue::getId))
         .containsExactlyInAnyOrderElementsOf(
             List.of(
-                "start",
-                "align-node-two-start",
-                "queued-align-node-two",
-                "align-node-two-running",
-                "align-node-two-complete"));
+                "test-pipeline-two.start-two.start.start",
+                "test-pipeline-two.align-node-two.start.align-node-two-start",
+                "test-pipeline-two.align-node-two.queued-align-node-two.queued-align-node-two",
+                "test-pipeline-two.align-node-two.align-node-two-running.align-node-two-running",
+                "test-pipeline-two.align-node-two.align-node-two-complete.align-node-two-complete"));
 
     val pipelineThree = sonar.getPipelineById("test-pipeline-three");
     assertThat(pipelineThree.getNodes())
@@ -96,13 +96,13 @@ public class SonarTest {
                 .filter(node -> node.getPipeline().equalsIgnoreCase("test-pipeline-three"))
                 .collect(Collectors.toList()));
     assertThat(pipelineThree.getQueues().stream().map(Queue::getId))
-        .containsExactlyInAnyOrderElementsOf(
-            List.of(
-                "start",
-                "align-node-three-start",
-                "queued-align-node-three",
-                "align-node-three-running",
-                "align-node-three-complete"));
+            .containsExactlyInAnyOrderElementsOf(
+                    List.of(
+                            "test-pipeline-three.start-three.start.start",
+                            "test-pipeline-three.align-node-three.start.align-node-three-start",
+                            "test-pipeline-three.align-node-three.queued-align-node-three.queued-align-node-three",
+                            "test-pipeline-three.align-node-three.align-node-three-running.align-node-three-running",
+                            "test-pipeline-three.align-node-three.align-node-three-complete.align-node-three-complete"));
   }
 
   @Test
