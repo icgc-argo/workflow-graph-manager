@@ -109,6 +109,15 @@ public class Sonar {
     return new ArrayList<>(nodes.values());
   }
 
+  public Queue getQueueById(String queueId) {
+    return queues.get(queueId);
+  }
+
+  // TODO these entity list methods will require filtering (ie. queues with nodeId == x)
+  public List<Queue> getQueues() {
+    return new ArrayList<>(queues.values());
+  }
+
   private HashMap<String, Pipeline> assemblePipelinesFromNodes(Collection<Node> nodes) {
     return nodes.stream()
         .reduce(
