@@ -18,17 +18,16 @@
 
 package org.icgc_argo.workflowgraphmanager.graphql.model;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.val;
 import org.icgc_argo.workflowgraphmanager.repository.model.GraphExchangesQueue;
 import org.icgc_argo.workflowgraphmanager.repository.model.GraphNode;
 import org.icgc_argo.workflowgraphmanager.repository.model.GraphNodeConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles("test")
 public class NodeTest {

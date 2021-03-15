@@ -18,19 +18,18 @@
 
 package org.icgc_argo.workflowgraphmanager.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.icgc_argo.workflowgraphmanager.TestUtils.loadK8sWithBaseResourcesAnd;
+
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.server.mock.EnableKubernetesMockClient;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.val;
 import org.icgc_argo.workflowgraphmanager.repository.model.GraphExchangesQueue;
 import org.icgc_argo.workflowgraphmanager.repository.model.GraphNode;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.icgc_argo.workflowgraphmanager.TestUtils.loadK8sWithBaseResourcesAnd;
 
 @ActiveProfiles("test")
 @EnableKubernetesMockClient(crud = true)

@@ -18,16 +18,15 @@
 
 package org.icgc_argo.workflowgraphmanager.graphql.model;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.HashMap;
+import java.util.List;
 import lombok.val;
 import org.icgc_argo.workflowgraphmanager.repository.model.GraphExchangesQueue;
 import org.icgc_argo.workflowgraphmanager.repository.model.GraphNode;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
-
-import java.util.HashMap;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles("test")
 public class QueueTest {
