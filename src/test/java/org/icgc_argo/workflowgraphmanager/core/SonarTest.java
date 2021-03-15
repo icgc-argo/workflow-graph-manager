@@ -18,18 +18,19 @@
 
 package org.icgc_argo.workflowgraphmanager.core;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.icgc_argo.workflowgraphmanager.TestUtils.loadK8sWithBaseResourcesAnd;
-
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.server.mock.EnableKubernetesMockClient;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.val;
 import org.icgc_argo.workflowgraphmanager.graphql.model.Pipeline;
 import org.icgc_argo.workflowgraphmanager.repository.GraphNodeRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.icgc_argo.workflowgraphmanager.TestUtils.loadK8sWithBaseResourcesAnd;
 
 @ActiveProfiles("test")
 @EnableKubernetesMockClient(crud = true)
@@ -74,5 +75,15 @@ public class SonarTest {
             sonar.getNodes().stream()
                 .filter(node -> node.getPipeline().equalsIgnoreCase("test-pipeline-three"))
                 .collect(Collectors.toList()));
+  }
+
+  @Test
+  public void testQueueExtraction() {
+    val queues = sonar.getQueues();
+    val expectedQueues =
+        sonar.getNodes().stream()
+            .flatMap(node -> node.getQueues().stream())
+            .collect(Collectors.toList());
+    assertThat(queues).containsExactlyInAnyOrderElementsOf(expectedQueues);
   }
 }
