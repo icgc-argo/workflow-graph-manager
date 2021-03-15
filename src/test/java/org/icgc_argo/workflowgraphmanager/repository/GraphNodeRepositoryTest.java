@@ -18,16 +18,19 @@
 
 package org.icgc_argo.workflowgraphmanager.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.icgc_argo.workflowgraphmanager.TestUtils.loadK8sWithBaseResourcesAnd;
-
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.server.mock.EnableKubernetesMockClient;
-import java.util.stream.Collectors;
 import lombok.val;
 import org.icgc_argo.workflowgraphmanager.repository.model.GraphExchangesQueue;
+import org.icgc_argo.workflowgraphmanager.repository.model.GraphNode;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.icgc_argo.workflowgraphmanager.TestUtils.loadK8sWithBaseResourcesAnd;
 
 @ActiveProfiles("test")
 @EnableKubernetesMockClient(crud = true)
@@ -59,20 +62,19 @@ public class GraphNodeRepositoryTest {
     loadK8sWithBaseResourcesAnd(client, "fixtures/multi-pipeline.json");
 
     val nodes = graphNodeRepository.getNodes().collect(Collectors.toList());
+    val expectedNodeIds =
+        List.of(
+            "start",
+            "align-node",
+            "start-two",
+            "align-node-two",
+            "start-three",
+            "align-node-three");
 
     // Test nodes list is correct
     assertThat(nodes.size()).isEqualTo(6);
-    assertThat(nodes.stream().anyMatch(node -> node.getId().equalsIgnoreCase("start"))).isTrue();
-    assertThat(nodes.stream().anyMatch(node -> node.getId().equalsIgnoreCase("align-node")))
-        .isTrue();
-    assertThat(nodes.stream().anyMatch(node -> node.getId().equalsIgnoreCase("start-two")))
-        .isTrue();
-    assertThat(nodes.stream().anyMatch(node -> node.getId().equalsIgnoreCase("align-node-two")))
-        .isTrue();
-    assertThat(nodes.stream().anyMatch(node -> node.getId().equalsIgnoreCase("start-three")))
-        .isTrue();
-    assertThat(nodes.stream().anyMatch(node -> node.getId().equalsIgnoreCase("align-node-three")))
-        .isTrue();
+    assertThat(nodes.stream().map(GraphNode::getId))
+        .containsExactlyInAnyOrderElementsOf(expectedNodeIds);
   }
 
   @Test
@@ -112,10 +114,10 @@ public class GraphNodeRepositoryTest {
             .get();
 
     assertThat(ingestPod.getGraphExchangesQueueList())
-        .containsOnly(GraphExchangesQueue.fromExchangeString("start"));
+        .containsOnly(GraphExchangesQueue.fromPod("start"));
 
     assertThat(nodePod.getGraphExchangesQueueList())
-        .containsExactly(
+        .containsExactlyInAnyOrder(
             new GraphExchangesQueue("start", "align-node"),
             new GraphExchangesQueue("queued-align-node", "align-node"),
             new GraphExchangesQueue("align-node-running", "align-node-running"),
