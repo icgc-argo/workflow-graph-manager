@@ -54,25 +54,4 @@ public class Pipeline {
   public static Pipeline parse(@NonNull Map<String, Object> sourceMap) {
     return JacksonUtils.parse(sourceMap, Pipeline.class);
   }
-
-  public static Pipeline parse(@NonNull String pipelineId, @NonNull List<Node> nodes) {
-    return Pipeline.builder()
-        .id(pipelineId)
-        .nodes(nodes)
-        .queues(
-            nodes.stream().flatMap(node -> node.getQueues().stream()).collect(Collectors.toList()))
-        .messages(Collections.emptyList())
-        .logs(Collections.emptyList())
-        .build();
-  }
-
-  public static Pipeline parse(@NonNull String pipelineId, @NonNull Node node) {
-    return Pipeline.builder()
-        .id(pipelineId)
-        .nodes(List.of(node))
-        .queues(node.getQueues())
-        .messages(Collections.emptyList())
-        .logs(Collections.emptyList())
-        .build();
-  }
 }

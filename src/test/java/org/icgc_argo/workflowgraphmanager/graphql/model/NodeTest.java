@@ -21,38 +21,51 @@ package org.icgc_argo.workflowgraphmanager.graphql.model;
 import lombok.val;
 import org.icgc_argo.workflowgraphmanager.repository.model.GraphExchangesQueue;
 import org.icgc_argo.workflowgraphmanager.repository.model.GraphNode;
+import org.icgc_argo.workflowgraphmanager.repository.model.GraphNodeConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles("test")
-public class QueueTest {
-
+public class NodeTest {
   @Test
   public void parseTest() {
-    val expected =
-        Queue.builder()
-            .id("start")
-            .exchange("start")
-            .pipeline("test-pipeline")
-            .node("test-node")
-            .build();
+    val nodeId = "align-node";
+    val pipelineId = "test-pipeline";
+    val queueIds =
+        List.of("start", "queued-align-node", "align-node-running", "align-node-complete");
 
-    val graphExchangeQueue = GraphExchangesQueue.fromExchangeString("start");
     val graphNode =
         GraphNode.builder()
-            .id("test-node")
-            .pipeline("test-pipeline")
-            .config(new HashMap<String, String>() {})
-            .graphExchangesQueueList(List.of(graphExchangeQueue))
+            .id(nodeId)
+            .pipeline(pipelineId)
+            .config(new GraphNodeConfig())
+            .graphExchangesQueueList(
+                queueIds.stream()
+                    .map(GraphExchangesQueue::fromExchangeString)
+                    .collect(Collectors.toList()))
             .build();
 
-    val actual = Queue.parse(graphExchangeQueue, graphNode);
+    val actualNode = Node.parse(graphNode);
 
-    assertThat(actual).isEqualTo(expected);
+    assertThat(actualNode)
+        .extracting("id", "pipeline", "queues")
+        .containsExactlyInAnyOrder(
+            "align-node",
+            "test-pipeline",
+            queueIds.stream()
+                .map(
+                    queueId ->
+                        Queue.builder()
+                            .id(queueId)
+                            .exchange(queueId)
+                            .pipeline(pipelineId)
+                            .node(nodeId)
+                            .build())
+                .collect(Collectors.toList()));
   }
 }

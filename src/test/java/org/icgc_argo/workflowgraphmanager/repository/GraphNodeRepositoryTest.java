@@ -118,8 +118,8 @@ public class GraphNodeRepositoryTest {
 
     assertThat(nodePod.getGraphExchangesQueueList())
         .containsExactlyInAnyOrder(
-            new GraphExchangesQueue("start", "align-node"),
-            new GraphExchangesQueue("queued-align-node", "align-node"),
+            new GraphExchangesQueue("start", "align-node-start"),
+            new GraphExchangesQueue("queued-align-node", "queued-align-node"),
             new GraphExchangesQueue("align-node-running", "align-node-running"),
             new GraphExchangesQueue("align-node-complete", "align-node-complete"));
   }

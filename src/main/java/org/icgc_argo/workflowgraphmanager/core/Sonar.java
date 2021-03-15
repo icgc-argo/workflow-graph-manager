@@ -18,14 +18,6 @@
 
 package org.icgc_argo.workflowgraphmanager.core;
 
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.icgc_argo.workflowgraphmanager.graphql.model.Node;
@@ -41,6 +33,12 @@ import org.springframework.context.annotation.Configuration;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.SynchronousSink;
+
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * The Sonar Service is responsible for building and maintaining in-memory state stores that
@@ -109,7 +107,7 @@ public class Sonar {
     return new ArrayList<>(nodes.values());
   }
 
-  public Queue getQueueById(String queueId) {
+  public Queue getQueueByFQQN(String queueId) {
     return queues.get(queueId);
   }
 
@@ -119,23 +117,28 @@ public class Sonar {
   }
 
   private HashMap<String, Pipeline> assemblePipelinesFromNodes(Collection<Node> nodes) {
-    return nodes.stream()
+    return nodes.stream().collect(Collectors.groupingBy(Node::getPipeline)).entrySet().stream()
         .reduce(
             new HashMap<>(),
-            (HashMap<String, Pipeline> pipelines, Node node) -> {
-              val pipeline = getOrCreatePipeline(node, pipelines);
-
-              // Add the new node to the list of nodes for the pipeline
-              pipeline.setNodes(
-                  Stream.concat(Stream.of(node), pipeline.getNodes().stream())
-                      .collect(Collectors.toList()));
-
-              if (pipelines.containsKey(pipeline.getId())) {
-                pipelines.replace(pipeline.getId(), pipeline);
-              } else {
-                pipelines.put(pipeline.getId(), pipeline);
-              }
-
+            (HashMap<String, Pipeline> pipelines, Map.Entry<String, List<Node>> entry) -> {
+              pipelines.put(
+                  entry.getKey(),
+                  Pipeline.builder()
+                      .id(entry.getKey())
+                      .nodes(entry.getValue())
+                      .queues(
+                          entry.getValue().stream()
+                              .flatMap(node -> node.getQueues().stream())
+                              .collect(Collectors.toList()))
+                      .messages(
+                          entry.getValue().stream()
+                              .flatMap(node -> node.getMessages().stream())
+                              .collect(Collectors.toList()))
+                      .logs(
+                          entry.getValue().stream()
+                              .flatMap(node -> node.getLogs().stream())
+                              .collect(Collectors.toList()))
+                      .build());
               return pipelines;
             },
             CommonUtils::handleReduceHashMapConflict);
@@ -145,7 +148,7 @@ public class Sonar {
     return nodes.stream()
         .flatMap(node -> node.getQueues().stream())
         .collect(
-            Collectors.toMap(Queue::getId, queue -> queue, (prev, next) -> next, HashMap::new));
+            Collectors.toMap(Queue::getFQQN, queue -> queue, (prev, next) -> next, HashMap::new));
   }
 
   /**
@@ -215,10 +218,6 @@ public class Sonar {
                     .map(Queue::getId)
                     .anyMatch(queueId -> queueId.equalsIgnoreCase(graphEntity.getQueue().getId())))
         .collect(Collectors.toList());
-  }
-
-  private static Pipeline getOrCreatePipeline(Node node, HashMap<String, Pipeline> pipelines) {
-    return pipelines.getOrDefault(node.getPipeline(), Pipeline.parse(node.getPipeline(), node));
   }
 
   private void rebuildStores(Collection<Node> nodes) {

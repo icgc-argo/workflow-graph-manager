@@ -22,6 +22,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.server.mock.EnableKubernetesMockClient;
 import lombok.val;
 import org.icgc_argo.workflowgraphmanager.graphql.model.Pipeline;
+import org.icgc_argo.workflowgraphmanager.graphql.model.Queue;
 import org.icgc_argo.workflowgraphmanager.repository.GraphNodeRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
@@ -58,23 +59,50 @@ public class SonarTest {
                 .containsAll(List.of("test-pipeline", "test-pipeline-two", "test-pipeline-three")))
         .isTrue();
 
-    assertThat(sonar.getPipelineById("test-pipeline").getNodes())
+    val pipelineOne = sonar.getPipelineById("test-pipeline");
+    assertThat(pipelineOne.getNodes())
         .hasSameElementsAs(
             sonar.getNodes().stream()
                 .filter(node -> node.getPipeline().equalsIgnoreCase("test-pipeline"))
                 .collect(Collectors.toList()));
+    assertThat(pipelineOne.getQueues().stream().map(Queue::getId))
+        .containsExactlyInAnyOrderElementsOf(
+            List.of(
+                "start",
+                "align-node-start",
+                "queued-align-node",
+                "align-node-running",
+                "align-node-complete"));
 
-    assertThat(sonar.getPipelineById("test-pipeline-two").getNodes())
+    val pipelineTwo = sonar.getPipelineById("test-pipeline-two");
+    assertThat(pipelineTwo.getNodes())
         .hasSameElementsAs(
             sonar.getNodes().stream()
                 .filter(node -> node.getPipeline().equalsIgnoreCase("test-pipeline-two"))
                 .collect(Collectors.toList()));
+    assertThat(pipelineTwo.getQueues().stream().map(Queue::getId))
+        .containsExactlyInAnyOrderElementsOf(
+            List.of(
+                "start",
+                "align-node-two-start",
+                "queued-align-node-two",
+                "align-node-two-running",
+                "align-node-two-complete"));
 
-    assertThat(sonar.getPipelineById("test-pipeline-three").getNodes())
+    val pipelineThree = sonar.getPipelineById("test-pipeline-three");
+    assertThat(pipelineThree.getNodes())
         .hasSameElementsAs(
             sonar.getNodes().stream()
                 .filter(node -> node.getPipeline().equalsIgnoreCase("test-pipeline-three"))
                 .collect(Collectors.toList()));
+    assertThat(pipelineThree.getQueues().stream().map(Queue::getId))
+        .containsExactlyInAnyOrderElementsOf(
+            List.of(
+                "start",
+                "align-node-three-start",
+                "queued-align-node-three",
+                "align-node-three-running",
+                "align-node-three-complete"));
   }
 
   @Test

@@ -64,4 +64,12 @@ public class Queue {
         .node(graphNode.getId())
         .build();
   }
+
+  /**
+   * Returns the fully-qualified-queue-name which is composite of Pipeline.Node.Exchange.QueueId
+   * @return FQQN string
+   */
+  public String getFQQN() {
+    return String.format("%s.%s.%s.%s", pipeline, node, exchange, id);
+  }
 }
