@@ -114,7 +114,7 @@ public class GraphNodeRepositoryTest {
             .get();
 
     assertThat(ingestPod.getGraphExchangesQueueList())
-        .containsOnly(GraphExchangesQueue.fromPod("start"));
+        .containsOnly(GraphExchangesQueue.fromExchangeString("start"));
 
     assertThat(nodePod.getGraphExchangesQueueList())
         .containsExactlyInAnyOrder(

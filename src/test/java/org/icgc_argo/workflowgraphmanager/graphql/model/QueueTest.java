@@ -18,50 +18,41 @@
 
 package org.icgc_argo.workflowgraphmanager.graphql.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import org.icgc_argo.workflowgraphmanager.graphql.model.base.Message;
+import lombok.val;
 import org.icgc_argo.workflowgraphmanager.repository.model.GraphExchangesQueue;
 import org.icgc_argo.workflowgraphmanager.repository.model.GraphNode;
-import org.icgc_argo.workflowgraphmanager.utils.JacksonUtils;
+import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
 
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-@Data
-@Builder
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class Queue {
-  @NonNull private String id;
+import static org.assertj.core.api.Assertions.assertThat;
 
-  @NonNull private String exchange;
+@ActiveProfiles("test")
+public class QueueTest {
 
-  @NonNull private String pipeline;
+  @Test
+  public void parseTest() {
+    val expected =
+        Queue.builder()
+            .id("start")
+            .exchange("start")
+            .pipeline("test-pipeline")
+            .node("test-node")
+            .build();
 
-  @NonNull private String node;
+    val graphExchangeQueue = GraphExchangesQueue.fromExchangeString("start");
+    val graphNode =
+        GraphNode.builder()
+            .id("test-node")
+            .pipeline("test-pipeline")
+            .config(new HashMap<String, String>() {})
+            .graphExchangesQueueList(List.of(graphExchangeQueue))
+            .build();
 
-  private List<Message> messages;
+    val actual = Queue.parse(graphExchangeQueue, graphNode);
 
-  private List<GraphLog> logs;
-
-  @SneakyThrows
-  public static Queue parse(@NonNull Map<String, Object> sourceMap) {
-    return JacksonUtils.parse(sourceMap, Queue.class);
-  }
-
-  public static Queue parse(
-      @NonNull GraphExchangesQueue graphExchangesQueue, @NonNull GraphNode<?> graphNode) {
-    return Queue.builder()
-        .id(graphExchangesQueue.getQueue())
-        .exchange(graphExchangesQueue.getExchange())
-        .pipeline(graphNode.getPipeline())
-        .node(graphNode.getId())
-        .build();
+    assertThat(expected).isEqualTo(actual);
   }
 }
