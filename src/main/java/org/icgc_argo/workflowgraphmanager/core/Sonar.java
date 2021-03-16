@@ -18,6 +18,11 @@
 
 package org.icgc_argo.workflowgraphmanager.core;
 
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.icgc_argo.workflowgraphmanager.graphql.model.Node;
 import org.icgc_argo.workflowgraphmanager.graphql.model.Pipeline;
@@ -33,12 +38,6 @@ import org.springframework.context.annotation.Configuration;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.SynchronousSink;
-
-import java.time.Duration;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * The Sonar Service is responsible for building and maintaining in-memory state stores that
@@ -121,7 +120,10 @@ public class Sonar {
   }
 
   private HashMap<String, Pipeline> assemblePipelinesFromNodes(Collection<Node> nodes) {
-    return nodes.stream().collect(Collectors.groupingBy(Node::getPipeline)).entrySet().stream()
+    return nodes.stream()
+        .collect(Collectors.groupingBy(Node::getPipeline))
+        .entrySet()
+        .stream()
         .reduce(
             new HashMap<>(),
             (HashMap<String, Pipeline> pipelines, Map.Entry<String, List<Node>> entry) -> {
