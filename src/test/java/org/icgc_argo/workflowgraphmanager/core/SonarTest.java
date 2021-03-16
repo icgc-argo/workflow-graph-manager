@@ -18,19 +18,25 @@
 
 package org.icgc_argo.workflowgraphmanager.core;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.icgc_argo.workflowgraphmanager.TestUtils.loadK8sWithBaseResourcesAnd;
-
+import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.server.mock.EnableKubernetesMockClient;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.val;
+import org.icgc_argo.workflowgraphmanager.graphql.model.Node;
 import org.icgc_argo.workflowgraphmanager.graphql.model.Pipeline;
 import org.icgc_argo.workflowgraphmanager.graphql.model.Queue;
 import org.icgc_argo.workflowgraphmanager.repository.GraphNodeRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.icgc_argo.workflowgraphmanager.TestUtils.loadK8sWithBaseResourcesAnd;
+import static org.icgc_argo.workflowgraphmanager.TestUtils.loadResource;
+import static org.icgc_argo.workflowgraphmanager.utils.JacksonUtils.readValue;
 
 @ActiveProfiles("test")
 @EnableKubernetesMockClient(crud = true)
@@ -112,5 +118,49 @@ public class SonarTest {
             .flatMap(node -> node.getQueues().stream())
             .collect(Collectors.toList());
     assertThat(queues).containsExactlyInAnyOrderElementsOf(expectedQueues);
+  }
+
+  @Test
+  public void testNewNodeAddition() {
+    // load new pods
+    client
+        .configMaps()
+        .create(
+            readValue(loadResource("configmaps/variant-caller-node-config.json"), ConfigMap.class));
+    client.pods().create(readValue(loadResource("fixtures/variant-caller-pod.json"), Pod.class));
+
+    // do update
+    sonar.shallowUpdateOnNext(graphNodeRepository.getNodes());
+
+    // Test that nodes have the update
+    assertThat(sonar.getNodes().stream().map(Node::getId)).containsOnlyOnce("variant-caller-node");
+
+    // Test Pipeline assembly is as expected
+    val updatePipeline = sonar.getPipelineById("test-pipeline");
+    assertThat(updatePipeline.getNodes().size()).isEqualTo(3);
+    assertThat(
+        updatePipeline.getNodes().stream()
+            .anyMatch(node -> node.getId().equalsIgnoreCase("variant-caller-node")));
+    assertThat(updatePipeline.getQueues().stream().map(Queue::getId))
+        .containsExactlyInAnyOrderElementsOf(
+            List.of(
+                "test-pipeline.start.start.start",
+                "test-pipeline.align-node.start.align-node-start",
+                "test-pipeline.align-node.queued-align-node.queued-align-node",
+                "test-pipeline.align-node.align-node-running.align-node-running",
+                "test-pipeline.align-node.align-node-complete.align-node-complete",
+                "test-pipeline.variant-caller-node.start.variant-caller-node-start",
+                "test-pipeline.variant-caller-node.queued-variant-caller-node.queued-variant-caller-node",
+                "test-pipeline.variant-caller-node.variant-caller-node-running.variant-caller-node-running",
+                "test-pipeline.variant-caller-node.variant-caller-node-complete.variant-caller-node-complete"));
+
+    // Test that Queues are updated
+    assertThat(sonar.getQueues().stream().map(Queue::getId))
+        .containsOnlyOnceElementsOf(
+            List.of(
+                "test-pipeline.variant-caller-node.start.variant-caller-node-start",
+                "test-pipeline.variant-caller-node.queued-variant-caller-node.queued-variant-caller-node",
+                "test-pipeline.variant-caller-node.variant-caller-node-running.variant-caller-node-running",
+                "test-pipeline.variant-caller-node.variant-caller-node-complete.variant-caller-node-complete"));
   }
 }
