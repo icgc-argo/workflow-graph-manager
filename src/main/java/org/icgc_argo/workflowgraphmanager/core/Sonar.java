@@ -24,8 +24,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
-import org.icgc_argo.workflowgraphmanager.graphql.model.Node;
-import org.icgc_argo.workflowgraphmanager.graphql.model.Pipeline;
+import lombok.val;
+import org.icgc_argo.workflowgraphmanager.graphql.model.*;
 import org.icgc_argo.workflowgraphmanager.graphql.model.Queue;
 import org.icgc_argo.workflowgraphmanager.graphql.model.base.GraphEntity;
 import org.icgc_argo.workflowgraphmanager.repository.GraphNodeRepository;
@@ -40,10 +40,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.SynchronousSink;
 
 /**
- * The Sonar Service is responsible for building and maintaining in-memory state stores that
- * represent the current state of all graph entities deployed within a single kubernetes namespace.
- * After the initial construction it will ping the various repositories for partial state updates in
- * order to maintain a near-realtime view of the current state of all aforementioned pipelines. Ref:
+ * Sonar is responsible for building and maintaining in-memory state stores that represent the
+ * current state of all graph entities deployed within a single kubernetes namespace. After the
+ * initial construction it will ping the various repositories for partial state updates in order to
+ * maintain a near-realtime view of the current state of all aforementioned pipelines. Ref:
  * https://wiki.oicr.on.ca/pages/viewpage.action?pageId=154539008
  */
 @Slf4j
@@ -94,14 +94,6 @@ public class Sonar {
         .subscribe();
   }
 
-  public Pipeline getPipelineById(String pipelineId) {
-    return pipelines.get(pipelineId);
-  }
-
-  public List<Pipeline> getPipelines() {
-    return new ArrayList<>(pipelines.values());
-  }
-
   public Node getNodeById(String nodeId) {
     return nodes.get(nodeId);
   }
@@ -110,13 +102,38 @@ public class Sonar {
     return new ArrayList<>(nodes.values());
   }
 
-  public Queue getQueueByFQQN(String queueId) {
+  public SearchResult<Node> searchNodes(QueryArgs queryArgs) {
+    // todo make this actually work with filters
+    val response = getNodes();
+    return new SearchResult<>(response, false, ((long) response.size()));
+  }
+
+  public Pipeline getPipelineById(String pipelineId) {
+    return pipelines.get(pipelineId);
+  }
+
+  public List<Pipeline> getPipelines() {
+    return new ArrayList<>(pipelines.values());
+  }
+
+  public SearchResult<Pipeline> searchPipelines(QueryArgs queryArgs) {
+    // todo make this actually work with filters
+    val response = getPipelines();
+    return new SearchResult<>(response, false, ((long) response.size()));
+  }
+
+  public Queue getQueueById(String queueId) {
     return queues.get(queueId);
   }
 
-  // TODO these entity list methods will require filtering (ie. queues with nodeId == x)
   public List<Queue> getQueues() {
     return new ArrayList<>(queues.values());
+  }
+
+  public SearchResult<Queue> searchQueues(QueryArgs queryArgs) {
+    // todo make this actually work with filters
+    val response = getQueues();
+    return new SearchResult<>(response, false, ((long) response.size()));
   }
 
   private HashMap<String, Pipeline> assemblePipelinesFromNodes(Collection<Node> nodes) {

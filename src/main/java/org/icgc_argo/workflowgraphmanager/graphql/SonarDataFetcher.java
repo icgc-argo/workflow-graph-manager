@@ -20,33 +20,42 @@ package org.icgc_argo.workflowgraphmanager.graphql;
 
 import graphql.schema.DataFetcher;
 import lombok.extern.slf4j.Slf4j;
-import org.icgc_argo.workflowgraphmanager.graphql.model.AggregationResult;
-import org.icgc_argo.workflowgraphmanager.graphql.model.GraphLog;
-import org.icgc_argo.workflowgraphmanager.graphql.model.QueryArgs;
-import org.icgc_argo.workflowgraphmanager.graphql.model.SearchResult;
-import org.icgc_argo.workflowgraphmanager.service.GraphLogService;
+import org.icgc_argo.workflowgraphmanager.core.Sonar;
+import org.icgc_argo.workflowgraphmanager.graphql.model.*;
+import org.icgc_argo.workflowgraphmanager.graphql.model.base.NodeProvider;
+import org.icgc_argo.workflowgraphmanager.graphql.model.base.PipelineProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class GraphLogDataFetcher {
+public class SonarDataFetcher {
 
-  private final GraphLogService graphLogService;
+  private final Sonar sonar;
 
   @Autowired
-  public GraphLogDataFetcher(GraphLogService graphLogService) {
-    this.graphLogService = graphLogService;
+  public SonarDataFetcher(Sonar sonar) {
+    this.sonar = sonar;
   }
 
-  @SuppressWarnings("unchecked")
-  public DataFetcher<SearchResult<GraphLog>> getGraphLogsDataFetcher() {
-    return environment -> graphLogService.searchGraphLogs(new QueryArgs(environment));
+  public DataFetcher<SearchResult<Pipeline>> getPipelineDataFetcher() {
+    return environment -> sonar.searchPipelines(new QueryArgs(environment));
   }
 
-  @SuppressWarnings("unchecked")
-  public DataFetcher<AggregationResult> getAggregateGraphLogsDataFetcher() {
+  public DataFetcher<SearchResult<Node>> getNodeDataFetcher() {
+    return environment -> sonar.searchNodes(new QueryArgs(environment));
+  }
+
+  public DataFetcher<SearchResult<Queue>> getQueueDataFetcher() {
+    return environment -> sonar.searchQueues(new QueryArgs(environment));
+  }
+
+  public DataFetcher<Pipeline> getNestedPipelineDataFetcher() {
     return environment ->
-        graphLogService.aggregateGraphLogs(new QueryArgs(environment).getFilter());
+        sonar.getPipelineById(((PipelineProvider) environment.getSource()).getPipeline());
+  }
+
+  public DataFetcher<Node> getNestedNodeDataFetcher() {
+    return environment -> sonar.getNodeById(((NodeProvider) environment.getSource()).getNode());
   }
 }

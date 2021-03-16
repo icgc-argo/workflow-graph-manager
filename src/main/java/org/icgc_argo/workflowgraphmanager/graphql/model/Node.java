@@ -31,6 +31,7 @@ import lombok.Data;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.icgc_argo.workflowgraphmanager.graphql.model.base.Message;
+import org.icgc_argo.workflowgraphmanager.graphql.model.base.PipelineProvider;
 import org.icgc_argo.workflowgraphmanager.repository.model.GraphNode;
 import org.icgc_argo.workflowgraphmanager.utils.JacksonUtils;
 
@@ -38,7 +39,7 @@ import org.icgc_argo.workflowgraphmanager.utils.JacksonUtils;
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class Node {
+public class Node implements PipelineProvider {
   @NonNull private String id;
 
   @NonNull private Map<String, Object> config;

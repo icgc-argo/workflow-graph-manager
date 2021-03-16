@@ -25,6 +25,8 @@ import graphql.schema.DataFetcher;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.icgc_argo.workflow_graph_lib.utils.PatternMatch;
+import org.icgc_argo.workflowgraphmanager.core.Sonar;
 import org.icgc_argo.workflowgraphmanager.service.GraphLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -32,12 +34,17 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class EntityDataFetcher {
+  public static final String PIPELINE_ENTITY = "Pipeline";
+  public static final String NODE_ENTITY = "Node";
+  public static final String QUEUE_ENTITY = "Queue";
   public static final String GRAPH_LOG_ENTITY = "GraphLog";
 
+  private final Sonar sonar;
   private final GraphLogService graphLogService;
 
   @Autowired
-  public EntityDataFetcher(GraphLogService graphLogService) {
+  public EntityDataFetcher(Sonar sonar, GraphLogService graphLogService) {
+    this.sonar = sonar;
     this.graphLogService = graphLogService;
   }
 
@@ -45,15 +52,50 @@ public class EntityDataFetcher {
     return environment ->
         environment.<List<Map<String, Object>>>getArgument(_Entity.argumentName).stream()
             .map(
-                values -> {
-                  if (GRAPH_LOG_ENTITY.equals(values.get("__typename"))) {
-                    final Object graphMessageId = values.get("graphMessageId");
-                    if (graphMessageId instanceof String) {
-                      return graphLogService.getGraphLogByGraphMessageId((String) graphMessageId);
-                    }
-                  }
-                  return null;
-                })
+                values ->
+                    PatternMatch.match(values.get("__typename"))
+                        .on(
+                            typename -> typename.equals(GRAPH_LOG_ENTITY),
+                            () -> {
+                              final Object graphMessageId = values.get("graphMessageId");
+                              if (graphMessageId instanceof String) {
+                                return graphLogService.getGraphLogByGraphMessageId(
+                                    (String) graphMessageId);
+                              } else {
+                                return null;
+                              }
+                            })
+                        .on(
+                            typename -> typename.equals(PIPELINE_ENTITY),
+                            () -> {
+                              final Object pipelineId = values.get("id");
+                              if (pipelineId instanceof String) {
+                                return sonar.getPipelineById((String) pipelineId);
+                              } else {
+                                return null;
+                              }
+                            })
+                        .on(
+                            typename -> typename.equals(NODE_ENTITY),
+                            () -> {
+                              final Object nodeId = values.get("id");
+                              if (nodeId instanceof String) {
+                                return sonar.getNodeById((String) nodeId);
+                              } else {
+                                return null;
+                              }
+                            })
+                        .on(
+                            typename -> typename.equals(QUEUE_ENTITY),
+                            () -> {
+                              final Object queueId = values.get("id");
+                              if (queueId instanceof String) {
+                                return sonar.getQueueById((String) queueId);
+                              } else {
+                                return null;
+                              }
+                            })
+                        .otherwise(() -> null))
             .collect(toList());
   }
 }
