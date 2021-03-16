@@ -18,6 +18,8 @@
 
 package org.icgc_argo.workflowgraphmanager.graphql;
 
+import static graphql.schema.idl.TypeRuntimeWiring.newTypeWiring;
+
 import com.apollographql.federation.graphqljava.Federation;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
@@ -29,6 +31,9 @@ import graphql.scalars.ExtendedScalars;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.RuntimeWiring;
+import java.io.IOException;
+import java.net.URL;
+import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.icgc_argo.workflow_graph_lib.utils.PatternMatch;
 import org.icgc_argo.workflowgraphmanager.config.websecurity.AuthProperties;
@@ -41,12 +46,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.net.URL;
-
-import static graphql.schema.idl.TypeRuntimeWiring.newTypeWiring;
 
 @Slf4j
 @Service

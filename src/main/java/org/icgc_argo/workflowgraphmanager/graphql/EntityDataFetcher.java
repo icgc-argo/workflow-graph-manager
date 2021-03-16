@@ -18,19 +18,18 @@
 
 package org.icgc_argo.workflowgraphmanager.graphql;
 
+import static java.util.stream.Collectors.toList;
+
 import com.apollographql.federation.graphqljava._Entity;
 import graphql.schema.DataFetcher;
+import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.icgc_argo.workflow_graph_lib.utils.PatternMatch;
 import org.icgc_argo.workflowgraphmanager.core.Sonar;
 import org.icgc_argo.workflowgraphmanager.service.GraphLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Map;
-
-import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Component
