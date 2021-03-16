@@ -22,6 +22,8 @@ import graphql.schema.DataFetcher;
 import lombok.extern.slf4j.Slf4j;
 import org.icgc_argo.workflowgraphmanager.core.Sonar;
 import org.icgc_argo.workflowgraphmanager.graphql.model.*;
+import org.icgc_argo.workflowgraphmanager.graphql.model.base.NodeProvider;
+import org.icgc_argo.workflowgraphmanager.graphql.model.base.PipelineProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -46,5 +48,14 @@ public class SonarDataFetcher {
 
   public DataFetcher<SearchResult<Queue>> getQueueDataFetcher() {
     return environment -> sonar.searchQueues(new QueryArgs(environment));
+  }
+
+  public DataFetcher<Pipeline> getNestedPipelineDataFetcher() {
+    return environment ->
+        sonar.getPipelineById(((PipelineProvider) environment.getSource()).getPipeline());
+  }
+
+  public DataFetcher<Node> getNestedNodeDataFetcher() {
+    return environment -> sonar.getNodeById(((NodeProvider) environment.getSource()).getNode());
   }
 }
