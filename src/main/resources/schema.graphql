@@ -1,8 +1,24 @@
 scalar JSON
 scalar Long
 
-### Top-level Entities ###
+### Common Search, Paging, and Sort ###
+type SearchResultInfo {
+    contentCount: String!
+    hasNextFrom: String!
+    totalHits: String!
+}
 
+input Page {
+    size: Int!
+    from: Int!
+}
+
+enum SortOrder {
+    asc,
+    desc
+}
+
+### Pipeline ###
 type Pipeline @key(fields: "id") {
     id: ID!
     nodes: [Node]
@@ -11,6 +27,25 @@ type Pipeline @key(fields: "id") {
     logs: [GraphLog]
 }
 
+enum PipelineFilter {
+    id
+}
+
+enum PipelineSortField {
+    id
+}
+
+input PipelineSort {
+    fieldName: NodeSortField!
+    order: SortOrder!
+}
+
+type PipelineResult {
+    content: [Pipeline!]
+    info: SearchResultInfo!
+}
+
+### Node ###
 type Node @key(fields: "id") {
     id: ID!
     config: JSON
@@ -23,8 +58,33 @@ type Node @key(fields: "id") {
     logs: [GraphLog]
 }
 
-### QUEUE Types ###
+enum NodeFilter {
+    id,
+    enabled,
+    pipeline,
+    queues,
+    workflow
+}
 
+enum NodeSortField {
+    id,
+    enabled,
+    pipeline,
+    queues,
+    capacity
+}
+
+input NodeSort {
+    fieldName: NodeSortField!
+    order: SortOrder!
+}
+
+type NodesResult {
+    content: [Node!]
+    info: SearchResultInfo!
+}
+
+### QUEUE Types ###
 type Queue @key(fields: "id") {
     id: ID!
     exchange: String
@@ -35,8 +95,33 @@ type Queue @key(fields: "id") {
     logs: [GraphLog]
 }
 
-### Message Types ###
+enum QueueFilter {
+    id,
+    exchange,
+    queue,
+    pipeline,
+    node
+}
 
+enum QueueSortField {
+    id,
+    exchange,
+    queue,
+    pipeline,
+    node
+}
+
+input QueueSort {
+    fieldName: QueueSortField!
+    order: SortOrder!
+}
+
+type QueuesResult {
+    content: [Queue!]
+    info: SearchResultInfo!
+}
+
+### Message Types ###
 interface Message {
     id: ID!
     pipeline: Pipeline
@@ -75,7 +160,7 @@ type GraphRun implements Message @key(fields: "id") {
     run: Run  # TODO: This type should go in lib
 }
 
-## Log types
+### GraphLog ###
 type GraphLog @key(fields: "id") {
     id: ID!
     graphMessageId: ID
@@ -84,6 +169,32 @@ type GraphLog @key(fields: "id") {
     node: Node
     pipeline: Pipeline
     timestamp: Long
+}
+
+enum GraphLogFilter {
+    graphMessageId,
+    queue,
+    node,
+    pipeline,
+    timestamp
+}
+
+input GraphLogSort {
+    fieldName: GraphLogSortField!
+    order: SortOrder!
+}
+
+enum GraphLogSortField {
+    graphMessageId,
+    queue,
+    node,
+    pipeline,
+    timestamp
+}
+
+type GraphLogsResult {
+    content: [GraphLog!]
+    info: SearchResultInfo!
 }
 
 ### Aggregations ###
@@ -101,6 +212,10 @@ type NodeAggs {
     queuedCount: Int
     runningCount: Int
     completeCount: Int
+}
+
+type AggregationResult {
+    totalHits: String!
 }
 
 # Stubbed external type (will come from Workflow Registry)
@@ -125,64 +240,11 @@ type Analysis @key(fields: "analysisId") @extends {
     node: Node
 }
 
-# temp filter that does nothing currently
-input StubFilter {
-    id: ID
-}
-
-enum GraphLogFilter {
-    graphMessageId,
-    queue,
-    node,
-    pipeline,
-    timestamp
-}
-
-# Paging and Sort
-input Page {
-    size: Int!
-    from: Int!
-}
-
-enum SortOrder {
-    asc,
-    desc
-}
-
-input GraphLogSort {
-    fieldName: GraphLogSortField!
-    order: SortOrder!
-}
-
-enum GraphLogSortField {
-    graphMessageId,
-    queue,
-    node,
-    pipeline,
-    timestamp
-}
-
-#  Search Results
-type SearchResultInfo {
-    contentCount: String!
-    hasNextFrom: String!
-    totalHits: String!
-}
-
-type GraphLogsResult {
-    content: [GraphLog!]
-    info: SearchResultInfo!
-}
-
-type AggregationResult {
-    totalHits: String!
-}
-
 # TBD if we want all these queries and what filters they would provide
 extend type Query {
-    #    pipelines(filter: StubFilter, page: Page): [Pipeline]
-    #    nodes(filter: StubFilter, page: Page): [Node]
-    #    queues(filter: StubFilter, page: Page): [Queue]
+    pipelines(filter: PipelineFilter, page: Page, sorts: [PipelineSort!]): PipelineResult!
+    nodes(filter: NodeFilter, page: Page, sorts: [NodeSort!]): NodesResult!
+    queues(filter: QueueFilter, page: Page, sorts: [QueueSort!]): QueuesResult!
     #    messages(filter: StubFilter, page: Page): [Message]
     logs(filter: GraphLogFilter, page: Page, sorts: [GraphLogSort!]): GraphLogsResult!
     logAggs(filter: GraphLogFilter): AggregationResult!

@@ -32,8 +32,8 @@ import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.search.SearchHit;
 import org.icgc_argo.workflowgraphmanager.graphql.model.AggregationResult;
 import org.icgc_argo.workflowgraphmanager.graphql.model.GraphLog;
+import org.icgc_argo.workflowgraphmanager.graphql.model.QueryArgs;
 import org.icgc_argo.workflowgraphmanager.graphql.model.SearchResult;
-import org.icgc_argo.workflowgraphmanager.graphql.model.Sort;
 import org.icgc_argo.workflowgraphmanager.repository.GraphLogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,8 +52,11 @@ public class GraphLogService {
     return GraphLog.parse(sourceMap);
   }
 
-  public SearchResult<GraphLog> searchGraphLogs(
-      Map<String, Object> filter, Map<String, Integer> page, List<Sort> sorts) {
+  public SearchResult<GraphLog> searchGraphLogs(QueryArgs queryArgs) {
+    val filter = queryArgs.getFilter();
+    val page = queryArgs.getPage();
+    val sorts = queryArgs.getSorts();
+
     val response = graphLogRepository.getGraphLogs(filter, page, sorts);
     val responseSearchHits = response.getHits();
 

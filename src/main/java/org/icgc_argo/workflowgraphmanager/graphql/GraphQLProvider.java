@@ -18,8 +18,6 @@
 
 package org.icgc_argo.workflowgraphmanager.graphql;
 
-import static graphql.schema.idl.TypeRuntimeWiring.newTypeWiring;
-
 import com.apollographql.federation.graphqljava.Federation;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
@@ -28,24 +26,33 @@ import com.google.common.io.Resources;
 import graphql.GraphQL;
 import graphql.execution.AsyncExecutionStrategy;
 import graphql.scalars.ExtendedScalars;
+import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.RuntimeWiring;
-import java.io.IOException;
-import java.net.URL;
-import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.icgc_argo.workflow_graph_lib.utils.PatternMatch;
 import org.icgc_argo.workflowgraphmanager.config.websecurity.AuthProperties;
 import org.icgc_argo.workflowgraphmanager.graphql.model.GraphLog;
+import org.icgc_argo.workflowgraphmanager.graphql.model.Node;
+import org.icgc_argo.workflowgraphmanager.graphql.model.Pipeline;
+import org.icgc_argo.workflowgraphmanager.graphql.model.Queue;
 import org.icgc_argo.workflowgraphmanager.graphql.security.VerifyAuthQueryExecutionStrategyDecorator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.net.URL;
+
+import static graphql.schema.idl.TypeRuntimeWiring.newTypeWiring;
+
 @Slf4j
 @Service
 public class GraphQLProvider {
 
+  private final SonarDataFetcher sonarDataFetcher;
   private final GraphLogDataFetcher graphLogDataFetcher;
   private final EntityDataFetcher entityDataFetcher;
   private final AuthProperties authProperties;
@@ -54,9 +61,11 @@ public class GraphQLProvider {
 
   @Autowired
   public GraphQLProvider(
+      SonarDataFetcher sonarDataFetcher,
       GraphLogDataFetcher graphLogDataFetcher,
       EntityDataFetcher entityDataFetcher,
       AuthProperties authProperties) {
+    this.sonarDataFetcher = sonarDataFetcher;
     this.graphLogDataFetcher = graphLogDataFetcher;
     this.entityDataFetcher = entityDataFetcher;
     this.authProperties = authProperties;
@@ -94,15 +103,33 @@ public class GraphQLProvider {
     return Federation.transform(sdl, buildWiring())
         .fetchEntities(entityDataFetcher.getDataFetcher())
         .resolveEntityType(
-            typeResolutionEnvironment -> {
-              final Object src = typeResolutionEnvironment.getObject();
-              if (src instanceof GraphLog) {
-                return typeResolutionEnvironment
-                    .getSchema()
-                    .getObjectType(EntityDataFetcher.GRAPH_LOG_ENTITY);
-              }
-              return null;
-            })
+            typeResolutionEnvironment ->
+                PatternMatch.<Object, GraphQLObjectType>match(typeResolutionEnvironment.getObject())
+                    .on(
+                        src -> (src instanceof Pipeline),
+                        () ->
+                            typeResolutionEnvironment
+                                .getSchema()
+                                .getObjectType(EntityDataFetcher.PIPELINE_ENTITY))
+                    .on(
+                        src -> (src instanceof Node),
+                        () ->
+                            typeResolutionEnvironment
+                                .getSchema()
+                                .getObjectType(EntityDataFetcher.NODE_ENTITY))
+                    .on(
+                        src -> (src instanceof Queue),
+                        () ->
+                            typeResolutionEnvironment
+                                .getSchema()
+                                .getObjectType(EntityDataFetcher.QUEUE_ENTITY))
+                    .on(
+                        src -> (src instanceof GraphLog),
+                        () ->
+                            typeResolutionEnvironment
+                                .getSchema()
+                                .getObjectType(EntityDataFetcher.GRAPH_LOG_ENTITY))
+                    .otherwise(() -> null))
         .build();
   }
 
@@ -110,6 +137,11 @@ public class GraphQLProvider {
     return RuntimeWiring.newRuntimeWiring()
         .scalar(ExtendedScalars.Json)
         .type(newTypeWiring("Message").typeResolver(new MessageTypeResolver()))
+        .type(
+            newTypeWiring("Query")
+                .dataFetcher("pipelines", sonarDataFetcher.getPipelineDataFetcher()))
+        .type(newTypeWiring("Query").dataFetcher("nodes", sonarDataFetcher.getNodeDataFetcher()))
+        .type(newTypeWiring("Query").dataFetcher("queues", sonarDataFetcher.getQueueDataFetcher()))
         .type(
             newTypeWiring("Query")
                 .dataFetcher("logs", graphLogDataFetcher.getGraphLogsDataFetcher()))
