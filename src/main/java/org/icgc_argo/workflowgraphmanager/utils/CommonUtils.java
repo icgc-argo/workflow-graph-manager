@@ -38,4 +38,9 @@ public class CommonUtils {
     }
     return newMap.build();
   }
+
+  public static <S, T> T handleReduceHashMapConflict(T a, T b) {
+    throw new RuntimeException(
+        "Beware, here there be dragons ... in the form of reducer combinators somehow being called on a non-parallel stream reduce ...");
+  }
 }

@@ -19,18 +19,20 @@
 package org.icgc_argo.workflowgraphmanager.core;
 
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.icgc_argo.workflowgraphmanager.graphql.model.Node;
 import org.icgc_argo.workflowgraphmanager.graphql.model.Pipeline;
 import org.icgc_argo.workflowgraphmanager.graphql.model.Queue;
 import org.icgc_argo.workflowgraphmanager.graphql.model.base.GraphEntity;
 import org.icgc_argo.workflowgraphmanager.repository.GraphNodeRepository;
-import org.icgc_argo.workflowgraphmanager.repository.model.GraphPipeline;
+import org.icgc_argo.workflowgraphmanager.repository.model.GraphNode;
+import org.icgc_argo.workflowgraphmanager.utils.CommonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import reactor.core.Disposable;
@@ -38,114 +40,200 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.SynchronousSink;
 
 /**
- * The Sonar Service is responsible for building and maintaining an in-memory store that represents
- * the current state of all pipelines deployed withing a single kubernetes namespace. After the
- * initial construction it will ping the various repositories for partial state updates in order to
- * maintain a near-realtime view of the current state of all aforementioned pipelines. Ref:
+ * The Sonar Service is responsible for building and maintaining in-memory state stores that
+ * represent the current state of all graph entities deployed within a single kubernetes namespace.
+ * After the initial construction it will ping the various repositories for partial state updates in
+ * order to maintain a near-realtime view of the current state of all aforementioned pipelines. Ref:
  * https://wiki.oicr.on.ca/pages/viewpage.action?pageId=154539008
  */
 @Slf4j
 @Configuration
 public class Sonar {
   private final GraphNodeRepository graphNodeRepository;
-  private ConcurrentHashMap<String, Pipeline> store;
+  private final Long shallowUpdateIntervalSeconds;
 
-  public Sonar(@Autowired GraphNodeRepository graphNodeRepository) {
+  // State Stores
+  private final ConcurrentHashMap<String, Node> nodes;
+  private final ConcurrentHashMap<String, Pipeline> pipelines;
+  private final ConcurrentHashMap<String, Queue> queues;
+
+  public Sonar(
+      @Autowired GraphNodeRepository graphNodeRepository,
+      @Value("${sonar.shallowUpdateIntervalSeconds}") Long shallowUpdateIntervalSeconds) {
     this.graphNodeRepository = graphNodeRepository;
-    initStore();
-  }
+    this.shallowUpdateIntervalSeconds = shallowUpdateIntervalSeconds;
 
-  private void initStore() {
-    log.info("Sonar initializing store ...");
-    store = new ConcurrentHashMap<>();
-    graphNodeRepository
-        .getPipelines()
-        .forEach((key, graphPipeline) -> store.put(key, Pipeline.parse(graphPipeline)));
-    log.debug("Sonar store initialized: {}", store);
-    log.info("Sonar store initialization complete!");
+    // Init Stores
+    log.info("Sonar initializing entity state stores ...");
+
+    nodes =
+        graphNodeRepository
+            .getNodes()
+            .collect(
+                Collectors.toMap(
+                    GraphNode::getId, Node::parse, (prev, next) -> next, ConcurrentHashMap::new));
+    log.debug("Sonar nodes store initialized: {}", nodes);
+
+    pipelines = new ConcurrentHashMap<>(assemblePipelinesFromNodes(nodes.values()));
+    log.debug("Sonar pipelines store initialized: {}", pipelines);
+
+    queues = new ConcurrentHashMap<>(extractQueuesFromNodes(nodes.values()));
+    log.debug("Sonar queues store initialized: {}", queues);
+
+    log.info("Sonar state stores initialization complete!");
   }
 
   @Bean
   public Disposable doShallowUpdate() {
     return Flux.generate(
-            (SynchronousSink<HashMap<String, GraphPipeline>> sink) -> {
-              sink.next(graphNodeRepository.getPipelines());
+            (SynchronousSink<Stream<GraphNode<?>>> sink) -> {
+              sink.next(graphNodeRepository.getNodes());
             })
-        .delayElements(Duration.ofSeconds(10)) // todo: make configurable
-        .doOnNext(this::shallowUpdate)
+        .delayElements(Duration.ofSeconds(shallowUpdateIntervalSeconds))
+        .doOnNext(this::shallowUpdateOnNext)
         .subscribe();
   }
 
-  public Pipeline getPipelineById(String pipeline) {
-    return store.get(pipeline);
+  public Pipeline getPipelineById(String pipelineId) {
+    return pipelines.get(pipelineId);
+  }
+
+  public List<Pipeline> getPipelines() {
+    return new ArrayList<>(pipelines.values());
+  }
+
+  public Node getNodeById(String nodeId) {
+    return nodes.get(nodeId);
+  }
+
+  public List<Node> getNodes() {
+    return new ArrayList<>(nodes.values());
+  }
+
+  public Queue getQueueByFQQN(String queueId) {
+    return queues.get(queueId);
+  }
+
+  // TODO these entity list methods will require filtering (ie. queues with nodeId == x)
+  public List<Queue> getQueues() {
+    return new ArrayList<>(queues.values());
+  }
+
+  private HashMap<String, Pipeline> assemblePipelinesFromNodes(Collection<Node> nodes) {
+    return nodes.stream()
+        .collect(Collectors.groupingBy(Node::getPipeline))
+        .entrySet()
+        .stream()
+        .reduce(
+            new HashMap<>(),
+            (HashMap<String, Pipeline> pipelines, Map.Entry<String, List<Node>> entry) -> {
+              pipelines.put(
+                  entry.getKey(),
+                  Pipeline.builder()
+                      .id(entry.getKey())
+                      .nodes(entry.getValue())
+                      .queues(
+                          entry.getValue().stream()
+                              .flatMap(node -> node.getQueues().stream())
+                              .collect(Collectors.toList()))
+                      .messages(
+                          entry.getValue().stream()
+                              .flatMap(node -> node.getMessages().stream())
+                              .collect(Collectors.toList()))
+                      .logs(
+                          entry.getValue().stream()
+                              .flatMap(node -> node.getLogs().stream())
+                              .collect(Collectors.toList()))
+                      .build());
+              return pipelines;
+            },
+            CommonUtils::handleReduceHashMapConflict);
+  }
+
+  private HashMap<String, Queue> extractQueuesFromNodes(Collection<Node> nodes) {
+    return nodes.stream()
+        .flatMap(node -> node.getQueues().stream())
+        .collect(
+            Collectors.toMap(Queue::getId, queue -> queue, (prev, next) -> next, HashMap::new));
   }
 
   /**
-   * Populates the top levels of the state tree comprised of pipelines, nodes, and a list of queues
-   * (without details), information which is gleamed via the Kubernetes API. A shallow update should
-   * not erase existing deep data unless there is an actual difference between the new state and the
-   * previous measured at the queue level. Pipeline/Node changes should be incorporated if possible
-   * without wiping the deeper data (ex. config change in a node)
+   * The onNext function called by the doShallowUpdate disposable every n seconds, where n is
+   * configurable. Using the GraphNode stream fetched by the flux generator, this method updates the
+   * shallow state maintained by this class. The keystone state store is the nodes store, all other
+   * states stores are derived from the updated nodes store. A shallow update should not erase
+   * existing deep data unless there is an actual difference between the new state and the previous
+   * state observed at the queue level.
    *
-   * @param state - list of pipelines without details deeper than the name of the queues associated
-   *     with a node
+   * @param graphNodes - stream of GraphNodes computed in the GraphNodeRepository (which is gleamed
+   *     via the Kubernetes API)
    */
-  private void shallowUpdate(HashMap<String, GraphPipeline> state) {
+  private void shallowUpdateOnNext(Stream<GraphNode<?>> graphNodes) {
     log.info("Sonar starting shallowUpdate ...");
-    log.debug("Sonar shallowUpdate received state update: {}", state);
-    state
-        .keySet()
-        .forEach(
-            pipelineId ->
-                store.merge(
-                    pipelineId,
-                    Pipeline.parse(state.get(pipelineId)),
-                    (existing, update) ->
-                        Pipeline.builder()
-                            .id(update.getId())
-                            .nodes(shallowMergeNodes(existing.getNodes(), update.getNodes()))
-                            .queues(shallowMergeQueues(existing.getQueues(), update.getQueues()))
-                            .messages(filterForActiveNodes(existing.getMessages(), update))
-                            .logs(filterForActiveNodes(existing.getLogs(), update))
-                            .build()));
-    log.debug("Sonar shallowUpdate store update complete, new store: {}", store);
+    log.debug("Sonar shallowUpdate received nodes update: {}", graphNodes);
+    graphNodes.forEach(
+        graphNode ->
+            nodes.merge(
+                graphNode.getId(),
+                Node.parse(graphNode),
+                (existing, update) ->
+                    Node.builder()
+                        .id(update.getId())
+                        .config(update.getConfig())
+                        .pipeline(update.getPipeline())
+                        .queues(shallowMergeQueues(existing.getQueues(), update.getQueues()))
+                        .messages(filterForActiveQueues(existing.getMessages(), update))
+                        .logs(filterForActiveQueues(existing.getLogs(), update))
+                        .build()));
+    log.debug("Sonar shallowUpdate of nodes complete, new nodes store: {}", nodes);
+    rebuildStores(nodes.values());
     log.info("Sonar shallowUpdate complete!");
   }
 
   /**
-   * TBD (not sure about this yet) Populates the deeper levels of the state tree, queues and below,
-   * information which is gleamed via the RabbitMQ management API. A deep update will use as input
-   * the complete state. New data WILL ALWAYS OVERWRITE existing data in a merge scenario.
+   * Merge existing queues with new ones in order to maintain as much deep state as possible
    *
-   * @param state - list of pipelines without details deeper than the name of the queues associated
-   *     with a node
+   * @param existing - list of existing queues in a node
+   * @param updates - list of latest list of queues
+   * @return a merged list of queues so that if the update contains an existing queue, the existing
+   *     value is reused, if not then the update us used. If the update does not contain and
+   *     existing queue it will be dropped.
    */
-  private void deepUpdate(HashMap<String, GraphPipeline> state) {}
-
-  private List<Node> shallowMergeNodes(List<Node> existing, List<Node> update) {
-    return update;
-  }
-
-  private List<Queue> shallowMergeQueues(List<Queue> existing, List<Queue> update) {
-    return update;
+  private List<Queue> shallowMergeQueues(List<Queue> existing, List<Queue> updates) {
+    return updates.stream()
+        .map(
+            update ->
+                existing.stream()
+                    .filter(existingQueue -> existingQueue.getId().equalsIgnoreCase(update.getId()))
+                    .findFirst()
+                    .orElse(update))
+        .collect(Collectors.toList());
   }
 
   /**
-   * Filters a list of GraphEntity, returning only the messages that that have a nodeId which is
-   * part of the pipeline passed in as the second argument
+   * Filters a list of GraphEntity, returning only the entities that have a queueId which is present
+   * in the node passed in as the second argument
    *
    * @param graphEntities - list of entities to filter
-   * @param pipeline - pipeline containing nodes which are used for the filter
-   * @return a filtered list of entities that have an associated node in the referenced pipeline
+   * @param node - node containing queues which are used for the filter
+   * @return a filtered list of entities that have an associated queue in the referenced node
    */
-  private <T extends GraphEntity> List<T> filterForActiveNodes(
-      List<T> graphEntities, Pipeline pipeline) {
+  private <T extends GraphEntity> List<T> filterForActiveQueues(List<T> graphEntities, Node node) {
     return graphEntities.stream()
         .filter(
             graphEntity ->
-                pipeline.getNodes().stream()
-                    .map(Node::getId)
-                    .anyMatch(nodeId -> nodeId.equalsIgnoreCase(graphEntity.getNode().getId())))
+                node.getQueues().stream()
+                    .map(Queue::getId)
+                    .anyMatch(queueId -> queueId.equalsIgnoreCase(graphEntity.getQueue().getId())))
         .collect(Collectors.toList());
+  }
+
+  private void rebuildStores(Collection<Node> nodes) {
+    // clear all existing states
+    List.of(pipelines, queues).forEach(ConcurrentHashMap::clear);
+
+    // rebuild from nodes
+    pipelines.putAll(assemblePipelinesFromNodes(nodes));
+    queues.putAll(extractQueuesFromNodes(nodes));
   }
 }

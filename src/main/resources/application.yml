@@ -24,6 +24,9 @@ kubernetes:
 rdpc:
   graphK8sNamespace: rdpc-collab
 
+sonar:
+  shallowUpdateIntervalSeconds: 10
+
 ---
 spring:
   config:

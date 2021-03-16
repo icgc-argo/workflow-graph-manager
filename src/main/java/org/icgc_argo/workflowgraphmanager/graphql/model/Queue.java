@@ -23,14 +23,17 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.util.List;
 import java.util.Map;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.icgc_argo.workflowgraphmanager.graphql.model.base.Message;
 import org.icgc_argo.workflowgraphmanager.repository.model.GraphExchangesQueue;
+import org.icgc_argo.workflowgraphmanager.repository.model.GraphNode;
 import org.icgc_argo.workflowgraphmanager.utils.JacksonUtils;
 
 @Data
+@Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class Queue {
@@ -38,9 +41,11 @@ public class Queue {
 
   @NonNull private String exchange;
 
-  private Pipeline pipeline;
+  @NonNull private String queue;
 
-  private Node node;
+  @NonNull private String pipeline;
+
+  @NonNull private String node;
 
   private List<Message> messages;
 
@@ -51,7 +56,20 @@ public class Queue {
     return JacksonUtils.parse(sourceMap, Queue.class);
   }
 
-  public static Queue parse(@NonNull GraphExchangesQueue graphExchangesQueue) {
-    return new Queue(graphExchangesQueue.getQueue(), graphExchangesQueue.getExchange());
+  public static Queue parse(
+      @NonNull GraphExchangesQueue graphExchangesQueue, @NonNull GraphNode<?> graphNode) {
+    return Queue.builder()
+        .id(
+            String.format(
+                "%s.%s.%s.%s",
+                graphNode.getPipeline(),
+                graphNode.getId(),
+                graphExchangesQueue.getExchange(),
+                graphExchangesQueue.getQueue()))
+        .exchange(graphExchangesQueue.getExchange())
+        .queue(graphExchangesQueue.getQueue())
+        .pipeline(graphNode.getPipeline())
+        .node(graphNode.getId())
+        .build();
   }
 }

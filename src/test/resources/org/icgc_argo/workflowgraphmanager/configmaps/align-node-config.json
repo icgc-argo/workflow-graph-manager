@@ -1,0 +1,15 @@
+{
+  "apiVersion": "v1",
+  "data": {
+    "align-node-config.json": "{\n    \"pipelineId\": \"test-pipeline\",\n    \"nodeId\": \"align-node\",\n    \"functionLanguage\": \"js\",\n    \"filters\": [\n      {\n        \"expression\": \"data.analysisType === 'sequencing_experiment'\",\n        \"reject\": false\n      }\n    ],\n    \"gqlQueryString\": \"query ANALYSIS($analysisId: String!) {\\n  analyses(filter: {analysisId: $analysisId}) {\\n    analysisId\\n    studyId\\n  }\\n}\",\n    \"activationFunction\": \"return {\\\"analysis_id\\\": data.data.analyses[0].analysisId,\\\"study_id\\\": data.data.analyses[0].studyId,\\\"score_url\\\": \\\"https:\\/\\/score.rdpc-qa.cancercollaboratory.org\\\",\\\"song_url\\\": \\\"https:\\/\\/song.rdpc-qa.cancercollaboratory.org\\\",\\\"ref_genome_fa\\\": \\\"\\/nfs-dev-1-vol-qa-1\\/reference\\/GRCh38_hla_decoy_ebv\\/GRCh38_hla_decoy_ebv.fa\\\",\\\"download\\\": {\\t\\\"song_cpus\\\": 2,\\t\\\"song_mem\\\": 2,\\t\\\"score_cpus\\\": 4,\\t\\\"score_mem\\\": 10,\\t\\\"score_url\\\": \\\"https:\\/\\/score.rdpc-qa.cancercollaboratory.org\\\",\\t\\\"song_url\\\": \\\"https:\\/\\/song.rdpc-qa.cancercollaboratory.org\\\"},\\\"cpu\\\": 6,\\\"mem\\\": 18\\r\\n};\",\n    \"input\": [\n      {\n        \"exchange\": \"start\",\n        \"queue\": \"align-node-start\"\n      },\n      {\n        \"exchange\": \"queued-align-node\",\n        \"queue\": \"queued-align-node\"\n      }\n    ],\n    \"running\": {\n      \"exchange\": \"align-node-running\",\n      \"queue\": \"align-node-running\"\n    },\n    \"complete\": {\n      \"exchange\": \"align-node-complete\",\n      \"queue\": \"align-node-complete\"\n    },\n    \"workflow\": {\n      \"url\": \"https://github.com/icgc-argo/dna-seq-processing-wfs.git\",\n      \"revision\": \"1.5.1\",\n      \"schemaName\": \"AlignParamsTest\",\n      \"schemaNamespace\": \"org.icgc_argo.workflow_graph_lib.schema\",\n      \"schemaVersion\": \"1\"\n    }\n  }\n"
+  },
+  "kind": "ConfigMap",
+  "metadata": {
+    "creationTimestamp": "2021-02-10T15:17:47Z",
+    "name": "align-node",
+    "namespace": "test",
+    "resourceVersion": "176470709",
+    "selfLink": "/api/v1/namespaces/test/configmaps/align-node",
+    "uid": "9eacc22d-4203-4df1-acb6-64728ae50b0b"
+  }
+}

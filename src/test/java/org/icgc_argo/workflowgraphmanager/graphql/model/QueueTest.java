@@ -18,38 +18,41 @@
 
 package org.icgc_argo.workflowgraphmanager.graphql.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import org.icgc_argo.workflowgraphmanager.graphql.model.base.Message;
-import org.icgc_argo.workflowgraphmanager.utils.JacksonUtils;
+import lombok.val;
+import org.icgc_argo.workflowgraphmanager.repository.model.GraphExchangesQueue;
+import org.icgc_argo.workflowgraphmanager.repository.model.GraphNode;
+import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
 
-@Data
-@Slf4j
-@Builder
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class Pipeline {
+@ActiveProfiles("test")
+public class QueueTest {
 
-  @NonNull private String id;
+  @Test
+  public void parseTest() {
+    val expected =
+        Queue.builder()
+            .id(String.format("%s.%s.%s.%s", "test-pipeline", "test-node", "start", "start"))
+            .exchange("start")
+            .queue("start")
+            .pipeline("test-pipeline")
+            .node("test-node")
+            .build();
 
-  @NonNull private List<Node> nodes;
+    val graphExchangeQueue = GraphExchangesQueue.fromExchangeString("start");
+    val graphNode =
+        GraphNode.builder()
+            .id("test-node")
+            .pipeline("test-pipeline")
+            .config(new HashMap<String, String>() {})
+            .graphExchangesQueueList(List.of(graphExchangeQueue))
+            .build();
 
-  @NonNull private List<Queue> queues;
+    val actual = Queue.parse(graphExchangeQueue, graphNode);
 
-  @NonNull private List<Message> messages;
-
-  @NonNull private List<GraphLog> logs;
-
-  @SneakyThrows
-  public static Pipeline parse(@NonNull Map<String, Object> sourceMap) {
-    return JacksonUtils.parse(sourceMap, Pipeline.class);
+    assertThat(actual).isEqualTo(expected);
   }
 }

@@ -912,7 +912,7 @@
               "successThreshold": 1,
               "timeoutSeconds": 2
             },
-            "name": "workflow-graph-ingest-two",
+            "name": "workflow-graph-ingest",
             "ports": [
               {
                 "containerPort": 8082,
@@ -1441,7 +1441,7 @@
               "successThreshold": 1,
               "timeoutSeconds": 2
             },
-            "name": "workflow-graph-ingest-three",
+            "name": "workflow-graph-ingest",
             "ports": [
               {
                 "containerPort": 8082,

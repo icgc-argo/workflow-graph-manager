@@ -19,15 +19,19 @@
 package org.icgc_argo.workflowgraphmanager.graphql.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.icgc_argo.workflowgraphmanager.graphql.model.base.Message;
+import org.icgc_argo.workflowgraphmanager.repository.model.GraphNode;
 import org.icgc_argo.workflowgraphmanager.utils.JacksonUtils;
 
 @Data
@@ -56,5 +60,19 @@ public class Node {
   @SneakyThrows
   public static Node parse(@NonNull Map<String, Object> sourceMap) {
     return JacksonUtils.parse(sourceMap, Node.class);
+  }
+
+  public static Node parse(@NonNull GraphNode<?> graphNode) {
+    return Node.builder()
+        .id(graphNode.getId())
+        .pipeline(graphNode.getPipeline())
+        .config(JacksonUtils.parse(graphNode.getConfig(), new TypeReference<>() {}))
+        .queues(
+            graphNode.getGraphExchangesQueueList().stream()
+                .map(graphExchangesQueue -> Queue.parse(graphExchangesQueue, graphNode))
+                .collect(Collectors.toList()))
+        .messages(Collections.emptyList())
+        .logs(Collections.emptyList())
+        .build();
   }
 }
