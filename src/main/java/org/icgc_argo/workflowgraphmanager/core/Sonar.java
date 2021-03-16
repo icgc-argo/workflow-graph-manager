@@ -18,11 +18,6 @@
 
 package org.icgc_argo.workflowgraphmanager.core;
 
-import java.time.Duration;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.icgc_argo.workflowgraphmanager.graphql.model.Node;
 import org.icgc_argo.workflowgraphmanager.graphql.model.Pipeline;
@@ -32,11 +27,18 @@ import org.icgc_argo.workflowgraphmanager.repository.GraphNodeRepository;
 import org.icgc_argo.workflowgraphmanager.repository.model.GraphNode;
 import org.icgc_argo.workflowgraphmanager.utils.CommonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.SynchronousSink;
+
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * The Sonar Service is responsible for building and maintaining in-memory state stores that
@@ -49,14 +51,18 @@ import reactor.core.publisher.SynchronousSink;
 @Configuration
 public class Sonar {
   private final GraphNodeRepository graphNodeRepository;
+  private final Long shallowUpdateIntervalSeconds;
 
   // State Stores
   private final ConcurrentHashMap<String, Node> nodes;
   private final ConcurrentHashMap<String, Pipeline> pipelines;
   private final ConcurrentHashMap<String, Queue> queues;
 
-  public Sonar(@Autowired GraphNodeRepository graphNodeRepository) {
+  public Sonar(
+      @Autowired GraphNodeRepository graphNodeRepository,
+      @Value("${sonar.shallowUpdateIntervalSeconds}") Long shallowUpdateIntervalSeconds) {
     this.graphNodeRepository = graphNodeRepository;
+    this.shallowUpdateIntervalSeconds = shallowUpdateIntervalSeconds;
 
     // Init Stores
     log.info("Sonar initializing entity state stores ...");
@@ -84,8 +90,8 @@ public class Sonar {
             (SynchronousSink<Stream<GraphNode<?>>> sink) -> {
               sink.next(graphNodeRepository.getNodes());
             })
-        .delayElements(Duration.ofSeconds(10)) // todo: make configurable
-        .doOnNext(this::shallowUpdate)
+        .delayElements(Duration.ofSeconds(shallowUpdateIntervalSeconds))
+        .doOnNext(this::shallowUpdateOnNext)
         .subscribe();
   }
 
@@ -115,10 +121,7 @@ public class Sonar {
   }
 
   private HashMap<String, Pipeline> assemblePipelinesFromNodes(Collection<Node> nodes) {
-    return nodes.stream()
-        .collect(Collectors.groupingBy(Node::getPipeline))
-        .entrySet()
-        .stream()
+    return nodes.stream().collect(Collectors.groupingBy(Node::getPipeline)).entrySet().stream()
         .reduce(
             new HashMap<>(),
             (HashMap<String, Pipeline> pipelines, Map.Entry<String, List<Node>> entry) -> {
@@ -153,15 +156,17 @@ public class Sonar {
   }
 
   /**
-   * Populates the top levels of the state tree comprised of pipelines, nodes, and a list of queues
-   * (without details), information which is gleamed via the Kubernetes API. A shallow update should
-   * not erase existing deep data unless there is an actual difference between the new state and the
-   * previous measured at the queue level. Pipeline/Node changes should be incorporated if possible
-   * without wiping the deeper data (ex. config change in a node) TODO: rewrite this
+   * The onNext function called by the doShallowUpdate disposable every n seconds, where n is
+   * configurable. Using the GraphNode stream fetched by the flux generator, this method updates the
+   * shallow state maintained by this class. The keystone state store is the nodes store, all other
+   * states stores are derived from the updated nodes store. A shallow update should not erase
+   * existing deep data unless there is an actual difference between the new state and the previous
+   * state observed at the queue level.
    *
-   * @param graphNodes - list of Nodes
+   * @param graphNodes - stream of GraphNodes computed in the GraphNodeRepository (which is gleamed
+   *     via the Kubernetes API)
    */
-  private void shallowUpdate(Stream<GraphNode<?>> graphNodes) {
+  private void shallowUpdateOnNext(Stream<GraphNode<?>> graphNodes) {
     log.info("Sonar starting shallowUpdate ...");
     log.debug("Sonar shallowUpdate received nodes update: {}", graphNodes);
     graphNodes.forEach(
