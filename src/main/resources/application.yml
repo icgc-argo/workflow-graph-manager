@@ -8,12 +8,12 @@ server:
   port: 8080
 
 elastic:
-  host: localhost
-  port: 9200
-  useHttps: false
-  useAuthentication: false
+  host: workflow-es.rdpc-dev.cancercollaboratory.org
+  port: 443
+  useHttps: true
+  useAuthentication: true
   username: elastic
-  password: testing
+  password: 4xbc2h5lr2zl9hfzhf96hf9w
   graphLogInfoDebugIndex: graphlog_info_debug
   graphLogErrorWarningIndex: graphlog_error_warning
 
@@ -21,7 +21,7 @@ elastic:
 kubernetes:
   master: https://kubernetes.default.svc
   trust.certificates: false
-  namespace: rdpc-collab
+  namespace: rdpc-collab-dev
 
 sonar:
   shallowUpdateIntervalSeconds: 10

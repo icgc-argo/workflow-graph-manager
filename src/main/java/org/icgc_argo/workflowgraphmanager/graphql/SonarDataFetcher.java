@@ -24,6 +24,7 @@ import org.icgc_argo.workflowgraphmanager.core.Sonar;
 import org.icgc_argo.workflowgraphmanager.graphql.model.*;
 import org.icgc_argo.workflowgraphmanager.graphql.model.base.NodeProvider;
 import org.icgc_argo.workflowgraphmanager.graphql.model.base.PipelineProvider;
+import org.icgc_argo.workflowgraphmanager.graphql.model.base.QueueProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -57,5 +58,9 @@ public class SonarDataFetcher {
 
   public DataFetcher<Node> getNestedNodeDataFetcher() {
     return environment -> sonar.getNodeById(((NodeProvider) environment.getSource()).getNode());
+  }
+
+  public DataFetcher<Queue> getNestedQueueDataFetcher() {
+    return environment -> sonar.getQueueById(((QueueProvider) environment.getSource()).getQueue());
   }
 }

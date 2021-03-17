@@ -26,12 +26,15 @@ import lombok.Data;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.icgc_argo.workflowgraphmanager.graphql.model.base.GraphEntity;
+import org.icgc_argo.workflowgraphmanager.graphql.model.base.NodeProvider;
+import org.icgc_argo.workflowgraphmanager.graphql.model.base.PipelineProvider;
+import org.icgc_argo.workflowgraphmanager.graphql.model.base.QueueProvider;
 import org.icgc_argo.workflowgraphmanager.utils.JacksonUtils;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class GraphLog implements GraphEntity {
+public class GraphLog implements PipelineProvider, NodeProvider, QueueProvider {
 
   private String id;
 
@@ -39,11 +42,11 @@ public class GraphLog implements GraphEntity {
 
   private String log;
 
-  private Queue queue;
+  private String queue;
 
-  private Node node;
+  private String node;
 
-  private Pipeline pipeline;
+  private String pipeline;
 
   private Long timestamp;
 

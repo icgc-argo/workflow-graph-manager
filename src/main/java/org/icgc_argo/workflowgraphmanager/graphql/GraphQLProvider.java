@@ -160,6 +160,11 @@ public class GraphQLProvider {
                 .dataFetcher("node", sonarDataFetcher.getNestedNodeDataFetcher())
                 .dataFetcher("logs", graphLogDataFetcher.getLogsForQueueDataFetcher()))
         .type(newTypeWiring("Message").typeResolver(new MessageTypeResolver()))
+        .type(
+            newTypeWiring("GraphLog")
+                .dataFetcher("pipeline", sonarDataFetcher.getNestedPipelineDataFetcher())
+                .dataFetcher("node", sonarDataFetcher.getNestedNodeDataFetcher())
+                .dataFetcher("queue", sonarDataFetcher.getNestedQueueDataFetcher()))
         .build();
   }
 
