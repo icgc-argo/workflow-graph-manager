@@ -161,14 +161,13 @@ type GraphRun implements Message @key(fields: "id") {
 }
 
 ### GraphLog ###
-type GraphLog @key(fields: "id") {
-    id: ID!
+type GraphLog {
     graphMessageId: ID
     log: String
-    queue: Queue
-    node: Node
-    pipeline: Pipeline
     timestamp: Long
+    pipeline: Pipeline
+    node: Node
+    queue: Queue
 }
 
 enum GraphLogFilter {
@@ -179,17 +178,17 @@ enum GraphLogFilter {
     timestamp
 }
 
-input GraphLogSort {
-    fieldName: GraphLogSortField!
-    order: SortOrder!
-}
-
 enum GraphLogSortField {
     graphMessageId,
     queue,
     node,
     pipeline,
     timestamp
+}
+
+input GraphLogSort {
+    fieldName: GraphLogSortField!
+    order: SortOrder!
 }
 
 type GraphLogsResult {

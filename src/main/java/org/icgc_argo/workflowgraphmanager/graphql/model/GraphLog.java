@@ -36,8 +36,6 @@ import org.icgc_argo.workflowgraphmanager.utils.JacksonUtils;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class GraphLog implements PipelineProvider, NodeProvider, QueueProvider {
 
-  private String id;
-
   private String graphMessageId;
 
   private String log;
