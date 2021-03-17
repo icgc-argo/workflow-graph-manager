@@ -22,11 +22,14 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.icgc_argo.workflowgraphmanager.config.constants.EsDefaults.ES_PAGE_DEFAULT_FROM;
 import static org.icgc_argo.workflowgraphmanager.config.constants.EsDefaults.ES_PAGE_DEFAULT_SIZE;
 import static org.icgc_argo.workflowgraphmanager.config.constants.SearchFields.GRAPH_MESSAGE_ID;
+import static org.icgc_argo.workflowgraphmanager.config.constants.SearchFields.PIPELINE;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import lombok.val;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.search.SearchHit;
@@ -78,6 +81,13 @@ public class GraphLogService {
     val responseSearchHits = response.getHits();
     val totalHits = responseSearchHits.getTotalHits().value;
     return new AggregationResult(totalHits);
+  }
+
+  public List<GraphLog> getGraphLogByPipelineId(String pipelineId) {
+    val response = graphLogRepository.getGraphLogs(Map.of(PIPELINE, pipelineId), null);
+    return Arrays.stream(response.getHits().getHits())
+        .map(GraphLogService::hitToGraphLog)
+        .collect(toUnmodifiableList());
   }
 
   public GraphLog getGraphLogByGraphMessageId(String graphMessageId) {

@@ -157,10 +157,6 @@ public class Sonar {
                           entry.getValue().stream()
                               .flatMap(node -> node.getMessages().stream())
                               .collect(Collectors.toList()))
-                      .logs(
-                          entry.getValue().stream()
-                              .flatMap(node -> node.getLogs().stream())
-                              .collect(Collectors.toList()))
                       .build());
               return pipelines;
             },

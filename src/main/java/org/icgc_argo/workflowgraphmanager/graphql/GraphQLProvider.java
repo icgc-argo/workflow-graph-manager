@@ -148,6 +148,9 @@ public class GraphQLProvider {
             newTypeWiring("Query")
                 .dataFetcher("logAggs", graphLogDataFetcher.getAggregateGraphLogsDataFetcher()))
         .type(
+            newTypeWiring("Pipeline")
+                .dataFetcher("logs", graphLogDataFetcher.getLogsForPipelineDataFetcher()))
+        .type(
             newTypeWiring("Node")
                 .dataFetcher("pipeline", sonarDataFetcher.getNestedPipelineDataFetcher()))
         .type(

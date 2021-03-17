@@ -20,13 +20,13 @@ package org.icgc_argo.workflowgraphmanager.graphql;
 
 import graphql.schema.DataFetcher;
 import lombok.extern.slf4j.Slf4j;
-import org.icgc_argo.workflowgraphmanager.graphql.model.AggregationResult;
-import org.icgc_argo.workflowgraphmanager.graphql.model.GraphLog;
-import org.icgc_argo.workflowgraphmanager.graphql.model.QueryArgs;
-import org.icgc_argo.workflowgraphmanager.graphql.model.SearchResult;
+import org.icgc_argo.workflowgraphmanager.graphql.model.*;
+import org.icgc_argo.workflowgraphmanager.graphql.model.base.PipelineProvider;
 import org.icgc_argo.workflowgraphmanager.service.GraphLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Slf4j
 @Component
@@ -48,5 +48,11 @@ public class GraphLogDataFetcher {
   public DataFetcher<AggregationResult> getAggregateGraphLogsDataFetcher() {
     return environment ->
         graphLogService.aggregateGraphLogs(new QueryArgs(environment).getFilter());
+  }
+
+  public DataFetcher<List<GraphLog>> getLogsForPipelineDataFetcher() {
+    return environment ->
+        graphLogService.getGraphLogByPipelineId(
+            ((PipelineProvider) environment.getSource()).getPipeline());
   }
 }

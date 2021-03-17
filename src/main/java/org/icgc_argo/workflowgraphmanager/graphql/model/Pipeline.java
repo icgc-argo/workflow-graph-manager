@@ -46,8 +46,6 @@ public class Pipeline {
 
   @NonNull private List<Message> messages;
 
-  @NonNull private List<GraphLog> logs;
-
   @SneakyThrows
   public static Pipeline parse(@NonNull Map<String, Object> sourceMap) {
     return JacksonUtils.parse(sourceMap, Pipeline.class);
