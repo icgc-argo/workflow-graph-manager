@@ -18,28 +18,23 @@
 
 package org.icgc_argo.workflowgraphmanager.service;
 
-import static java.util.stream.Collectors.toUnmodifiableList;
-import static org.icgc_argo.workflowgraphmanager.config.constants.EsDefaults.ES_PAGE_DEFAULT_FROM;
-import static org.icgc_argo.workflowgraphmanager.config.constants.EsDefaults.ES_PAGE_DEFAULT_SIZE;
-import static org.icgc_argo.workflowgraphmanager.config.constants.SearchFields.GRAPH_MESSAGE_ID;
-import static org.icgc_argo.workflowgraphmanager.config.constants.SearchFields.PIPELINE;
+import lombok.val;
+import org.elasticsearch.action.search.MultiSearchResponse;
+import org.elasticsearch.search.SearchHit;
+import org.icgc_argo.workflowgraphmanager.graphql.model.*;
+import org.icgc_argo.workflowgraphmanager.repository.GraphLogRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-import lombok.val;
-import org.elasticsearch.action.search.MultiSearchResponse;
-import org.elasticsearch.search.SearchHit;
-import org.icgc_argo.workflowgraphmanager.graphql.model.AggregationResult;
-import org.icgc_argo.workflowgraphmanager.graphql.model.GraphLog;
-import org.icgc_argo.workflowgraphmanager.graphql.model.QueryArgs;
-import org.icgc_argo.workflowgraphmanager.graphql.model.SearchResult;
-import org.icgc_argo.workflowgraphmanager.repository.GraphLogRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import static java.util.stream.Collectors.toUnmodifiableList;
+import static org.icgc_argo.workflowgraphmanager.config.constants.EsDefaults.ES_PAGE_DEFAULT_FROM;
+import static org.icgc_argo.workflowgraphmanager.config.constants.EsDefaults.ES_PAGE_DEFAULT_SIZE;
+import static org.icgc_argo.workflowgraphmanager.config.constants.SearchFields.*;
 
 @Service
 public class GraphLogService {
@@ -85,6 +80,23 @@ public class GraphLogService {
 
   public List<GraphLog> getGraphLogByPipelineId(String pipelineId) {
     val response = graphLogRepository.getGraphLogs(Map.of(PIPELINE, pipelineId), null);
+    return Arrays.stream(response.getHits().getHits())
+        .map(GraphLogService::hitToGraphLog)
+        .collect(toUnmodifiableList());
+  }
+
+  public List<GraphLog> getGraphLogByNodeId(String nodeId) {
+    val response = graphLogRepository.getGraphLogs(Map.of(NODE, nodeId), null);
+    return Arrays.stream(response.getHits().getHits())
+        .map(GraphLogService::hitToGraphLog)
+        .collect(toUnmodifiableList());
+  }
+
+  public List<GraphLog> getGraphLogByQueue(Queue queue) {
+    val response =
+        graphLogRepository.getGraphLogs(
+            Map.of(PIPELINE, queue.getPipeline(), NODE, queue.getNode(), QUEUE, queue.getQueue()),
+            null);
     return Arrays.stream(response.getHits().getHits())
         .map(GraphLogService::hitToGraphLog)
         .collect(toUnmodifiableList());

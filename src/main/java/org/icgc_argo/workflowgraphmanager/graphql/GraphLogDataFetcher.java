@@ -53,6 +53,18 @@ public class GraphLogDataFetcher {
   public DataFetcher<List<GraphLog>> getLogsForPipelineDataFetcher() {
     return environment ->
         graphLogService.getGraphLogByPipelineId(
-            ((PipelineProvider) environment.getSource()).getPipeline());
+            ((Pipeline) environment.getSource()).getId());
+  }
+
+  public DataFetcher<List<GraphLog>> getLogsForNodeDataFetcher() {
+    return environment ->
+            graphLogService.getGraphLogByNodeId(
+                    ((Node) environment.getSource()).getId());
+  }
+
+  public DataFetcher<List<GraphLog>> getLogsForQueueDataFetcher() {
+    return environment ->
+            graphLogService.getGraphLogByQueue(
+                    ((Queue) environment.getSource()));
   }
 }

@@ -50,8 +50,6 @@ public class Node implements PipelineProvider {
 
   @NonNull private List<Message> messages;
 
-  @NonNull private List<GraphLog> logs;
-
   private Boolean enabled;
 
   private Integer capacity;
@@ -73,7 +71,6 @@ public class Node implements PipelineProvider {
                 .map(graphExchangesQueue -> Queue.parse(graphExchangesQueue, graphNode))
                 .collect(Collectors.toList()))
         .messages(Collections.emptyList())
-        .logs(Collections.emptyList())
         .build();
   }
 }

@@ -52,8 +52,6 @@ public class Queue implements PipelineProvider, NodeProvider {
 
   private List<Message> messages;
 
-  private List<GraphLog> logs;
-
   @SneakyThrows
   public static Queue parse(@NonNull Map<String, Object> sourceMap) {
     return JacksonUtils.parse(sourceMap, Queue.class);

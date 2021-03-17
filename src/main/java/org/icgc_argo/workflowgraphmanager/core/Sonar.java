@@ -196,7 +196,6 @@ public class Sonar {
                         .pipeline(update.getPipeline())
                         .queues(shallowMergeQueues(existing.getQueues(), update.getQueues()))
                         .messages(filterForActiveQueues(existing.getMessages(), update))
-                        .logs(filterForActiveQueues(existing.getLogs(), update))
                         .build()));
     log.debug("Sonar shallowUpdate of nodes complete, new nodes store: {}", nodes);
     rebuildStores(nodes.values());
