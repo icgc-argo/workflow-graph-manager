@@ -22,28 +22,26 @@ import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Slf4j
 @Configuration
 public class KubernetesConfig {
-  private final RdpcProperties rdpcProperties;
+  private final String namespace;
 
   @Autowired
-  public KubernetesConfig(@NonNull RdpcProperties rdpcProperties) {
-    this.rdpcProperties = rdpcProperties;
-    log.info(
-        "Connecting to Kubernetes, using namespace: {}", rdpcProperties.getGraphK8sNamespace());
+  public KubernetesConfig(@Value("${kubernetes.namespace}") String namespace) {
+    this.namespace = namespace;
+    log.info("Connecting to Kubernetes, using namespace: {}", namespace);
   }
 
   @Bean("KubernetesClient")
   public KubernetesClient kubernetesClient() {
-    Config config =
-        new ConfigBuilder().withNamespace(rdpcProperties.getGraphK8sNamespace()).build();
+    Config config = new ConfigBuilder().withNamespace(namespace).build();
     return new DefaultKubernetesClient(config);
   }
 }

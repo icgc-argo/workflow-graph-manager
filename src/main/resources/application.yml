@@ -20,9 +20,8 @@ elastic:
 # https://github.com/fabric8io/kubernetes-client#configuring-the-client
 kubernetes:
   master: https://kubernetes.default.svc
-
-rdpc:
-  graphK8sNamespace: rdpc-collab
+  trust.certificates: false
+  namespace: rdpc-collab
 
 sonar:
   shallowUpdateIntervalSeconds: 10
