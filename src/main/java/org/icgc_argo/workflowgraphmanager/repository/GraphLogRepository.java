@@ -18,24 +18,11 @@
 
 package org.icgc_argo.workflowgraphmanager.repository;
 
-import static java.util.Collections.emptyList;
-import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
-import static org.elasticsearch.search.sort.SortOrder.ASC;
-import static org.icgc_argo.workflowgraphmanager.config.constants.SearchFields.*;
-import static org.icgc_argo.workflowgraphmanager.utils.ElasticsearchQueryUtils.queryFromArgs;
-import static org.icgc_argo.workflowgraphmanager.utils.ElasticsearchQueryUtils.sortsToEsSortBuilders;
-
 import com.google.common.collect.ImmutableMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.elasticsearch.action.search.MultiSearchRequest;
-import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -50,6 +37,17 @@ import org.icgc_argo.workflowgraphmanager.graphql.model.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+
+import static java.util.Collections.emptyList;
+import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
+import static org.elasticsearch.search.sort.SortOrder.ASC;
+import static org.icgc_argo.workflowgraphmanager.config.constants.SearchFields.*;
+import static org.icgc_argo.workflowgraphmanager.utils.ElasticsearchQueryUtils.queryFromArgs;
+import static org.icgc_argo.workflowgraphmanager.utils.ElasticsearchQueryUtils.sortsToEsSortBuilders;
 
 @Slf4j
 @Component
@@ -108,26 +106,6 @@ public class GraphLogRepository {
     return execute(searchSourceBuilder);
   }
 
-  public MultiSearchResponse getGraphLogs(
-      List<Map<String, Object>> multipleFilters, Map<String, Integer> page) {
-    List<SearchSourceBuilder> searchSourceBuilders =
-        multipleFilters.stream()
-            .filter(f -> f != null && f.size() != 0)
-            .map(f -> createSearchSourceBuilder(queryFromArgs(QUERY_RESOLVER, f), page))
-            .collect(Collectors.toList());
-
-    if (searchSourceBuilders.isEmpty()) {
-      searchSourceBuilders.add(createSearchSourceBuilder(matchAllQuery(), page));
-    }
-
-    return execute(searchSourceBuilders);
-  }
-
-  private SearchSourceBuilder createSearchSourceBuilder(
-      AbstractQueryBuilder<?> query, Map<String, Integer> page) {
-    return createSearchSourceBuilder(query, page, emptyList());
-  }
-
   private SearchSourceBuilder createSearchSourceBuilder(
       AbstractQueryBuilder<?> query, Map<String, Integer> page, List<Sort> sorts) {
     val searchSourceBuilder = new SearchSourceBuilder();
@@ -154,12 +132,5 @@ public class GraphLogRepository {
     val searchRequest = new SearchRequest(graphLogErrorWarningIndex, graphLogInfoDebugIndex);
     searchRequest.source(builder);
     return client.search(searchRequest, RequestOptions.DEFAULT);
-  }
-
-  @SneakyThrows
-  private MultiSearchResponse execute(@NonNull List<SearchSourceBuilder> builders) {
-    MultiSearchRequest mSearchRequest = new MultiSearchRequest();
-    builders.forEach(b -> mSearchRequest.add(new SearchRequest().source(b)));
-    return client.msearch(mSearchRequest, RequestOptions.DEFAULT);
   }
 }

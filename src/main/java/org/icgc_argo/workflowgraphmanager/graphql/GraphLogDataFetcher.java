@@ -21,7 +21,6 @@ package org.icgc_argo.workflowgraphmanager.graphql;
 import graphql.schema.DataFetcher;
 import lombok.extern.slf4j.Slf4j;
 import org.icgc_argo.workflowgraphmanager.graphql.model.*;
-import org.icgc_argo.workflowgraphmanager.graphql.model.base.PipelineProvider;
 import org.icgc_argo.workflowgraphmanager.service.GraphLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -52,19 +51,15 @@ public class GraphLogDataFetcher {
 
   public DataFetcher<List<GraphLog>> getLogsForPipelineDataFetcher() {
     return environment ->
-        graphLogService.getGraphLogByPipelineId(
-            ((Pipeline) environment.getSource()).getId());
+        graphLogService.getGraphLogByPipelineId(((Pipeline) environment.getSource()).getId());
   }
 
   public DataFetcher<List<GraphLog>> getLogsForNodeDataFetcher() {
     return environment ->
-            graphLogService.getGraphLogByNodeId(
-                    ((Node) environment.getSource()).getId());
+        graphLogService.getGraphLogByNodeId(((Node) environment.getSource()).getId());
   }
 
   public DataFetcher<List<GraphLog>> getLogsForQueueDataFetcher() {
-    return environment ->
-            graphLogService.getGraphLogByQueue(
-                    ((Queue) environment.getSource()));
+    return environment -> graphLogService.getGraphLogByQueue(environment.getSource());
   }
 }
