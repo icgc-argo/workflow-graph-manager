@@ -18,23 +18,20 @@
 
 package org.icgc_argo.workflowgraphmanager.service;
 
+import static java.util.stream.Collectors.toUnmodifiableList;
+import static org.icgc_argo.workflowgraphmanager.config.constants.EsDefaults.ES_PAGE_DEFAULT_FROM;
+import static org.icgc_argo.workflowgraphmanager.config.constants.EsDefaults.ES_PAGE_DEFAULT_SIZE;
+import static org.icgc_argo.workflowgraphmanager.config.constants.SearchFields.*;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import lombok.val;
-import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.search.SearchHit;
 import org.icgc_argo.workflowgraphmanager.graphql.model.*;
 import org.icgc_argo.workflowgraphmanager.repository.GraphLogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import static java.util.stream.Collectors.toUnmodifiableList;
-import static org.icgc_argo.workflowgraphmanager.config.constants.EsDefaults.ES_PAGE_DEFAULT_FROM;
-import static org.icgc_argo.workflowgraphmanager.config.constants.EsDefaults.ES_PAGE_DEFAULT_SIZE;
-import static org.icgc_argo.workflowgraphmanager.config.constants.SearchFields.*;
 
 @Service
 public class GraphLogService {
@@ -79,53 +76,31 @@ public class GraphLogService {
   }
 
   public List<GraphLog> getGraphLogByPipelineId(String pipelineId) {
-    val response = graphLogRepository.getGraphLogs(Map.of(PIPELINE, pipelineId), null);
-    return Arrays.stream(response.getHits().getHits())
-        .map(GraphLogService::hitToGraphLog)
-        .collect(toUnmodifiableList());
+    return getGraphLogs(Map.of(PIPELINE, pipelineId), null);
   }
 
   public List<GraphLog> getGraphLogByNodeId(String nodeId) {
-    val response = graphLogRepository.getGraphLogs(Map.of(NODE, nodeId), null);
-    return Arrays.stream(response.getHits().getHits())
-        .map(GraphLogService::hitToGraphLog)
-        .collect(toUnmodifiableList());
+    return getGraphLogs(Map.of(NODE, nodeId), null);
   }
 
   public List<GraphLog> getGraphLogByQueue(Queue queue) {
-    val response =
-        graphLogRepository.getGraphLogs(
-            Map.of(PIPELINE, queue.getPipeline(), NODE, queue.getNode(), QUEUE, queue.getQueue()),
-            null);
-    return Arrays.stream(response.getHits().getHits())
-        .map(GraphLogService::hitToGraphLog)
-        .collect(toUnmodifiableList());
+    return getGraphLogs(
+        Map.of(PIPELINE, queue.getPipeline(), NODE, queue.getNode(), QUEUE, queue.getQueue()));
   }
 
-  public GraphLog getGraphLogByGraphMessageId(String graphMessageId) {
-    val response = graphLogRepository.getGraphLogs(Map.of(GRAPH_MESSAGE_ID, graphMessageId), null);
-    val runOpt =
-        Arrays.stream(response.getHits().getHits()).map(GraphLogService::hitToGraphLog).findFirst();
-    return runOpt.orElse(null);
+  public List<GraphLog> getGraphLogsByGraphMessageId(String graphMessageId) {
+    return getGraphLogs(Map.of(GRAPH_MESSAGE_ID, graphMessageId));
+  }
+
+  public List<GraphLog> getGraphLogs(Map<String, Object> filter) {
+    val response = graphLogRepository.getGraphLogs(filter, null);
+    val hitStream = Arrays.stream(response.getHits().getHits());
+    return hitStream.map(GraphLogService::hitToGraphLog).collect(toUnmodifiableList());
   }
 
   public List<GraphLog> getGraphLogs(Map<String, Object> filter, Map<String, Integer> page) {
     val response = graphLogRepository.getGraphLogs(filter, page);
     val hitStream = Arrays.stream(response.getHits().getHits());
     return hitStream.map(GraphLogService::hitToGraphLog).collect(toUnmodifiableList());
-  }
-
-  public List<GraphLog> getGraphLogs(List<Map<String, Object>> multipleFilters) {
-    val multiSearchResponse = graphLogRepository.getGraphLogs(multipleFilters, null);
-    return Arrays.stream(multiSearchResponse.getResponses())
-        .map(MultiSearchResponse.Item::getResponse)
-        .map(
-            res ->
-                Arrays.stream(res.getHits().getHits())
-                    .map(GraphLogService::hitToGraphLog)
-                    .findFirst())
-        .filter(Optional::isPresent)
-        .map(Optional::get)
-        .collect(toUnmodifiableList());
   }
 }

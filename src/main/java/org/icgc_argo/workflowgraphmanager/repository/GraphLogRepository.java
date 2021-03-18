@@ -29,13 +29,10 @@ import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.elasticsearch.action.search.MultiSearchRequest;
-import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -108,26 +105,6 @@ public class GraphLogRepository {
     return execute(searchSourceBuilder);
   }
 
-  public MultiSearchResponse getGraphLogs(
-      List<Map<String, Object>> multipleFilters, Map<String, Integer> page) {
-    List<SearchSourceBuilder> searchSourceBuilders =
-        multipleFilters.stream()
-            .filter(f -> f != null && f.size() != 0)
-            .map(f -> createSearchSourceBuilder(queryFromArgs(QUERY_RESOLVER, f), page))
-            .collect(Collectors.toList());
-
-    if (searchSourceBuilders.isEmpty()) {
-      searchSourceBuilders.add(createSearchSourceBuilder(matchAllQuery(), page));
-    }
-
-    return execute(searchSourceBuilders);
-  }
-
-  private SearchSourceBuilder createSearchSourceBuilder(
-      AbstractQueryBuilder<?> query, Map<String, Integer> page) {
-    return createSearchSourceBuilder(query, page, emptyList());
-  }
-
   private SearchSourceBuilder createSearchSourceBuilder(
       AbstractQueryBuilder<?> query, Map<String, Integer> page, List<Sort> sorts) {
     val searchSourceBuilder = new SearchSourceBuilder();
@@ -154,12 +131,5 @@ public class GraphLogRepository {
     val searchRequest = new SearchRequest(graphLogErrorWarningIndex, graphLogInfoDebugIndex);
     searchRequest.source(builder);
     return client.search(searchRequest, RequestOptions.DEFAULT);
-  }
-
-  @SneakyThrows
-  private MultiSearchResponse execute(@NonNull List<SearchSourceBuilder> builders) {
-    MultiSearchRequest mSearchRequest = new MultiSearchRequest();
-    builders.forEach(b -> mSearchRequest.add(new SearchRequest().source(b)));
-    return client.msearch(mSearchRequest, RequestOptions.DEFAULT);
   }
 }

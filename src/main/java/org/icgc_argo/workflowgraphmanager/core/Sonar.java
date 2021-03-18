@@ -181,7 +181,7 @@ public class Sonar {
    * @param graphNodes - stream of GraphNodes computed in the GraphNodeRepository (which is gleamed
    *     via the Kubernetes API)
    */
-  private void shallowUpdateOnNext(Stream<GraphNode<?>> graphNodes) {
+  void shallowUpdateOnNext(Stream<GraphNode<?>> graphNodes) {
     log.info("Sonar starting shallowUpdate ...");
     log.debug("Sonar shallowUpdate received nodes update: {}", graphNodes);
     graphNodes.forEach(

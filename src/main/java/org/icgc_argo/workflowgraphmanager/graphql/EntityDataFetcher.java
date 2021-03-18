@@ -55,17 +55,6 @@ public class EntityDataFetcher {
                 values ->
                     PatternMatch.match(values.get("__typename"))
                         .on(
-                            typename -> typename.equals(GRAPH_LOG_ENTITY),
-                            () -> {
-                              final Object graphMessageId = values.get("graphMessageId");
-                              if (graphMessageId instanceof String) {
-                                return graphLogService.getGraphLogByGraphMessageId(
-                                    (String) graphMessageId);
-                              } else {
-                                return null;
-                              }
-                            })
-                        .on(
                             typename -> typename.equals(PIPELINE_ENTITY),
                             () -> {
                               final Object pipelineId = values.get("id");

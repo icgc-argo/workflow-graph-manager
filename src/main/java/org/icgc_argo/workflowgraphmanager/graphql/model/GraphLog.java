@@ -25,7 +25,6 @@ import java.util.Map;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.SneakyThrows;
-import org.icgc_argo.workflowgraphmanager.graphql.model.base.GraphEntity;
 import org.icgc_argo.workflowgraphmanager.graphql.model.base.NodeProvider;
 import org.icgc_argo.workflowgraphmanager.graphql.model.base.PipelineProvider;
 import org.icgc_argo.workflowgraphmanager.graphql.model.base.QueueProvider;
