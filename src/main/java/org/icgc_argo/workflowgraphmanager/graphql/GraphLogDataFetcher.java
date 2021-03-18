@@ -19,13 +19,12 @@
 package org.icgc_argo.workflowgraphmanager.graphql;
 
 import graphql.schema.DataFetcher;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.icgc_argo.workflowgraphmanager.graphql.model.*;
 import org.icgc_argo.workflowgraphmanager.service.GraphLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Slf4j
 @Component

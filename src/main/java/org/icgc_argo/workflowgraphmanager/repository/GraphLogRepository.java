@@ -18,7 +18,17 @@
 
 package org.icgc_argo.workflowgraphmanager.repository;
 
+import static java.util.Collections.emptyList;
+import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
+import static org.elasticsearch.search.sort.SortOrder.ASC;
+import static org.icgc_argo.workflowgraphmanager.config.constants.SearchFields.*;
+import static org.icgc_argo.workflowgraphmanager.utils.ElasticsearchQueryUtils.queryFromArgs;
+import static org.icgc_argo.workflowgraphmanager.utils.ElasticsearchQueryUtils.sortsToEsSortBuilders;
+
 import com.google.common.collect.ImmutableMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -37,17 +47,6 @@ import org.icgc_argo.workflowgraphmanager.graphql.model.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-
-import static java.util.Collections.emptyList;
-import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
-import static org.elasticsearch.search.sort.SortOrder.ASC;
-import static org.icgc_argo.workflowgraphmanager.config.constants.SearchFields.*;
-import static org.icgc_argo.workflowgraphmanager.utils.ElasticsearchQueryUtils.queryFromArgs;
-import static org.icgc_argo.workflowgraphmanager.utils.ElasticsearchQueryUtils.sortsToEsSortBuilders;
 
 @Slf4j
 @Component

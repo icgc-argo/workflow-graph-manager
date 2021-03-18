@@ -18,21 +18,20 @@
 
 package org.icgc_argo.workflowgraphmanager.service;
 
+import static java.util.stream.Collectors.toUnmodifiableList;
+import static org.icgc_argo.workflowgraphmanager.config.constants.EsDefaults.ES_PAGE_DEFAULT_FROM;
+import static org.icgc_argo.workflowgraphmanager.config.constants.EsDefaults.ES_PAGE_DEFAULT_SIZE;
+import static org.icgc_argo.workflowgraphmanager.config.constants.SearchFields.*;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import lombok.val;
 import org.elasticsearch.search.SearchHit;
 import org.icgc_argo.workflowgraphmanager.graphql.model.*;
 import org.icgc_argo.workflowgraphmanager.repository.GraphLogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
-import static java.util.stream.Collectors.toUnmodifiableList;
-import static org.icgc_argo.workflowgraphmanager.config.constants.EsDefaults.ES_PAGE_DEFAULT_FROM;
-import static org.icgc_argo.workflowgraphmanager.config.constants.EsDefaults.ES_PAGE_DEFAULT_SIZE;
-import static org.icgc_argo.workflowgraphmanager.config.constants.SearchFields.*;
 
 @Service
 public class GraphLogService {
