@@ -45,7 +45,7 @@ public class SonarTest {
   private final Sonar sonar;
 
   public SonarTest() {
-    loadK8sWithBaseResourcesAnd(client, "fixtures/multi-pipeline.json");
+    loadK8sWithBaseResourcesAnd(client, "fixtures/pods/multi-pipeline.json");
     this.graphNodeRepository = new GraphNodeRepository(client);
     this.sonar = new Sonar(graphNodeRepository, 10L);
   }
@@ -125,8 +125,8 @@ public class SonarTest {
     client
         .configMaps()
         .create(
-            readValue(loadResource("configmaps/variant-caller-node-config.json"), ConfigMap.class));
-    client.pods().create(readValue(loadResource("fixtures/variant-caller-pod.json"), Pod.class));
+            readValue(loadResource("fixtures/configmaps/variant-caller-node-config.json"), ConfigMap.class));
+    client.pods().create(readValue(loadResource("fixtures/pods/variant-caller-pod.json"), Pod.class));
 
     // do update
     sonar.shallowUpdateOnNext(graphNodeRepository.getNodes());

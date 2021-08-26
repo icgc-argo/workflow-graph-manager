@@ -48,9 +48,9 @@ public class TestUtils {
 
     // load all configmaps
     List.of(
-            "configmaps/align-node-config.json",
-            "configmaps/align-node-two-config.json",
-            "configmaps/align-node-three-config.json")
+            "fixtures/configmaps/align-node-config.json",
+            "fixtures/configmaps/align-node-two-config.json",
+            "fixtures/configmaps/align-node-three-config.json")
         .forEach(
             configMapName -> {
               // load config map
@@ -58,7 +58,7 @@ public class TestUtils {
             });
 
     // read decoy pods
-    val decoyPodsJson = readValue(loadResource("fixtures/decoy-pods.json"), Map.class);
+    val decoyPodsJson = readValue(loadResource("fixtures/pods/decoy-pods.json"), Map.class);
 
     // Merge pods with decoy stream and load mock K8s
     Stream.concat(pods, ((List<Map<String, Object>>) decoyPodsJson.get("items")).stream())

@@ -45,7 +45,7 @@ public class GraphNodeRepositoryTest {
 
   @Test
   public void singlePipelineTest() {
-    loadK8sWithBaseResourcesAnd(client, "fixtures/single-pipeline.json");
+    loadK8sWithBaseResourcesAnd(client, "fixtures/pods/single-pipeline.json");
 
     val nodes = graphNodeRepository.getNodes().collect(Collectors.toList());
 
@@ -58,7 +58,7 @@ public class GraphNodeRepositoryTest {
 
   @Test
   public void multiPipelinePipelineTest() {
-    loadK8sWithBaseResourcesAnd(client, "fixtures/multi-pipeline.json");
+    loadK8sWithBaseResourcesAnd(client, "fixtures/pods/multi-pipeline.json");
 
     val nodes = graphNodeRepository.getNodes().collect(Collectors.toList());
     val expectedNodeIds =
@@ -78,7 +78,7 @@ public class GraphNodeRepositoryTest {
 
   @Test
   public void graphNodeConfigTest() {
-    loadK8sWithBaseResourcesAnd(client, "fixtures/single-pipeline.json");
+    loadK8sWithBaseResourcesAnd(client, "fixtures/pods/single-pipeline.json");
 
     val pod = client.pods().withName("align-node-workflow-graph-node-86cf986995-c5gvk").get();
     val config = graphNodeRepository.parseGraphNodeConfig(pod);
@@ -89,7 +89,7 @@ public class GraphNodeRepositoryTest {
 
   @Test
   public void graphIngestNodeConfigTest() {
-    loadK8sWithBaseResourcesAnd(client, "fixtures/single-pipeline.json");
+    loadK8sWithBaseResourcesAnd(client, "fixtures/pods/single-pipeline.json");
 
     val pod = client.pods().withName("ingest-workflow-graph-ingest-769f477677-64cp8").get();
     val config = graphNodeRepository.parseGraphIngestNodeConfig(pod);
@@ -100,7 +100,7 @@ public class GraphNodeRepositoryTest {
 
   @Test
   public void graphNodeQueueTest() {
-    loadK8sWithBaseResourcesAnd(client, "fixtures/single-pipeline.json");
+    loadK8sWithBaseResourcesAnd(client, "fixtures/pods/single-pipeline.json");
 
     val nodes = graphNodeRepository.getNodes().collect(Collectors.toList());
 

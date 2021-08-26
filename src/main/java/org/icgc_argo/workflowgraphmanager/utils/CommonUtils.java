@@ -20,12 +20,14 @@ package org.icgc_argo.workflowgraphmanager.utils;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
+
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 @Slf4j
+@NoArgsConstructor
 public class CommonUtils {
-  private CommonUtils() {}
 
   public static <K, V> ImmutableMap<K, V> asImmutableMap(Object obj) {
     val newMap = ImmutableMap.<K, V>builder();
