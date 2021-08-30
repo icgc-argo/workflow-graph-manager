@@ -39,8 +39,9 @@ public class TestUtils {
 
   public static void loadK8sWithBaseResourcesAnd(KubernetesClient client, String resourcePath) {
 
-    // clear all pods
+    // clear all cluster resources
     client.pods().delete();
+    client.configMaps().delete();
 
     val pods =
         ((List<Map<String, Object>>) readValue(loadResource(resourcePath), Map.class).get("items"))

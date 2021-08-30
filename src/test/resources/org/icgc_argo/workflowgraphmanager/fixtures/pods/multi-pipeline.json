@@ -296,17 +296,17 @@
           "seccomp.security.alpha.kubernetes.io/pod": "docker/default"
         },
         "creationTimestamp": "2021-02-12T17:32:08Z",
-        "generateName": "ingest-workflow-graph-ingest-769f477677-",
+        "generateName": "ingest-workflow-graph-ingest-83gus85hny-",
         "labels": {
           "app.kubernetes.io/instance": "ingest",
           "app.kubernetes.io/name": "workflow-graph-ingest",
           "common.org.icgc.argo/type": "workflow-graph",
-          "pod-template-hash": "769f477677",
+          "pod-template-hash": "83gus85hny",
           "workflow-graph.org.icgc.argo/app": "workflow-graph-ingest-node",
           "workflow-graph.org.icgc.argo/node-id": "start",
           "workflow-graph.org.icgc.argo/pipeline-id": "test-pipeline"
         },
-        "name": "ingest-workflow-graph-ingest-769f477677-64cp8",
+        "name": "ingest-workflow-graph-ingest-83gus85hny-64cp8",
         "namespace": "test",
         "ownerReferences": [
           {
@@ -314,12 +314,12 @@
             "blockOwnerDeletion": true,
             "controller": true,
             "kind": "ReplicaSet",
-            "name": "ingest-workflow-graph-ingest-769f477677",
+            "name": "ingest-workflow-graph-ingest-83gus85hny",
             "uid": "df9faa9d-771f-4f97-9787-07b73e73514d"
           }
         ],
         "resourceVersion": "177715594",
-        "selfLink": "/api/v1/namespaces/test/pods/ingest-workflow-graph-ingest-769f477677-64cp8",
+        "selfLink": "/api/v1/namespaces/test/pods/ingest-workflow-graph-ingest-83gus85hny-64cp8",
         "uid": "602f69e7-d584-4937-8440-00dbdc8c27dc"
       },
       "spec": {
@@ -825,17 +825,17 @@
           "seccomp.security.alpha.kubernetes.io/pod": "docker/default"
         },
         "creationTimestamp": "2021-02-12T17:32:08Z",
-        "generateName": "ingest-two-workflow-graph-ingest-769f477677-",
+        "generateName": "ingest-two-workflow-graph-ingest-48ght76as5-",
         "labels": {
           "app.kubernetes.io/instance": "ingest-two",
           "app.kubernetes.io/name": "workflow-graph-ingest",
           "common.org.icgc.argo/type": "workflow-graph",
-          "pod-template-hash": "769f477677",
+          "pod-template-hash": "48ght76as5",
           "workflow-graph.org.icgc.argo/app": "workflow-graph-ingest-node",
           "workflow-graph.org.icgc.argo/node-id": "start-two",
           "workflow-graph.org.icgc.argo/pipeline-id": "test-pipeline-two"
         },
-        "name": "ingest-workflow-graph-ingest-7695677677-12cp8",
+        "name": "ingest-workflow-graph-ingest-48ght76as5-12cp8",
         "namespace": "test",
         "ownerReferences": [
           {
@@ -843,12 +843,12 @@
             "blockOwnerDeletion": true,
             "controller": true,
             "kind": "ReplicaSet",
-            "name": "ingest-workflow-graph-ingest-769f477677",
+            "name": "ingest-workflow-graph-ingest-48ght76as5",
             "uid": "df9faa9d-771f-4f97-9787-07b73e73514d"
           }
         ],
         "resourceVersion": "177715594",
-        "selfLink": "/api/v1/namespaces/test/pods/ingest-workflow-graph-ingest-7695677677-12cp8",
+        "selfLink": "/api/v1/namespaces/test/pods/ingest-workflow-graph-ingest-48ght76as5-12cp8",
         "uid": "602f69e7-d584-4937-8440-00dbdc8c27dc"
       },
       "spec": {
@@ -1354,17 +1354,17 @@
           "seccomp.security.alpha.kubernetes.io/pod": "docker/default"
         },
         "creationTimestamp": "2021-02-12T17:32:08Z",
-        "generateName": "ingest-three-workflow-graph-ingest-769f477677-",
+        "generateName": "ingest-three-workflow-graph-ingest-09df1yh54v-",
         "labels": {
           "app.kubernetes.io/instance": "ingest-three",
           "app.kubernetes.io/name": "workflow-graph-ingest",
           "common.org.icgc.argo/type": "workflow-graph",
-          "pod-template-hash": "769f477677",
+          "pod-template-hash": "09df1yh54v",
           "workflow-graph.org.icgc.argo/app": "workflow-graph-ingest-node",
           "workflow-graph.org.icgc.argo/node-id": "start-three",
           "workflow-graph.org.icgc.argo/pipeline-id": "test-pipeline-three"
         },
-        "name": "ingest-workflow-graph-ingest-7695677677-12cp8",
+        "name": "ingest-workflow-graph-ingest-09df1yh54v-12cp8",
         "namespace": "test",
         "ownerReferences": [
           {
@@ -1372,12 +1372,12 @@
             "blockOwnerDeletion": true,
             "controller": true,
             "kind": "ReplicaSet",
-            "name": "ingest-workflow-graph-ingest-769f477677",
+            "name": "ingest-workflow-graph-ingest-09df1yh54v",
             "uid": "gh9faa9d-771f-4f97-9787-07b73e73515g"
           }
         ],
         "resourceVersion": "177715594",
-        "selfLink": "/api/v1/namespaces/test/pods/ingest-workflow-graph-ingest-7695677677-12cp8",
+        "selfLink": "/api/v1/namespaces/test/pods/ingest-workflow-graph-ingest-09df1yh54v-12cp8",
         "uid": "g12f69e7-d584-4937-8440-00dbdc8c27ad"
       },
       "spec": {

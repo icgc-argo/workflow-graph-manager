@@ -125,8 +125,12 @@ public class SonarTest {
     client
         .configMaps()
         .create(
-            readValue(loadResource("fixtures/configmaps/variant-caller-node-config.json"), ConfigMap.class));
-    client.pods().create(readValue(loadResource("fixtures/pods/variant-caller-pod.json"), Pod.class));
+            readValue(
+                loadResource("fixtures/configmaps/variant-caller-node-config.json"),
+                ConfigMap.class));
+    client
+        .pods()
+        .create(readValue(loadResource("fixtures/pods/variant-caller-pod.json"), Pod.class));
 
     // do update
     sonar.shallowUpdateOnNext(graphNodeRepository.getNodes());

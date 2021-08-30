@@ -195,13 +195,13 @@
           "seccomp.security.alpha.kubernetes.io/pod": "docker/default"
         },
         "creationTimestamp": "2021-02-12T17:32:08Z",
-        "generateName": "ingest-workflow-graph-ingest-769f477677-",
+        "generateName": "ingest-workflow-graph-ingest-decoy-64cp8",
         "labels": {
           "app.kubernetes.io/instance": "ingest",
           "app.kubernetes.io/name": "workflow-graph-ingest",
-          "pod-template-hash": "769f477677"
+          "pod-template-hash": "decoy"
         },
-        "name": "ingest-workflow-graph-ingest-769f477677-64cp8",
+        "name": "ingest-workflow-graph-ingest-decoy-64cp8",
         "namespace": "test",
         "ownerReferences": [
           {
@@ -209,12 +209,12 @@
             "blockOwnerDeletion": true,
             "controller": true,
             "kind": "ReplicaSet",
-            "name": "ingest-workflow-graph-ingest-769f477677",
+            "name": "ingest-workflow-graph-ingest-decoy",
             "uid": "df9faa9d-771f-4f97-9787-07b73e73514d"
           }
         ],
         "resourceVersion": "177715594",
-        "selfLink": "/api/v1/namespaces/test/pods/ingest-workflow-graph-ingest-769f477677-64cp8",
+        "selfLink": "/api/v1/namespaces/test/pods/ingest-workflow-graph-ingest-decoy-64cp8",
         "uid": "602f69e7-d584-4937-8440-00dbdc8c27dc"
       },
       "spec": {

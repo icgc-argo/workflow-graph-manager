@@ -20,7 +20,6 @@ package org.icgc_argo.workflowgraphmanager.utils;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
-
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
