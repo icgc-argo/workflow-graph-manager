@@ -32,16 +32,18 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class KubernetesConfig {
   private final String namespace;
+  private final String masterUrl;
 
   @Autowired
-  public KubernetesConfig(@Value("${kubernetes.namespace}") String namespace) {
+  public KubernetesConfig(@Value("${kubernetes.namespace}") String namespace, @Value("${kubernetes.masterUrl}")String masterUrl) {
     this.namespace = namespace;
+    this.masterUrl = masterUrl;
     log.info("Connecting to Kubernetes, using namespace: {}", namespace);
   }
 
   @Bean("KubernetesClient")
   public KubernetesClient kubernetesClient() {
-    Config config = new ConfigBuilder().withNamespace(namespace).build();
+    Config config = new ConfigBuilder().withNamespace(namespace).withMasterUrl(masterUrl).build();
     return new DefaultKubernetesClient(config);
   }
 }
