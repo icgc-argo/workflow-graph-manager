@@ -47,7 +47,7 @@ public class GraphNodeConfig {
 
   private WorkflowProperties workflow;
 
-  private WorkflowEngineParameters workflowEngineParameters;
+  private WorkflowEngineParameters workflowEngineParams;
 
   @Data
   @AllArgsConstructor
@@ -71,10 +71,9 @@ public class GraphNodeConfig {
   @Data
   @AllArgsConstructor
   @NoArgsConstructor
-  public static class WorkflowEngineParameters{
+  public static class WorkflowEngineParameters {
     private String workDir;
     private String launchDir;
     private String projectDir;
   }
-
 }

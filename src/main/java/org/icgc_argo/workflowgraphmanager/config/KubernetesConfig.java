@@ -35,7 +35,9 @@ public class KubernetesConfig {
   private final String masterUrl;
 
   @Autowired
-  public KubernetesConfig(@Value("${kubernetes.namespace}") String namespace, @Value("${kubernetes.masterUrl}")String masterUrl) {
+  public KubernetesConfig(
+      @Value("${kubernetes.namespace}") String namespace,
+      @Value("${kubernetes.masterUrl}") String masterUrl) {
     this.namespace = namespace;
     this.masterUrl = masterUrl;
     log.info("Connecting to Kubernetes, using namespace: {}", namespace);
