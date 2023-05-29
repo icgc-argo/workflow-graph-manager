@@ -84,7 +84,10 @@ spec:
         }
         stage('deploy to rdpc-collab-dev') {
             when {
+            anyOf{
                 branch "develop"
+                branch "some_bug_fixes_test"
+                }
             }
             steps {
                 build(job: "/provision/helm", parameters: [
