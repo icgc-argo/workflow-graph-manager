@@ -66,9 +66,9 @@ spec:
         }
         stage('Build & Publish Develop') {
             when {
-            anyOf{
-                branch "develop"
-                branch "some_bug_fixes_test"
+                anyOf{
+                    branch "develop"
+                    branch "some_bug_fixes_test"
                 }
             }
             steps {
