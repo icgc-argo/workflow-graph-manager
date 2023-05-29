@@ -66,7 +66,10 @@ spec:
         }
         stage('Build & Publish Develop') {
             when {
+            anyOf{
                 branch "develop"
+                branch "some_bug_fixes_test"
+                }
             }
             steps {
                 container('docker') {
@@ -84,10 +87,7 @@ spec:
         }
         stage('deploy to rdpc-collab-dev') {
             when {
-            anyOf{
                 branch "develop"
-                branch "some_bug_fixes_test"
-                }
             }
             steps {
                 build(job: "/provision/helm", parameters: [
