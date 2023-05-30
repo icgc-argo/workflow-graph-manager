@@ -16,15 +16,16 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflowgraphmanager;
+package org.icgc_argo.workflowgraphmanager.config.constants;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import static lombok.AccessLevel.PRIVATE;
 
-@SpringBootApplication
-public class WorkflowGraphManagerApplication {
+import lombok.NoArgsConstructor;
 
-  public static void main(String[] args) {
-    SpringApplication.run(WorkflowGraphManagerApplication.class, args);
-  }
+@NoArgsConstructor(access = PRIVATE)
+public class EsDefaults {
+  // Default values from ES pagination:
+  // https://www.elastic.co/guide/en/elasticsearch/reference/7.x/paginate-search-results.html
+  public static final Integer ES_PAGE_DEFAULT_SIZE = 10;
+  public static final Integer ES_PAGE_DEFAULT_FROM = 0;
 }

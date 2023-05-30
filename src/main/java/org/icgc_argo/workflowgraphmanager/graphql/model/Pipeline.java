@@ -16,15 +16,38 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflowgraphmanager;
+package org.icgc_argo.workflowgraphmanager.graphql.model;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import java.util.List;
+import java.util.Map;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.icgc_argo.workflowgraphmanager.graphql.model.base.Message;
+import org.icgc_argo.workflowgraphmanager.utils.JacksonUtils;
 
-@SpringBootApplication
-public class WorkflowGraphManagerApplication {
+@Data
+@Slf4j
+@Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+public class Pipeline {
 
-  public static void main(String[] args) {
-    SpringApplication.run(WorkflowGraphManagerApplication.class, args);
+  @NonNull private String id;
+
+  @NonNull private List<Node> nodes;
+
+  @NonNull private List<Queue> queues;
+
+  @NonNull private List<Message> messages;
+
+  @SneakyThrows
+  public static Pipeline parse(@NonNull Map<String, Object> sourceMap) {
+    return JacksonUtils.parse(sourceMap, Pipeline.class);
   }
 }

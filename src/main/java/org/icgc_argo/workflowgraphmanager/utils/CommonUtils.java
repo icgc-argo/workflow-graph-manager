@@ -16,15 +16,32 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflowgraphmanager;
+package org.icgc_argo.workflowgraphmanager.utils;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import com.google.common.collect.ImmutableMap;
+import java.util.Map;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 
-@SpringBootApplication
-public class WorkflowGraphManagerApplication {
+@Slf4j
+@NoArgsConstructor
+public class CommonUtils {
 
-  public static void main(String[] args) {
-    SpringApplication.run(WorkflowGraphManagerApplication.class, args);
+  public static <K, V> ImmutableMap<K, V> asImmutableMap(Object obj) {
+    val newMap = ImmutableMap.<K, V>builder();
+    if (obj instanceof Map) {
+      try {
+        newMap.putAll((Map<? extends K, ? extends V>) obj);
+      } catch (ClassCastException e) {
+        log.error("Failed to cast obj to Map<K,V>");
+      }
+    }
+    return newMap.build();
+  }
+
+  public static <S, T> T handleReduceHashMapConflict(T a, T b) {
+    throw new RuntimeException(
+        "Beware, here there be dragons ... in the form of reducer combinators somehow being called on a non-parallel stream reduce ...");
   }
 }

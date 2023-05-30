@@ -16,15 +16,22 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflowgraphmanager;
+package org.icgc_argo.workflowgraphmanager.config;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
-@SpringBootApplication
-public class WorkflowGraphManagerApplication {
-
-  public static void main(String[] args) {
-    SpringApplication.run(WorkflowGraphManagerApplication.class, args);
-  }
+@Data
+@Configuration
+@ConfigurationProperties(prefix = "elastic")
+public class ElasticsearchProperties {
+  private String host;
+  private Integer port;
+  private Boolean useHttps;
+  private Boolean useAuthentication;
+  private String username;
+  private String password;
+  private String graphLogInfoDebugIndex;
+  private String graphLogErrorWarningIndex;
 }

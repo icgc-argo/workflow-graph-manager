@@ -16,15 +16,18 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc_argo.workflowgraphmanager;
+package org.icgc_argo.workflowgraphmanager.repository.model;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import java.util.List;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NonNull;
 
-@SpringBootApplication
-public class WorkflowGraphManagerApplication {
-
-  public static void main(String[] args) {
-    SpringApplication.run(WorkflowGraphManagerApplication.class, args);
-  }
+@Data
+@Builder
+public class GraphNode<T> {
+  @NonNull private String id;
+  @NonNull private String pipeline;
+  @NonNull private T config;
+  @NonNull private List<GraphExchangesQueue> graphExchangesQueueList;
 }

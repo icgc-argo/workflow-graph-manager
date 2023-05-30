@@ -1,0 +1,252 @@
+scalar JSON
+scalar Long
+
+### Common Search, Paging, and Sort ###
+type SearchResultInfo {
+    contentCount: String!
+    hasNextFrom: String!
+    totalHits: String!
+}
+
+input Page {
+    size: Int!
+    from: Int!
+}
+
+enum SortOrder {
+    asc,
+    desc
+}
+
+### Pipeline ###
+type Pipeline @key(fields: "id") {
+    id: ID!
+    nodes: [Node]
+    queues: [Queue]
+    messages: [Message]
+    logs: [GraphLog]
+}
+
+enum PipelineFilter {
+    id
+}
+
+enum PipelineSortField {
+    id
+}
+
+input PipelineSort {
+    fieldName: NodeSortField!
+    order: SortOrder!
+}
+
+type PipelineResult {
+    content: [Pipeline!]
+    info: SearchResultInfo!
+}
+
+### Node ###
+type Node @key(fields: "id") {
+    id: ID!
+    config: JSON
+    enabled: Boolean # is the node "turned on"
+    capacity: Int # maximum runs allowed in running queue
+    workflow: Workflow  # TODO: This type should go in lib
+    pipeline: Pipeline
+    queues: [Queue]
+    messages: [Message]
+    logs: [GraphLog]
+}
+
+enum NodeFilter {
+    id,
+    enabled,
+    pipeline,
+    queues,
+    workflow
+}
+
+enum NodeSortField {
+    id,
+    enabled,
+    pipeline,
+    queues,
+    capacity
+}
+
+input NodeSort {
+    fieldName: NodeSortField!
+    order: SortOrder!
+}
+
+type NodesResult {
+    content: [Node!]
+    info: SearchResultInfo!
+}
+
+### QUEUE Types ###
+type Queue @key(fields: "id") {
+    id: ID!
+    exchange: String
+    queue: String
+    pipeline: Pipeline
+    node: Node
+    messages: [Message]
+    logs: [GraphLog]
+}
+
+enum QueueFilter {
+    id,
+    exchange,
+    queue,
+    pipeline,
+    node
+}
+
+enum QueueSortField {
+    id,
+    exchange,
+    queue,
+    pipeline,
+    node
+}
+
+input QueueSort {
+    fieldName: QueueSortField!
+    order: SortOrder!
+}
+
+type QueuesResult {
+    content: [Queue!]
+    info: SearchResultInfo!
+}
+
+### Message Types ###
+interface Message {
+    id: ID!
+    pipeline: Pipeline
+    node: Node
+    queue: Queue
+    logs: [GraphLog]
+}
+
+type GraphEvent implements Message @key(fields: "id") {
+    id: ID!
+    pipeline: Pipeline
+    node: Node
+    queue: Queue
+    logs: [GraphLog]
+    analysisId: ID
+    analysisState: String
+    analysisType: String
+    studyId: String
+    experimentalStrategy: String
+    donorIds: [String]
+    files: [AnalysisFile]
+    analysis: Analysis  # TODO: This type should go in lib
+}
+
+type AnalysisFile {
+    dataType: String
+}
+
+type GraphRun implements Message @key(fields: "id") {
+    id: ID!
+    pipeline: Pipeline
+    node: Node
+    queue: Queue
+    logs: [GraphLog]
+    runId: ID
+    run: Run  # TODO: This type should go in lib
+}
+
+### GraphLog ###
+type GraphLog {
+    graphMessageId: ID
+    log: String
+    timestamp: Long
+    pipeline: Pipeline
+    node: Node
+    queue: Queue
+}
+
+enum GraphLogFilter {
+    graphMessageId,
+    queue,
+    node,
+    pipeline,
+    timestamp
+}
+
+enum GraphLogSortField {
+    graphMessageId,
+    queue,
+    node,
+    pipeline,
+    timestamp
+}
+
+input GraphLogSort {
+    fieldName: GraphLogSortField!
+    order: SortOrder!
+}
+
+type GraphLogsResult {
+    content: [GraphLog!]
+    info: SearchResultInfo!
+}
+
+### Aggregations ###
+
+type PipelineAggs {
+    pipeline: Pipeline
+    numNodes: Int
+    queuedCount: Int
+    runningCount: Int
+    completeCount: Int
+}
+
+type NodeAggs {
+    node: Node
+    queuedCount: Int
+    runningCount: Int
+    completeCount: Int
+}
+
+type AggregationResult {
+    totalHits: String!
+}
+
+# Stubbed external type (will come from Workflow Registry)
+type Workflow @key(fields: "id") @extends {
+    id: ID! @external
+    repo: String
+    schema: String
+    running: [Run] # runs that are in the running queue(s) owned by this Pipeline/Node
+}
+
+# Stubbed external type (from Workflow Search)
+type Run @key(fields: "runId") @extends {
+    runId: ID! @external
+    pipeline: Pipeline @requires(fields: "workflow")
+    node: Node @requires(fields: "workflow")
+}
+
+# Stubbed external type (from Song Search)
+type Analysis @key(fields: "analysisId") @extends {
+    analysisId: ID! @external
+    pipeline: Pipeline
+    node: Node
+}
+
+# TBD if we want all these queries and what filters they would provide
+extend type Query {
+    pipelines(filter: PipelineFilter, page: Page, sorts: [PipelineSort!]): PipelineResult!
+    nodes(filter: NodeFilter, page: Page, sorts: [NodeSort!]): NodesResult!
+    queues(filter: QueueFilter, page: Page, sorts: [QueueSort!]): QueuesResult!
+    #    messages(filter: StubFilter, page: Page): [Message]
+    logs(filter: GraphLogFilter, page: Page, sorts: [GraphLogSort!]): GraphLogsResult!
+    logAggs(filter: GraphLogFilter): AggregationResult!
+    #    pipelineAggs: PipelineAggs
+    #    nodeAggs: NodeAggs
+}
