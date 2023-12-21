@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>workflow-graph-manager</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.1.0</version>
     <name>Workflow Graph Manager</name>
     <description>Workflow Graph Manager</description>
     <url>https://github.com/icgc-argo/workflow-graph-manager</url>
