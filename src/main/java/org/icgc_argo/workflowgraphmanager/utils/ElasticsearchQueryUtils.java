@@ -43,7 +43,7 @@ public class ElasticsearchQueryUtils {
   public static BoolQueryBuilder queryFromArgs(
       Map<String, Function<String, AbstractQueryBuilder<?>>> QUERY_RESOLVER,
       Map<String, Object> args) {
-    val bool = QueryBuilders.boolQuery();
+    BoolQueryBuilder bool = QueryBuilders.boolQuery();
     args.forEach(
         (key, value) ->
             bool.must(
