@@ -7,11 +7,11 @@
     <parent>
         <groupId>org.icgc_argo</groupId>
         <artifactId>workflow-graph-parent-pom</artifactId>
-        <version>1.10.0</version>
+        <version>1.14.0</version>
     </parent>
 
     <artifactId>workflow-graph-manager</artifactId>
-    <version>0.0.1</version>
+    <version>0.1.0</version>
     <name>Workflow Graph Manager</name>
     <description>Workflow Graph Manager</description>
     <url>https://github.com/icgc-argo/workflow-graph-manager</url>
